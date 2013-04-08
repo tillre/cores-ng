@@ -1,0 +1,27 @@
+{
+  "name": "comodl-angular",
+  "version": "0.0.1",
+  "description": "angular service for comodl modules",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": "",
+  "author": "",
+  "license": "BSD",
+  "dependencies": {
+    "underscore": "~1.4.4"
+  },
+  "devDependencies": {
+    "nano": "~3.3.8",
+    "mocha": "1.x.x",
+    "chai": "1.x.x",
+    "hapi": "~0.16.0",
+    "karma": "~0.8.4",
+    "karma-mocha": "0.0.1",
+    "grunt": "~0.4.1",
+    "grunt-karma": "~0.4.3",
+    "bower": "~0.8.6",
+    "grunt-contrib-clean": "~0.4.0"
+  }
+}
