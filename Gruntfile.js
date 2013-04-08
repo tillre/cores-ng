@@ -2,6 +2,7 @@ var path = require('path');
 var nano = require('nano')('http://localhost:5984');
 
 
+var dbName = 'test-comodl-angular';
 var serviceFile = path.resolve('./test/comodl-service.js');
 
 
@@ -23,8 +24,6 @@ module.exports = function(grunt) {
 
     clean: [serviceFile]
   });
-
-  var dbName = 'test-comodl-ng-service';
 
 
   grunt.loadNpmTasks('grunt-contrib-clean');
