@@ -9,9 +9,6 @@
   "repository": "",
   "author": "",
   "license": "BSD",
-  "dependencies": {
-    "underscore": "~1.4.4"
-  },
   "devDependencies": {
     "nano": "~3.3.8",
     "mocha": "1.x.x",

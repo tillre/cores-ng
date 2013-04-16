@@ -14,8 +14,8 @@ files = [
   './components/jquery/jquery.js',
   './components/angular/angular.js',
 
-  './comodl-service.js', // this file gets generated
-  
+  // './comodl-service.js', // this file gets generated
+  './app.js',
   './unit.js'
 ];
 

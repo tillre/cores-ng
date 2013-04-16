@@ -5,7 +5,7 @@ var hapi = require('hapi');
 
 var comodlLoad = require('comodl-load');
 var comodlHapi = require('comodl-hapi');
-var comodlNGService = require('../index.js');
+// var comodlNGService = require('../index.js');
 
 
 function setupServer(db, callback) {
@@ -29,20 +29,20 @@ function setupServer(db, callback) {
 }
 
 
-function createServiceFile(comodl, serviceFile, callback) {
-  comodlNGService(comodl, { host: 'http://localhost:3333' }, function(err, src) {
+// function createServiceFile(comodl, serviceFile, callback) {
+//   comodlNGService(comodl, { host: 'http://localhost:3333' }, function(err, src) {
 
-    if (err) return callback(err);
+//     if (err) return callback(err);
 
-    console.log('writing service file:', serviceFile);
+//     console.log('writing service file:', serviceFile);
     
-    fs.writeFile(serviceFile, src, function(err) {
+//     fs.writeFile(serviceFile, src, function(err) {
 
-      callback(err);
+//       callback(err);
       
-    });
-  });
-}
+//     });
+//   });
+// }
 
 
 module.exports = function(db, serviceFile, callback) {
@@ -51,13 +51,13 @@ module.exports = function(db, serviceFile, callback) {
 
     if (err) return callback(err);
 
-    createServiceFile(comodl, serviceFile, function(err) {
+    // createServiceFile(comodl, serviceFile, function(err) {
 
-      if (err) return callback(err);
+      // if (err) return callback(err);
       
       server.start();
       callback(server);
-    })
+    // })
   });
 
 };
