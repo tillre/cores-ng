@@ -3,7 +3,6 @@ var nano = require('nano')('http://localhost:5984');
 
 
 var dbName = 'test-comodl-angular';
-var serviceFile = path.resolve('./test/comodl-service.js');
 
 
 module.exports = function(grunt) {
@@ -13,16 +12,14 @@ module.exports = function(grunt) {
   
   grunt.initConfig({
     bower: {
-      test: './test'
+      test: './test/public'
     },
     
     karma: {
       run: {
         configFile: './test/karma.conf.js'
       }
-    },
-
-    clean: [serviceFile]
+    }
   });
 
 
@@ -30,7 +27,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-karma');
 
 
-  grunt.registerTask('test', ['db:create', 'server', 'karma', 'db:destroy', 'clean']);
+  grunt.registerTask('default', ['db:create', 'server:run', 'db:destroy']);
+  grunt.registerTask('test', ['db:create', 'server:test', 'karma', 'db:destroy']);
   
   
   grunt.registerMultiTask('bower', 'install components', function() {
@@ -54,12 +52,20 @@ module.exports = function(grunt) {
     child.stderr.on('data', function(data) { grunt.log.write(data); });
   });
   
-  
-  grunt.registerTask('server', 'start test server', function() {
+
+  grunt.registerTask('server:run', 'start server', function() {
+    var done = this.async();
+    var server = require('./test/server.js');
+    var db = nano.use(dbName);
+    server(db, function() {});
+    // never call done to run endlessly
+  });
+
+  grunt.registerTask('server:test', 'start test server', function() {
     var done = this.async();
     var server = require('./test/server.js');
     var db = nano.use(dbName);          
-    server(db, serviceFile, done);
+    server(db, done);
   });
 
   

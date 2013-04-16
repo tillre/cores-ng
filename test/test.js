@@ -1,10 +1,101 @@
 var expect = chai.expect;
 
 
+
+var schema = {
+  properties: {
+    boolean: { type: 'boolean' },
+    integer: { type: 'integer' },
+    number: { type: 'number' },
+    string: { type: 'string' },
+    stringarray: {
+      type: 'array',
+      items: { type: 'string' }
+    },
+    object: {
+      type: 'object',
+      properties: {
+        foo: { type: 'number' },
+        bar: { type: 'string' }
+      }
+    }
+  }
+};
+
+
+// var AppCtrl = function($scope, builder) {
+//   $scope.schema = schema;
+//   $scope.model = builder.createModel(schema);
+// };
+
+
 describe('comodl angular', function() {
 
+  describe('builder', function() {
   
+    var injector = angular.injector(['comodl.directives', 'ng']);
+
+    function buildFromSchema(schema, callback) {
+      injector.invoke(function($rootScope, $compile, builder) {
+        var scope = $rootScope;
+        scope.schema = schema;
+        scope.model = builder.createModel(schema);
+        
+        var elem = angular.element('<div cm-model model="model" schema="schema"/>');
+        var link = $compile(elem);
+        link(scope);
+        scope.$digest();
+
+        callback(scope, elem);
+      });
+    }
+
+    it('should build boolean input', function(done) {
+      buildFromSchema({ properties: { foo: { type: 'boolean' } } }, function(scope, elem) {
+        expect(elem.find('input[type="checkbox"]').length).to.equal(1);
+        done();
+      });
+    });
+
+    it('should build integer input', function(done) {
+      buildFromSchema({ properties: { foo: { type: 'integer' } } }, function(scope, elem) {
+        expect(elem.find('input[type="integer"]').length).to.equal(1);
+        done();
+      });
+    });
+
+    it('should build number input', function(done) {
+      buildFromSchema({ properties: { foo: { type: 'number' } } }, function(scope, elem) {
+        expect(elem.find('input[type="number"]').length).to.equal(1);
+        done();
+      });
+    });
   
+
+    it('should build string input', function(done) {
+      buildFromSchema({ properties: { foo: { type: 'string' } } }, function(scope, elem) {
+        var input = elem.find('input[type="text"]');
+        expect(input.length).to.equal(1);
+        done();
+      });
+    });
+
+    // it('should build object form', function(done) {
+    //   var s = {
+    //     properties: {
+    //       foo: {
+    //         properties: { bar: { type: string } }
+    //       }
+    //     }
+    //   };
+    //   buildFromSchema({ properties: { foo: { type: 'string' } } }, function(elem) {
+    //     expect(elem.find('input[type="text"]').length).to.equal(1);
+    //     done();
+    //   });
+    // });
+    
+  }); // builder
+    
 });
 
 // describe('comodl angular', function() {

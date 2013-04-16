@@ -11,12 +11,13 @@ files = [
   MOCHA_ADAPTER,
   '../node_modules/chai/chai.js',
 
-  './components/jquery/jquery.js',
-  './components/angular/angular.js',
+  './public/components/jquery/jquery.js',
+  './public/components/angular/angular.js',
 
-  // './comodl-service.js', // this file gets generated
-  './app.js',
-  './unit.js'
+  '../lib/services.js',
+  '../lib/directives.js',
+  
+  './test.js'
 ];
 
 
