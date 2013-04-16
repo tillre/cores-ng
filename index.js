@@ -37,5 +37,3 @@ module.exports = function(comodl, options, callback) {
     callback(null, src);
   });
 };
-
-
