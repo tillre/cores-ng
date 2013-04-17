@@ -5,8 +5,9 @@
   </head>
   <body>
     <div ng-controller="AppCtrl">
-      <div cm-model schema="schema" model="model">
+      <div style="float:left" cm-model schema="schema" model="model">
       </div>
+      <pre style="float:left; margin-left:200px">{{ model | json }}</pre>
     </div>
     <script src="/test/public/components/jquery/jquery.js"></script>
     <script src="/test/public/components/angular/angular.js"></script>

@@ -13,10 +13,32 @@ function setupServer(db, callback) {
     cors: {
       origin: ['*'],
       headers: ['X-Requested-With', 'Content-Type']
+    },
+    payload: {
+      maxBytes: 10 * 1024 * 1024 // 10MB
     }
   });
 
 
+  // logging
+  server.on('request', function(req) {
+    if (req.path === '/favicon.ico') return;
+    console.log('-- request', req.path, req);
+  });
+  server.on('response', function(res) {
+    console.log('-- response', res);
+  });
+  server.on('tail', function(event) {
+    console.log('-- tail');
+  });
+  server.on('internalError', function(req, error) {
+    console.log('-- internalError', error);
+  });
+  server.on('error', function(err) {
+    console.log(err);
+  });
+
+  
   // serve index.html
   server.route({
     path: '/',
@@ -30,6 +52,19 @@ function setupServer(db, callback) {
     method: 'GET',
     handler: { directory: { path: '.', listing: true }}
   });
+
+
+
+  server.route({
+    path: '/postit',
+    method: 'POST',
+    handler: function(req) {
+      console.log('req', req);
+      req.reply('HOOOAHAHOAHAOHAOAH');
+    }
+  });
+
+
   
   // load models and mount routes
   comodlLoad(db, './test/models', function(err, comodl) {

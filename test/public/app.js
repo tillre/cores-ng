@@ -13,12 +13,12 @@
       },
       content: {
         type: 'array',
-        items: { type: 'string' }
+        items: { properties: { value: { type: 'string' }}}
       },
       content2: {
         type: 'array',
         items: { anyOf: [
-          { name: 'one', properties: { foo: { type: 'number' } }  },
+          { name: 'one', properties: { foo: { type: 'string' } }  },
           { name: 'two', properties: { bar: { type: 'boolean'} }  },
           { name: 'three', properties: { goo: { type: 'integer'} }  }
         ]}
@@ -37,41 +37,52 @@
   var articleModel = {
     title: 'Hello COMODL',
     author: 'Some Dude',
-    content: ['one', 'two', 'three'],
+    content: [
+      { value: 'one' },
+      { value: 'two' },
+      { value: 'three' }
+    ],
     content2: [
-      { _type: 'two', bar: 11 },
-      { _type: 'three', goo: false }
+      { _type: 'two', bar: false },
+      { _type: 'three', goo: 11 }
     ],
     foo: { bar: 42, baz: true }
   };
 
 
+  // var imageSchema = {
+  //   view: 'image',
+  //   properties: {
+  //     title: { type: 'string' },
+  //     caption: { type: 'string' },
+  //     articles: {
+  //       type: 'array',
+  //       view: 'none',
+  //       items: { type: 'string' }
+  //     },
+  //     galleries: {
+  //       type: 'array',
+  //       view: 'none',
+  //       items: { type: 'string' }
+  //     },
+  //     files: {
+  //       type: 'array',
+  //       view: 'none',
+  //       items: { type: 'string' }
+  //     }
+  //   }
+  // };
+
   var imageSchema = {
-    view: 'image',
     properties: {
       title: { type: 'string' },
-      caption: { type: 'string' },
-      articles: {
-        type: 'array',
-        view: 'none',
-        items: { type: 'string' }
-      },
-      galleries: {
-        type: 'array',
-        view: 'none',
-        items: { type: 'string' }
-      },
-      files: {
-        type: 'array',
-        view: 'none',
-        items: { type: 'string' }
-      }
+      file: { type: 'string', view: 'file' }
     }
   };
-
   
-  angular.module('testComodlAngular', ['comodl.directives'])
-    .controller('AppCtrl', function($scope) {
+  
+  angular.module('testComodlAngular', ['comodl.services', 'comodl.directives'])
+    .controller('AppCtrl', function($scope, builder) {
       $scope.schema = articleSchema;
       $scope.model = articleModel;
       // $scope.schema = imageSchema;
