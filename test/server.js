@@ -6,10 +6,11 @@ var hapi = require('hapi');
 var comodlLoad = require('comodl-load');
 var comodlHapi = require('comodl-hapi');
 
+var port = 3333;
 
 function setupServer(db, callback) {
   // run test server
-  var server = new hapi.Server('0.0.0.0', 3333, {
+  var server = new hapi.Server('0.0.0.0', port, {
     cors: {
       origin: ['*'],
       headers: ['X-Requested-With', 'Content-Type']
@@ -60,7 +61,7 @@ function setupServer(db, callback) {
     method: 'POST',
     handler: function(req) {
       console.log('req', req);
-      req.reply('HOOOAHAHOAHAOHAOAH');
+      req.reply({ ok: true });
     }
   });
 
@@ -85,6 +86,7 @@ module.exports = function(db, callback) {
     if (err) return callback(err);
 
     server.start();
+    console.log('started server on port:', port);
     callback(server);
   });
 
