@@ -91,13 +91,12 @@
       comodl.initialize().then(function() {
         console.log('comodl intialized', comodl);
 
-        var Image = comodl.resources.Image;
+        var resource = comodl.getResource('Image');
 
-        console.log('Image', Image.schema);
-        
-        Image.schema().then(function(schema) {
+        resource.schema().then(function(schema) {
           console.log('image schema', schema);
 
+          $scope.type = resource.type;
           $scope.schema = schema;
           $scope.model = comodl.createModel(schema);
         });
