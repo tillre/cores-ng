@@ -73,20 +73,36 @@
   //   }
   // };
 
-  var imageSchema = {
-    properties: {
-      title: { type: 'string' },
-      file: { type: 'string', view: 'file' }
-    }
-  };
+  // var imageSchema = {
+  //   properties: {
+  //     title: { type: 'string' },
+  //     file: { type: 'string', view: 'image' }
+  //   }
+  // };
   
   
   angular.module('testComodlAngular', ['comodl.services', 'comodl.directives'])
-    .controller('AppCtrl', function($scope, builder) {
+    .controller('AppCtrl', function($scope, comodl) {
       // $scope.schema = articleSchema;
       // $scope.model = articleModel;
-      $scope.schema = imageSchema;
-      $scope.model = builder.createModel(imageSchema);
+      // $scope.schema = imageSchema;
+      // $scope.model = builder.createModel(imageSchema);
+
+      comodl.initialize().then(function() {
+        console.log('comodl intialized', comodl);
+
+        var Image = comodl.resources.Image;
+
+        console.log('Image', Image.schema);
+        
+        Image.schema().then(function(schema) {
+          console.log('image schema', schema);
+
+          $scope.schema = schema;
+          $scope.model = comodl.createModel(schema);
+        });
+        
+      });
     })
   ;
   
