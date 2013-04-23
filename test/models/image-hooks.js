@@ -1,25 +1,33 @@
 
-function handlePayload(payload, callback) {
-  console.log("handlePayload handlePayload handlePayload");
+var fs = require('fs');
+var path = require('path');
+var url = require('url');
+
+
+function handlePayload(res, payload, callback) {
 
   if (payload.isMultipart) {
 
     var doc = payload.doc;
     var file = payload.file;
+    var targetFile = path.join(res.ext.uploadDir, file.name);
 
-    doc.file.path = file.path;
+    fs.rename(file.path, targetFile, function(err) {
 
-    console.log('image multipart', payload);
-    
-    callback(doc);
+      if (err) {
+        err.code = 500;
+        return callback(err);
+      }
+      
+      doc.file.url = url.resolve(res.ext.uploadUrl, file.name);
+      callback(null, doc);
+    });
   }
   else {
-
-    console.log('image json');
-    
-    callback(payload);
+    callback(null, payload);
   }
 }
+
 
 module.exports = {
   create: handlePayload,

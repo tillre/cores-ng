@@ -31,70 +31,109 @@ var schema = {
 
 describe('cores angular', function() {
 
-  describe('builder', function() {
+  describe('build', function() {
   
     var injector = angular.injector(['cores.directives', 'ng']);
 
-    function buildFromSchema(schema, callback) {
-      injector.invoke(function($rootScope, $compile, builder) {
-        var scope = $rootScope;
+    
+    function buildFromSchema(schema, value, callback) {
+
+      if (typeof value === 'function') {
+        callback = value;
+        value = null;
+      }
+      
+      injector.invoke(function($rootScope, $compile, cores) {
+        var scope = $rootScope.$new();
         scope.schema = schema;
-        scope.model = builder.createModel(schema);
+        scope.model = value || cores.createModel(schema);
         
-        var elem = angular.element('<div cm-model model="model" schema="schema"/>');
-        var link = $compile(elem);
-        link(scope);
+        var elem = angular.element('<div cr-model model="model" schema="schema"/>');
+        $compile(elem)(scope);
         scope.$digest();
 
         callback(scope, elem);
       });
     }
 
+    
     it('should build boolean input', function(done) {
-      buildFromSchema({ properties: { foo: { type: 'boolean' } } }, function(scope, elem) {
+      buildFromSchema({ type: 'boolean' }, function(scope, elem) {
         expect(elem.find('input[type="checkbox"]').length).to.equal(1);
         done();
       });
     });
 
     it('should build integer input', function(done) {
-      buildFromSchema({ properties: { foo: { type: 'integer' } } }, function(scope, elem) {
-        expect(elem.find('input[type="integer"]').length).to.equal(1);
+      buildFromSchema({ type: 'integer' }, function(scope, elem) {
+        expect(elem.find('input[type="number"]').length).to.equal(1);
         done();
       });
     });
 
     it('should build number input', function(done) {
-      buildFromSchema({ properties: { foo: { type: 'number' } } }, function(scope, elem) {
+      buildFromSchema({ type: 'number' }, function(scope, elem) {
         expect(elem.find('input[type="number"]').length).to.equal(1);
         done();
       });
     });
   
-
     it('should build string input', function(done) {
-      buildFromSchema({ properties: { foo: { type: 'string' } } }, function(scope, elem) {
-        var input = elem.find('input[type="text"]');
-        expect(input.length).to.equal(1);
+      buildFromSchema({ type: 'string' }, function(scope, elem) {
+        expect(elem.find('input[type="text"]').length).to.equal(1);
         done();
       });
     });
 
-    // it('should build object form', function(done) {
-    //   var s = {
-    //     properties: {
-    //       foo: {
-    //         properties: { bar: { type: string } }
-    //       }
-    //     }
-    //   };
-    //   buildFromSchema({ properties: { foo: { type: 'string' } } }, function(elem) {
-    //     expect(elem.find('input[type="text"]').length).to.equal(1);
-    //     done();
-    //   });
-    // });
+    it('should build enum form', function(done) {
+      buildFromSchema(
+        { type: 'string', 'enum': ['one', 'two', 'three'] },
+        function(scope, elem) {
+          expect(elem.find('option').length).to.equal(3);
+          done();
+        }
+      );
+    });
     
-  }); // builder
+    it('should build object form', function(done) {
+      buildFromSchema(
+        { properties: { foo: { type: 'string'}, bar: { type: 'number'} } },
+        function(scope, elem) {
+          expect(elem.find('input[type="text"]').length).to.equal(1);
+          expect(elem.find('input[type="number"]').length).to.equal(1);
+          done();
+        });
+    });
+
+    it('should build array form', function(done) {
+      buildFromSchema(
+        {items: { properties: { foo: { type: 'string'}}}},
+        [ {foo:'a'}, {foo:'b'}, {foo:'c'} ],
+
+        function(scope, elem) {
+          expect(elem.find('input[type="text"]').length).to.equal(3);
+          done();
+        }
+      );
+    });
+
+    it('should build anyOf form', function(done) {
+      buildFromSchema(
+        {items: { anyOf: [
+          { name: 'one', properties: { foo: { type: 'string' }}},
+          { name: 'two', properties: { bar: { type: 'number' }}}
+        ]}},
+        [ { type_: 'one', foo: 'hello' }, { type_: 'two', bar: 42 }],
+        function(scope, elem) {
+          expect(elem.find('input[type="text"]').length).to.equal(1);
+          expect(elem.find('input[type="number"]').length).to.equal(1);
+          done();
+        }
+      );
+    });
+
+    
+  }); // build
     
 });
 

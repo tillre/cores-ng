@@ -13,6 +13,7 @@ files = [
 
   './public/components/jquery/jquery.js',
   './public/components/angular/angular.js',
+  './public/components/angular/angular-scenario.js',
 
   '../lib/services.js',
   '../lib/directives.js',
