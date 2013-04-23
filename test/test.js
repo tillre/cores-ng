@@ -29,11 +29,11 @@ var schema = {
 // };
 
 
-describe('comodl angular', function() {
+describe('cores angular', function() {
 
   describe('builder', function() {
   
-    var injector = angular.injector(['comodl.directives', 'ng']);
+    var injector = angular.injector(['cores.directives', 'ng']);
 
     function buildFromSchema(schema, callback) {
       injector.invoke(function($rootScope, $compile, builder) {
@@ -98,9 +98,9 @@ describe('comodl angular', function() {
     
 });
 
-// describe('comodl angular', function() {
+// describe('cores angular', function() {
 
-//   var comodl;
+//   var cores;
 //   var doc = {
 //     type: 'Article',
 //     title: 'Some Article',

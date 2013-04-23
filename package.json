@@ -1,7 +1,7 @@
 {
-  "name": "comodl-angular",
+  "name": "cores-angular",
   "version": "0.0.1",
-  "description": "angular service for comodl modules",
+  "description": "angular service and directives for cores",
   "main": "index.js",
   "scripts": {
     "test": "grunt test"

@@ -3,8 +3,8 @@ var fs = require('fs');
 
 var hapi = require('hapi');
 
-var comodlLoad = require('comodl-load');
-var comodlHapi = require('comodl-hapi');
+var loadResources = require('cores-load');
+var mountResources = require('cores-hapi');
 
 var port = 3333;
 
@@ -22,16 +22,16 @@ function setupServer(db, callback) {
 
 
   // logging
-  server.on('request', function(req) {
-    if (req.path === '/favicon.ico') return;
-    console.log('-- request', req.path, req);
-  });
-  server.on('response', function(res) {
-    console.log('-- response', res);
-  });
-  server.on('tail', function(event) {
-    console.log('-- tail');
-  });
+  // server.on('request', function(req) {
+  //   if (req.path === '/favicon.ico') return;
+  //   console.log('-- request', req.path, req);
+  // });
+  // server.on('response', function(res) {
+  //   console.log('-- response', res);
+  // });
+  // server.on('tail', function(event) {
+  //   console.log('-- tail');
+  // });
   server.on('internalError', function(req, error) {
     console.log('-- internalError', error);
   });
@@ -68,20 +68,20 @@ function setupServer(db, callback) {
 
   
   // load models and mount routes
-  comodlLoad(db, './test/models', function(err, comodl) {
+  loadResources(db, './test/models', function(err, resources) {
 
     if (err) return callback(err);
     
-    comodlHapi(comodl, server);
+    mountResources(resources, server);
 
-    callback(null, comodl, server);
+    callback(null, resources, server);
   });
 }
 
 
 module.exports = function(db, callback) {
 
-  setupServer(db, function(err, comodl, server) {
+  setupServer(db, function(err, resources, server) {
 
     if (err) return callback(err);
 

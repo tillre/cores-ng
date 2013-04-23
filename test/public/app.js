@@ -81,24 +81,24 @@
   // };
   
   
-  angular.module('testComodlAngular', ['comodl.services', 'comodl.directives'])
-    .controller('AppCtrl', function($scope, comodl) {
+  angular.module('testCoresAngular', ['cores.services', 'cores.directives'])
+    .controller('AppCtrl', function($scope, cores) {
       // $scope.schema = articleSchema;
       // $scope.model = articleModel;
       // $scope.schema = imageSchema;
       // $scope.model = builder.createModel(imageSchema);
 
-      comodl.initialize().then(function() {
-        console.log('comodl intialized', comodl);
+      cores.initialize().then(function() {
+        console.log('cores intialized', cores);
 
-        var resource = comodl.getResource('Image');
+        var resource = cores.getResource('Image');
 
         resource.schema().then(function(schema) {
           console.log('image schema', schema);
 
           $scope.type = resource.type;
           $scope.schema = schema;
-          $scope.model = comodl.createModel(schema);
+          $scope.model = cores.createModel(schema);
         });
         
       });

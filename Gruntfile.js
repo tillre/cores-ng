@@ -2,7 +2,7 @@ var path = require('path');
 var nano = require('nano')('http://localhost:5984');
 
 
-var dbName = 'test-comodl-angular';
+var dbName = 'test-cores-angular';
 
 
 module.exports = function(grunt) {

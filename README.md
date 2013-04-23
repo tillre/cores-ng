@@ -1,4 +1,4 @@
-comodl-angular - work in progress
+cores-angular - work in progress
 =================================
 
-angular service for comodl
+angular service/directives for cores
