@@ -1,7 +1,6 @@
 var expect = chai.expect;
 
 
-
 var schema = {
   properties: {
     boolean: { type: 'boolean' },
@@ -21,12 +20,6 @@ var schema = {
     }
   }
 };
-
-
-// var AppCtrl = function($scope, builder) {
-//   $scope.schema = schema;
-//   $scope.model = builder.createModel(schema);
-// };
 
 
 describe('cores angular', function() {

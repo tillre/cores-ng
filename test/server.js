@@ -54,23 +54,13 @@ function setupServer(db, callback) {
     handler: { directory: { path: '.', listing: true }}
   });
 
-  server.route({
-    path: '/postit',
-    method: 'POST',
-    handler: function(req) {
-      console.log('req', req);
-      req.reply({ ok: true });
-    }
-  });
-
-
   var ext = {
     uploadDir: path.join(__dirname, '/upload'),
-    uploadUrl: '/test/upload/'
+    uploadUrl: '/upload/'
   };
   
   // load models and mount routes
-  loadResources(db, './test/models', ext, function(err, resources) {
+  loadResources(db, './models', ext, function(err, resources) {
 
     if (err) return callback(err);
     

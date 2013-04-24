@@ -9,14 +9,13 @@ basePath = '';
 files = [
   MOCHA,
   MOCHA_ADAPTER,
-  '../node_modules/chai/chai.js',
+  './node_modules/chai/chai.js',
 
   './public/components/jquery/jquery.js',
   './public/components/angular/angular.js',
-  './public/components/angular/angular-scenario.js',
 
-  '../lib/services.js',
-  '../lib/directives.js',
+  '../cr-services.js',
+  '../cr-directives.js',
   
   './test.js'
 ];

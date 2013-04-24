@@ -12,12 +12,12 @@ module.exports = function(grunt) {
   
   grunt.initConfig({
     bower: {
-      test: './test/public'
+      test: './public'
     },
     
     karma: {
       run: {
-        configFile: './test/karma.conf.js'
+        configFile: './karma.conf.js'
       }
     }
   });
@@ -55,7 +55,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('server:run', 'start server', function() {
     var done = this.async();
-    var server = require('./test/server.js');
+    var server = require('./server.js');
     var db = nano.use(dbName);
     server(db, function() {});
     // never call done to run endlessly
@@ -63,7 +63,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('server:test', 'start test server', function() {
     var done = this.async();
-    var server = require('./test/server.js');
+    var server = require('./server.js');
     var db = nano.use(dbName);          
     server(db, done);
   });
