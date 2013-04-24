@@ -14,6 +14,7 @@ files = [
   './public/components/jquery/jquery.js',
   './public/components/angular/angular.js',
 
+  '../cr-templates.js',
   '../cr-services.js',
   '../cr-directives.js',
   

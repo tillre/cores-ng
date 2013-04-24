@@ -6,7 +6,7 @@
   // directive namespace prefix
   var NS = 'cr';
 
-  var module = angular.module('cores.directives', ['ng', 'cores.services']);
+  var module = angular.module('cores.directives', ['ng', 'cores.services', 'cores.templates']);
 
 
   //
@@ -19,7 +19,7 @@
         model: '=',
         name: '@'
       },
-      template: '<label>{{name}}<input type="checkbox" ng-model="model" name="{{name}}"/></label>'
+      templateUrl: 'cr-boolean.html'
     };
   });
 
@@ -34,7 +34,7 @@
         model: '=',
         name: '@'
       },
-      template: '<label>{{name}}<input type="number" ng-model="model" name="{{name}}"/></label>'
+      templateUrl: 'cr-integer.html'
     };
   });
 
@@ -49,7 +49,7 @@
         model: '=',
         name: '@'
       },
-      template: '<label>{{name}}<input type="number" ng-model="model" name="{{name}}"/></label>'
+      templateUrl: 'cr-number.html'
     };
   });
 
@@ -64,7 +64,7 @@
         model: '=',
         name: '@'
       },
-      template: '<label>{{name}}<input type="text" ng-model="model" name="{{name}}"/></label>'
+      templateUrl: 'cr-string.html'
     };
   });
 
@@ -80,7 +80,7 @@
         schema: '=',
         name: '@'
       },
-      template: '<label>{{name}}<select ng-model="model" ng-options="e for e in schema.enum" name="{{name}}"></select></label>'
+      templateUrl: 'cr-enum.html'
     };
   });
 
@@ -96,7 +96,7 @@
         schema: '=',
         name: '@'
       },
-      template: '<div name={{name}}></div>',
+      templateUrl: 'cr-object.html',
 
       link: function postLink(scope, elem, attrs) {
         // console.log('-- link object --', scope.schema, scope.model);
@@ -136,7 +136,7 @@
         model: '=',
         name: '@'
       },
-      template: '<div name="{{name}}"><button ng-click="remove()">Remove</button></div>',
+      templateUrl: 'cr-anyof-item.html',
 
       link: function(scope, elem, attrs, anyof) {
         // get the schema from the anyof-array
@@ -161,8 +161,7 @@
         schema: '=',
         name: '@'
       },
-      template: '<div name={{name}}><div class="controls"/><ul><li ng-repeat="model in model"><div ' + NS + '-anyof-item model="model"></div></li></ul></div>',
-
+      templateUrl: 'cr-anyof-array.html',
       
       controller: function($scope, cores) {
 
