@@ -44,29 +44,39 @@ function setupServer(db, callback) {
   server.route({
     path: '/',
     method: 'GET',
-    handler: { file: './test/public/index.html' }
+    handler: { file: './public/index.html' }
   });
   
   // serve files
   server.route({
     path: '/{path*}',
     method: 'GET',
-    handler: { directory: { path: '.', listing: true }}
+    handler: { directory: { path: '..', listing: true }}
   });
 
   var ext = {
-    uploadDir: path.join(__dirname, '/upload'),
-    uploadUrl: '/upload/'
+    upload: {
+      dir: path.join(__dirname, '/upload'),
+      url: '/test/upload/'
+    }
   };
-  
-  // load models and mount routes
-  loadResources(db, './models', ext, function(err, resources) {
 
-    if (err) return callback(err);
+  // create upload dir
+  // fs.mkdirSync(ext.upload.dir);
+  fs.mkdir(ext.upload.dir, function(err) {
+    if (err && err.code !== 'EEXIST') {
+      return callback(err);
+    }
     
-    mountResources(resources, server);
+    // load models and mount routes
+    loadResources(db, './models', ext, function(err, resources) {
 
-    callback(null, resources, server);
+      if (err) return callback(err);
+      
+      mountResources(resources, server);
+
+      callback(null, resources, server);
+    });
   });
 }
 

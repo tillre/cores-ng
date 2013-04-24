@@ -10,8 +10,10 @@ function handlePayload(res, payload, callback) {
 
     var doc = payload.doc;
     var file = payload.file;
-    var targetFile = path.join(res.ext.uploadDir, file.name);
+    var targetFile = path.join(res.ext.upload.dir, file.name);
 
+    console.log('targetFile', targetFile);
+    
     fs.rename(file.path, targetFile, function(err) {
 
       if (err) {
@@ -19,7 +21,7 @@ function handlePayload(res, payload, callback) {
         return callback(err);
       }
       
-      doc.file.url = url.resolve(res.ext.uploadUrl, file.name);
+      doc.file.url = url.resolve(res.ext.upload.url, file.name);
       callback(null, doc);
     });
   }
