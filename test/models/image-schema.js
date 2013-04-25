@@ -1,5 +1,7 @@
 module.exports = {
 
+  name: 'Image',
+  
   properties: {
     title: { type: 'string' },
     file: {

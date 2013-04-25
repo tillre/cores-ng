@@ -81,7 +81,7 @@
   // };
   
   
-  angular.module('testCoresAngular', ['cores.services', 'cores.directives'])
+  angular.module('testCoresAngular', ['cores'])
     .controller('AppCtrl', function($scope, cores) {
       // $scope.schema = articleSchema;
       // $scope.model = articleModel;
@@ -91,7 +91,7 @@
       cores.initialize().then(function() {
         console.log('cores intialized', cores);
 
-        var resource = cores.getResource('Image');
+        var resource = cores.getResource('Article');
 
         resource.schema().then(function(schema) {
 

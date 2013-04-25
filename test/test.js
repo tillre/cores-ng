@@ -1,34 +1,102 @@
 var expect = chai.expect;
 
 
-var schema = {
-  properties: {
-    boolean: { type: 'boolean' },
-    integer: { type: 'integer' },
-    number: { type: 'number' },
-    string: { type: 'string' },
-    stringarray: {
-      type: 'array',
-      items: { type: 'string' }
-    },
-    object: {
-      type: 'object',
-      properties: {
-        foo: { type: 'number' },
-        bar: { type: 'string' }
-      }
-    }
-  }
-};
+// var schema = {
+//   properties: {
+//     boolean: { type: 'boolean' },
+//     integer: { type: 'integer' },
+//     number: { type: 'number' },
+//     string: { type: 'string' },
+//     stringarray: {
+//       type: 'array',
+//       items: { type: 'string' }
+//     },
+//     object: {
+//       type: 'object',
+//       properties: {
+//         foo: { type: 'number' },
+//         bar: { type: 'string' }
+//       }
+//     }
+//   }
+// };
 
 
 describe('cores angular', function() {
 
-  describe('build', function() {
+  var injector = angular.injector(['cores', 'ng']);
+
+  var cores;
   
-    var injector = angular.injector(['cores.directives', 'ng']);
+
+  describe('services', function() {
+
+    it('should initialize', function(done) {
+      injector.invoke(function(cores) {
+        cores.initialize('http://localhost:3333').then(done, done);
+      });
+    });
+
+
+    it('should have the resources', function(done) {
+      injector.invoke(function(cores) {
+        expect(cores.getResource('Article')).to.be.a('object');
+        expect(cores.getResource('Image')).to.be.a('object');
+        done();
+      });
+    });
+
+
+    it('should create default model', function(done) {
+      injector.invoke(function(cores) {
+        expect(cores.createModel({ type: 'boolean' })).to.be.a('boolean');
+        expect(cores.createModel({ type: 'integer' })).to.be.a('number');
+        expect(cores.createModel({ type: 'number' })).to.be.a('number');
+        expect(cores.createModel({ type: 'string' })).to.be.a('string');
+
+        var obj = cores.createModel({
+          properties: {
+            foo: { type: 'boolean' }, bar: { type: 'number'}
+          }
+        });
+        expect(obj).to.be.a('object');
+        expect(obj.foo).to.be.a('boolean');
+        expect(obj.bar).to.be.a('number');
+
+        expect(cores.createModel({ items: { type: 'string' }})).to.be.a('array');
+        
+        done();
+      });
+    });
+    
+    it('should build the template', function(done) {
+      injector.invoke(function(cores) {
+        var schema = { properties: {
+          foo: { type: 'boolean' }, bar: { type: 'number' }
+        }};
+        var model = cores.createModel(schema);
+        var template = cores.buildTemplate(schema, model);
+
+        expect(template.match('cr-object').length).to.equal(1);
+        expect(template.match('model="model"').length).to.equal(1);
+        expect(template.match('schema="schema"').length).to.equal(1);
+        
+        console.log('template', template);
+        done();
+      });
+    });
+  });
+
+
+  describe('resource', function() {
 
     
+    
+  });
+  
+  
+  describe('directives', function() {
+  
     function buildFromSchema(schema, value, callback) {
 
       if (typeof value === 'function') {
@@ -40,53 +108,61 @@ describe('cores angular', function() {
         var scope = $rootScope.$new();
         scope.schema = schema;
         scope.model = value || cores.createModel(schema);
-        
+
         var elem = angular.element('<div cr-model model="model" schema="schema"/>');
         $compile(elem)(scope);
-        scope.$digest();
+        scope.$apply();
 
+        $('body').append(elem);
+        $('body').append($('<hr>'));
+        
         callback(scope, elem);
       });
     }
 
     
     it('should build boolean input', function(done) {
-      buildFromSchema({ type: 'boolean' }, function(scope, elem) {
+      buildFromSchema({properties: { test: { type: 'boolean' }}}, function(scope, elem) {
         expect(elem.find('input[type="checkbox"]').length).to.equal(1);
         done();
       });
     });
 
+    
     it('should build integer input', function(done) {
-      buildFromSchema({ type: 'integer' }, function(scope, elem) {
+      buildFromSchema({ properties: { test: { type: 'integer' }}}, function(scope, elem) {
         expect(elem.find('input[type="number"]').length).to.equal(1);
         done();
       });
     });
 
+    
     it('should build number input', function(done) {
-      buildFromSchema({ type: 'number' }, function(scope, elem) {
+      buildFromSchema({ properties: { test: { type: 'number' }}}, function(scope, elem) {
         expect(elem.find('input[type="number"]').length).to.equal(1);
         done();
       });
     });
-  
+
+    
     it('should build string input', function(done) {
-      buildFromSchema({ type: 'string' }, function(scope, elem) {
+      buildFromSchema({ properties: { test: { type: 'string' }}}, function(scope, elem) {
         expect(elem.find('input[type="text"]').length).to.equal(1);
         done();
       });
     });
 
+    
     it('should build enum form', function(done) {
       buildFromSchema(
-        { type: 'string', 'enum': ['one', 'two', 'three'] },
+        { properties: { test: { type: 'string', 'enum': ['one', 'two', 'three'] }}},
         function(scope, elem) {
           expect(elem.find('option').length).to.equal(3);
           done();
         }
       );
     });
+
     
     it('should build object form', function(done) {
       buildFromSchema(
@@ -98,9 +174,10 @@ describe('cores angular', function() {
         });
     });
 
+    
     it('should build array form', function(done) {
       buildFromSchema(
-        {items: { properties: { foo: { type: 'string'}}}},
+        { items: { properties: { foo: { type: 'string'}}}},
         [ {foo:'a'}, {foo:'b'}, {foo:'c'} ],
 
         function(scope, elem) {
@@ -110,9 +187,10 @@ describe('cores angular', function() {
       );
     });
 
+    
     it('should build anyOf form', function(done) {
       buildFromSchema(
-        {items: { anyOf: [
+        { items: { anyOf: [
           { name: 'one', properties: { foo: { type: 'string' }}},
           { name: 'two', properties: { bar: { type: 'number' }}}
         ]}},
@@ -125,9 +203,37 @@ describe('cores angular', function() {
       );
     });
 
-    
+
+    // it('should build image form', function(done) {
+    //   cores.getResource('Image').schema().then(
+    //     function(schema) {
+    //       buildFromSchema(schema, function(scope, elem) {
+    //         console.log(elem[0]);
+    //         done();
+    //       });
+    //     },
+    //     done
+    //   );
+    //   // buildFromSchema(
+    //   //   { properties: {
+    //   //     file: {
+    //   //       view: 'image',
+    //   //       properties: {
+    //   //         name: { type: 'string' },
+    //   //         url: { type: 'string' }
+    //   //       }
+    //   //     }
+    //   //   }},
+    //   //   function(scope, elem) {
+    //   //     console.log(elem[0]);
+    //   //     done();
+    //   //   }
+    //   // );
+    // });
   }); // build
-    
+
+
+  
 });
 
 // describe('cores angular', function() {
