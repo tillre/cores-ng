@@ -12,8 +12,6 @@ function handlePayload(res, payload, callback) {
     var file = payload.file;
     var targetFile = path.join(res.ext.upload.dir, file.name);
 
-    console.log('targetFile', targetFile);
-    
     fs.rename(file.path, targetFile, function(err) {
 
       if (err) {

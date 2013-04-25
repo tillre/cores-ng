@@ -7,7 +7,7 @@ module.exports = {
       view: 'image',
       properties: {
         name: { type: 'string' },
-        path: { type: 'string' }
+        url: { type: 'string' }
       }
     }
   }

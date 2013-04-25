@@ -9,10 +9,28 @@ module.exports = {
       }
     },
     tags: {
-      type: 'array',
-      items: { type: 'string' }
+      items: {
+        properties: { name: {type: 'string' }}
+      }
     },
-    body: { type: 'string', minLength: 1 }
+    body: {
+      items: {
+        anyOf: [
+          {
+            name: 'paragraph',
+            properties: {
+              text: { type: 'string' }
+            }
+          },
+          {
+            name: 'doit',
+            properties: {
+              check: { type: 'boolean' }
+            }
+          }
+        ]
+      }
+    }
   },
   required: ['title', 'author', 'body']
 };

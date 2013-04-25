@@ -94,11 +94,15 @@
         var resource = cores.getResource('Image');
 
         resource.schema().then(function(schema) {
-          console.log('image schema', schema);
+
+          var model = cores.createModel(schema);
+          
+          console.log('schema', schema);
+          console.log('model', model);
 
           $scope.type = resource.type;
           $scope.schema = schema;
-          $scope.model = cores.createModel(schema);
+          $scope.model = model;
         });
         
       });
