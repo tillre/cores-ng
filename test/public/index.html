@@ -2,13 +2,18 @@
 <html lang="en" ng-app="testCoresAngular">
   <head>
     <title>CORES-ANGULAR</title>
+    <link rel="stylesheet" type="text/css" href="/test/components/bootstrap/docs/assets/css/bootstrap.css">
   </head>
   <body>
-    <div ng-controller="AppCtrl">
-      <div style="float:left" cr-model schema="schema" model="model" type="type">
+
+    <div class="container">
+      <div ng-controller="AppCtrl">
+        <div style="float:left" cr-model schema="schema" model="model" type="type">
+        </div>
+        <pre style="float:left; margin-left:54px">{{ model | json }}</pre>
       </div>
-      <pre style="float:left; margin-left:200px">{{ model | json }}</pre>
     </div>
+    
     <script src="/test/components/jquery/jquery.js"></script>
     <script src="/test/components/angular/angular.js"></script>
     <script src="/test/public/app.js"></script>
