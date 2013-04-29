@@ -181,7 +181,12 @@
 
     function makeError(response) {
 
-      var err = new Error(response.message || response.data);
+      var msg = response.msg || '';
+      if (!msg && response.data) {
+        msg = response.data.message || response.data.error;
+      }
+      
+      var err = new Error(msg);
       err.code = response.code || response.status;
 
       if (response.config) {
@@ -316,7 +321,7 @@
     Resource.prototype.destroy = function(doc) {
 
       var def = $q.defer();
-      $http.delete(this.host + this.path + '/' + doc._id + '?rev=' + doc._rev).then(
+      $http.delete(this.host + this.path + '/' + doc._id + '/' + doc._rev).then(
         function(res) { def.resolve(); },
         function(res) { def.reject(makeError(res)); }
       );

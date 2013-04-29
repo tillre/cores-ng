@@ -102,9 +102,9 @@ describe('cores angular', function() {
     };
 
     var savedArticle, savedImage;
-    
     var articleRes, imageRes;
 
+    
     before(function(done) {
       injector.invoke(function(cores) {
         articleRes = cores.getResource('Article');
@@ -112,6 +112,7 @@ describe('cores angular', function() {
         done();
       });
     });
+
     
     it('should get the schema', function(done) {
       articleRes.schema().then(
@@ -125,6 +126,7 @@ describe('cores angular', function() {
       );
     });
 
+    
     it('should save the doc', function(done) {
       articleRes.save(articleDoc).then(
         function(doc) {
@@ -140,6 +142,7 @@ describe('cores angular', function() {
       );
     });
 
+    
     it('should save another doc', function(done) {
       articleRes.save(articleDoc).then(
         function(doc) {
@@ -151,6 +154,7 @@ describe('cores angular', function() {
       );
     });
 
+    
     it('should update the doc', function(done) {
       savedArticle.title = 'New Title';
       
@@ -167,6 +171,7 @@ describe('cores angular', function() {
         done
       );
     });
+
     
     it('should return error when doc not valid', function(done) {
       articleDoc.title = '';
@@ -184,6 +189,7 @@ describe('cores angular', function() {
       done();
     });
 
+    
     it('should save multipart doc', function(done) {
       var fd = new FormData();
       fd.append('type_', fileDoc.type_);
@@ -205,6 +211,7 @@ describe('cores angular', function() {
       );
     });
 
+    
     it('should update multipart doc', function(done) {
       var fd = new FormData();
       fd.append('type_', savedImage.type_);
@@ -225,6 +232,7 @@ describe('cores angular', function() {
       );
     });
 
+    
     it('should load the doc', function(done) {
       articleRes.load(savedArticle._id).then(
         function(doc) {
@@ -236,6 +244,7 @@ describe('cores angular', function() {
       );
     });
 
+    
     it('should call the view', function(done) {
       articleRes.view('titles').then(
         function(result) {
@@ -247,6 +256,7 @@ describe('cores angular', function() {
       );
     });
 
+    
     it('should call the view with params', function(done) {
       articleRes.view('titles', { limit: 1 }).then(
         function(result) {
@@ -257,9 +267,23 @@ describe('cores angular', function() {
         done
       );
     });
+
     
     it('should destroy the doc', function(done) {
-      done();
+      articleRes.destroy(savedArticle).then(done, done);
+    });
+
+    
+    it('should not load destroyed doc', function(done) {
+      articleRes.load(savedArticle._id).then(
+        function(doc) {
+          expect(doc).to.not.exist;
+          done();
+        },
+        function() {
+          done();
+        }
+      );
     });
   });
   
