@@ -81,7 +81,6 @@ describe('cores angular', function() {
         expect(template.match('model="model"').length).to.equal(1);
         expect(template.match('schema="schema"').length).to.equal(1);
         
-        console.log('template', template);
         done();
       });
     });
@@ -90,8 +89,178 @@ describe('cores angular', function() {
 
   describe('resource', function() {
 
+    var articleDoc = {
+      type_: 'Article',
+      title: 'Some Title',
+      author: { firstname: 'Bob', lastname: 'Bobsen' },
+      tags: [],
+      body: []
+    };
+    var fileDoc = {
+      title: 'Some Image',
+      file: { name: 'test.jpg', url: '' }
+    };
+
+    var savedArticle, savedImage;
     
+    var articleRes, imageRes;
+
+    before(function(done) {
+      injector.invoke(function(cores) {
+        articleRes = cores.getResource('Article');
+        imageRes = cores.getResource('Image');
+        done();
+      });
+    });
     
+    it('should get the schema', function(done) {
+      articleRes.schema().then(
+        function(schema) {
+          expect(schema).to.be.a('object');
+          expect(schema.name).to.equal('Article');
+          expect(schema.properties).to.be.a('object');
+          done();
+        },
+        done
+      );
+    });
+
+    it('should save the doc', function(done) {
+      articleRes.save(articleDoc).then(
+        function(doc) {
+          expect(doc).to.be.a('object');
+          expect(doc._id).to.be.a('string');
+          expect(doc._rev).to.be.a('string');
+
+          savedArticle = doc;
+          
+          done();
+        },
+        done
+      );
+    });
+
+    it('should save another doc', function(done) {
+      articleRes.save(articleDoc).then(
+        function(doc) {
+          expect(doc._id).to.be.a('string');
+          expect(doc._id).to.not.equal(savedArticle._id);
+          done();
+        },
+        done
+      );
+    });
+
+    it('should update the doc', function(done) {
+      savedArticle.title = 'New Title';
+      
+      articleRes.save(savedArticle).then(
+        function(doc) {
+          expect(doc._id).to.equal(savedArticle._id);
+          expect(doc._rev).to.not.equal(savedArticle._rev);
+          expect(doc.title).to.equal('New Title');
+
+          savedArticle = doc;
+          
+          done();
+        },
+        done
+      );
+    });
+    
+    it('should return error when doc not valid', function(done) {
+      articleDoc.title = '';
+      articleRes.save(articleDoc).then(
+        done(),
+        function(err) {
+          expect(err).to.exist;
+          expect(err.message === 'Validation failed').to.be(true);
+
+          articleDoc.title = 'Some Title';
+          
+          done();
+        }
+      );
+      done();
+    });
+
+    it('should save multipart doc', function(done) {
+      var fd = new FormData();
+      fd.append('type_', fileDoc.type_);
+      fd.append('doc', JSON.stringify(fileDoc));
+      fd.append('file', JSON.stringify({ name: 'foo.jpg', path: '/upload/foo.jpg', isTest: true }));
+
+      imageRes.save(fd).then(
+        function(doc) {
+          expect(doc).to.be.a('object');
+          expect(doc._id).to.be.a('string');
+          expect(doc._rev).to.be.a('string');
+          expect(doc.file.url).to.equal('/upload/foo.jpg');
+          
+          savedImage = doc;
+          
+          done();
+        },
+        done
+      );
+    });
+
+    it('should update multipart doc', function(done) {
+      var fd = new FormData();
+      fd.append('type_', savedImage.type_);
+      fd.append('doc', JSON.stringify(savedImage));
+      fd.append('file', JSON.stringify({ name: 'bar.jpg', path: '/upload/bar.jpg', isTest: true}));
+
+      imageRes.save(fd).then(
+        function(doc) {
+          expect(doc._id).to.equal(savedImage._id);
+          expect(doc._rev).to.not.equal(savedImage._rev);
+          expect(doc.file.url).to.equal('/upload/bar.jpg');
+
+          savedImage = doc;
+
+          done();
+        },
+        done
+      );
+    });
+
+    it('should load the doc', function(done) {
+      articleRes.load(savedArticle._id).then(
+        function(doc) {
+          expect(doc._id).to.equal(savedArticle._id);
+          expect(doc._rev).to.equal(savedArticle._rev);
+          done();
+        },
+        done
+      );
+    });
+
+    it('should call the view', function(done) {
+      articleRes.view('titles').then(
+        function(result) {
+          expect(result.total_rows).to.be.above(1);
+          expect(result.rows.length).to.be.above(1);
+          done();
+        },
+        done
+      );
+    });
+
+    it('should call the view with params', function(done) {
+      articleRes.view('titles', { limit: 1 }).then(
+        function(result) {
+          expect(result.total_rows).to.be.above(1);
+          expect(result.rows.length).to.be.equal(1);
+          done();
+        },
+        done
+      );
+    });
+    
+    it('should destroy the doc', function(done) {
+      done();
+    });
   });
   
   
@@ -235,104 +404,3 @@ describe('cores angular', function() {
 
   
 });
-
-// describe('cores angular', function() {
-
-//   var cores;
-//   var doc = {
-//     type: 'Article',
-//     title: 'Some Article',
-//     author: {
-//       firstname: 'Balou',
-//       lastname: 'The Bear'
-//     },
-//     tags: ['one', 'two'],
-//     body: 'The actual body...'
-//   };
-  
-  
-//   before(function() {
-//     angular.module('comodlTest', ['http']);
-//   });
-
-
-//   describe('service', function() {
-  
-//     it('should get the service from injector', function() {
-//       var $injector = angular.injector(['comodl.services', 'ng']);
-//       comodl = $injector.get('comodl');
-//       expect(comodl).to.be.a('object');
-//     });
-
-
-//     it('should save a document', function(done) {
-//       comodl.save(doc, function(err, d) {
-//         expect(err).to.not.exist;
-//         expect(d._id).to.be.a('string');
-//         expect(d._rev).to.be.a('string');
-//         doc = d;
-//         done();
-//       });
-//     });
-
-    
-//     it('should save an updated document', function(done) {
-//       doc.title = 'New Content';
-//       comodl.save(doc, function(err, d) {
-//         expect(err).to.not.exist;
-//         expect(d._id).to.equal(doc._id);
-//         expect(d._rev).to.not.equal(doc._rev);
-//         doc = d;
-//         done();
-//       });
-//     });
-
-    
-//     it('should get the document', function(done) {
-//       comodl.load('Article', doc._id, function(err, d) {
-//         expect(err).to.not.exist;
-//         expect(d._id).to.equal(doc._id);
-//         expect(d._rev).to.equal(doc._rev);
-//         done();
-//       });
-//     });
-
-
-//     it('should call the all view', function(done) {
-//       comodl.view('Article', 'all', function(err, docs) {
-//         expect(err).to.not.exist;
-//         expect(docs).to.be.a('array');
-//         expect(docs.length).to.equal(1);
-//         done();
-//       });
-//     });
-
-
-//     it('should call the titles view', function(done) {
-//       comodl.view('Article', 'titles', function(err, titles) {
-//         expect(err).to.not.exist;
-//         expect(titles).to.be.a('array');
-//         expect(titles.length).to.equal(1);
-//         expect(titles[0]).to.equal('New Content');
-//         done();
-//       });
-//     });
-    
-    
-//     it('should destroy a document', function(done) {
-//       comodl.destroy(doc, function(err) {
-//         expect(err).to.not.exist;
-//         done();
-//       });
-//     });
-
-
-//     it('should not get a non existant document', function(done) {
-//       comodl.load('Article', doc._id, function(err, d) {
-//         expect(err).to.exist;
-//         expect(err.code).to.equal(404);
-//         done();
-//       });
-//     });
-//   });
-// });

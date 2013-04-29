@@ -3,7 +3,7 @@ module.exports = {
   views: {
     titles: {
       map: function(doc) {
-        if (doc.type === 'Article') {
+        if (doc.type_ === 'Article') {
           emit(doc._id, doc.title);
         }
       }

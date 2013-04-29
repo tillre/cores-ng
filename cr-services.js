@@ -1,6 +1,8 @@
 (function() {
 
   var NS = 'cr';
+  var module = angular.module('cores.services', ['ng']);
+
   
   //
   // create a object with default values from schema
@@ -32,7 +34,7 @@
         obj[name] = createDefaultModel(propSchema);
       });
       if (typeName) {
-        obj.type = typeName;
+        obj.type_ = typeName;
       }
       return obj;
     case 'array': return [];
@@ -70,7 +72,7 @@
   
   function buildAnyOfTemplate(schema, model, schemaPath, modelPath, options) {
     if (!angular.isObject(model) || !model._type) {
-      throw new Error('AnyOf only works with models who have a type property');
+      throw new Error('AnyOf model does not have a type property: ' + JSON.stringify(model));
     }
     // find subschema
     var index = -1;
@@ -106,6 +108,7 @@
   //
   
   function buildTypeTemplate(schema, model, schemaPath, modelPath, options) {
+
     if (angular.isArray(schema.type)) {
       throw new Error('Union types are not supported');
     }
@@ -115,7 +118,7 @@
     }
     
     var name = getModelName(schema, modelPath);
-    
+
     return '<div ' + NS + '-' + type + ' name="' + name + '" schema="' + schemaPath + '" model="' + modelPath + '"/>';
   }
 
@@ -125,6 +128,13 @@
   //
   
   function buildTemplate(schema, model, schemaPath, modelPath, options) {
+
+    // default values for paths
+    schemaPath = schemaPath || 'schema';
+    modelPath = modelPath || 'model';
+
+    var args = [schema, model, schemaPath, modelPath];
+    
     // infer type
     if (!schema.type) {
       if (schema.properties) schema.type = 'object';
@@ -132,7 +142,7 @@
     }
 
     if (schema.enum) {
-      return buildEnumTemplate.apply(null, arguments);
+      return buildEnumTemplate.apply(null, args);
     }
     else if (schema.oneOf) {
       throw new Error('oneOf not implemented');
@@ -141,18 +151,18 @@
       throw new Error('allOf not implemented');
     }
     else if (schema.anyOf) {
-      return buildAnyOfTemplate.apply(null, arguments);
+      return buildAnyOfTemplate.apply(null, args);
     }
     else if (schema.view) {
-      return buildViewTemplate.apply(null, arguments);
+      return buildViewTemplate.apply(null, args);
     }
     else if (schema.type) {
-      return buildTypeTemplate.apply(null, arguments);
+      return buildTypeTemplate.apply(null, args);
     }
     else if (schema.$ref) {
       throw new Error('$ref not implemented');
     }
-    throw new Error('Unkown schema: ' + schemaPath);
+    throw new Error('Unkown schema: ' + schemaPath + ': ' + JSON.stringify(schema));
   }
   
 
@@ -161,17 +171,49 @@
   // create the service module
   //
   
-  var module = angular.module('cores.services', ['ng']);
+  // var module = angular.module('cores.services', ['ng']);
   
   module.service('cores', function($http, $q, $rootScope) {
+
+    //
+    // Create error object from response
+    //
+
+    function makeError(response) {
+
+      var err = new Error(response.message || response.data);
+      err.code = response.code || response.status;
+
+      if (response.config) {
+        err.config = response.config;
+      }
+
+      if (response.errors) {
+        err.errors = response.errors;
+      }
+      return err;
+    };
 
     
     //
     // Resource class
     //
 
-    var Resource = function(config) {
-      angular.extend(this, config);
+    var Resource = function(config, options) {
+
+      // add config to this
+      angular.extend(
+        this,
+        { path: '', schemaPath: '', viewPaths: {} },
+        config
+      );
+
+      // add options to this
+      angular.extend(
+        this,
+        { host: '' },
+        options
+      );
     };
 
 
@@ -180,10 +222,12 @@
     //
     
     Resource.prototype.schema = function() {
+
       var def = $q.defer();
-      $http.get(this.schemaPath).then(
+
+      $http.get(this.host + this.schemaPath).then(
         function(res) { def.resolve(res.data); },
-        function(res) { def.reject(res.data); }
+        function(res) { def.reject(makeError(res)); }
       );
       return def.promise;
     };
@@ -194,10 +238,16 @@
     //
     
     Resource.prototype.load = function(id) {
+
+      var path = this.host + this.path;
+      if (id) {
+        path += '/' + id;
+      }
       var def = $q.defer();
-      $http.get(this.path).then(
+
+      $http.get(path).then(
         function(res) { def.resolve(res.data); },
-        function(res) { def.reject(res.data); }
+        function(res) { def.reject(makeError(res)); }
       );
       return def.promise;
     };
@@ -215,32 +265,45 @@
 
         // update
         
-        $http.put(this.path + '/' + doc._id + '/' + doc._rev, doc).then(
+        $http.put(this.host + this.path + '/' + doc._id + '/' + doc._rev, doc).then(
           function(res) { def.resolve(res.data); },
-          function(res) { def.reject(res.data); }
+          function(res) { def.reject(makeError(res)); }
         );
       }
       else {
 
         // create
-        // send with a xhr for now, $http seems to have problems with multipart/formdata
-        
-        var xhr = new XMLHttpRequest();
-        xhr.addEventListener('load', function() {
-          if (xhr.status === 200) {
-            // success
-            def.resolve(xhr.response);
-          }
-          else {
-            // error
-            def.reject(xhr.response);
-          }
-          // call apply, because we are outside the angular life-cycle
-          $rootScope.$apply();
-        });
-        
-        xhr.open('POST', this.path);
-        xhr.send(doc);
+
+        if (doc instanceof FormData) {
+
+          // send formdata multipart with a xhr for now, $http seems to have problems with it
+          var xhr = new XMLHttpRequest();
+
+          xhr.addEventListener('load', function() {
+
+            var data = typeof xhr.response === 'string' ? JSON.parse(xhr.response) : xhr.response;
+
+            if (xhr.status === 200) {
+              // success
+              def.resolve(data);
+            }
+            else {
+              // error
+              def.reject(makeError(data));
+            }
+            // call apply, because we are outside the angular life-cycle
+            $rootScope.$apply();
+          });
+          
+          xhr.open('POST', this.host + this.path);
+          xhr.send(doc);
+        }
+        else {
+          $http.post(this.host + this.path, doc).then(
+            function(res) { def.resolve(res.data); },
+            function(res) { def.reject(makeError(res.data)); }
+          );
+        }
       }
       return def.promise;
     };
@@ -251,10 +314,11 @@
     //
     
     Resource.prototype.destroy = function(doc) {
+
       var def = $q.defer();
-      $http.delete(this.path + '/' + doc._id + '?rev=' + doc._rev).then(
+      $http.delete(this.host + this.path + '/' + doc._id + '?rev=' + doc._rev).then(
         function(res) { def.resolve(); },
-        function(res) { def.reject(res.data); }
+        function(res) { def.reject(makeError(res)); }
       );
       return def.promise;
     };
@@ -264,16 +328,22 @@
     // Call a couchdb view
     //
     
-    Resource.prototype.view = function(name) {
-      var path = this.viewsPaths[name];
+    Resource.prototype.view = function(name, params) {
+
+      var path = this.viewPaths[name];
       if (!path) {
         throw new Error('No view with name found: ' + name);
       }
+      path = this.host + path;
+
+      var config = {
+        params: params || {}
+      };
 
       var def = $q.defer();
-      $http.get(path).then(
+      $http.get(path, config).then(
         function(res) { def.resolve(res.data); },
-        function(res) { def.reject(res.data); }
+        function(res) { def.reject(makeError(res)); }
       );
       return def.promise;
     };
@@ -287,20 +357,22 @@
     
     var resources = {};
 
-    function loadIndex() {
+    function loadIndex(host) {
+
+      host = host || '';
+      
       var def = $q.defer();
 
-      $http.get('/_index').then(
-
+      $http.get(host + '/_index').then(
         function(res) {
           angular.forEach(res.data, function(value, key) {
-            resources[key] = new Resource(value);
+            resources[key] = new Resource(value, { host: host });
           });
           def.resolve();
         },
-
+        
         function(res) {
-          def.reject(res.data);
+          def.reject(makeError(res));
         }
       );
       return def.promise;
@@ -312,6 +384,7 @@
     //
     
     function getResource(type) {
+
       var r = resources[type];
       if (!r) {
         throw new Error('Resource with type not found: ' + type);
@@ -327,8 +400,8 @@
     return {
       initialize: loadIndex,
       getResource: getResource,
-      buildTemplate: buildTemplate,
-      createModel: createDefaultModel
+      createModel: createDefaultModel,
+      buildTemplate: buildTemplate
     };
   });
 

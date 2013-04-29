@@ -3,22 +3,31 @@
 
 (function() {
 
-  // directive namespace prefix
   var NS = 'cr';
+  var module = angular.module('cores.directives', ['ng',
+                                                   'cores.templates',
+                                                   'cores.services']);
 
-  var module = angular.module('cores.directives', ['ng', 'cores.services', 'cores.templates']);
+  
+  function isObjectSchema(schema) {
+    return schema.type === 'object' || schema.properties;
+  }
+  
+  function isArraySchema(schema) {
+    return schema.type === 'array' || schema.items;
+  }
 
-
+  
   //
   // boolean
   //
   module.directive(NS + 'Boolean', function() {
     return {
-      replace: true,
       scope: {
         model: '=',
         name: '@'
       },
+      replace: true,
       templateUrl: 'cr-boolean.html'
     };
   });
@@ -29,11 +38,11 @@
   //
   module.directive(NS + 'Integer', function() {
     return {
-      replace: true,
       scope: {
         model: '=',
         name: '@'
       },
+      replace: true,
       templateUrl: 'cr-integer.html'
     };
   });
@@ -44,11 +53,11 @@
   //
   module.directive(NS + 'Number', function() {
     return {
-      replace: true,
       scope: {
         model: '=',
         name: '@'
       },
+      replace: true,
       templateUrl: 'cr-number.html'
     };
   });
@@ -59,11 +68,11 @@
   //
   module.directive(NS + 'String', function() {
     return {
-      replace: true,
       scope: {
         model: '=',
         name: '@'
       },
+      replace: true,
       templateUrl: 'cr-string.html'
     };
   });
@@ -74,12 +83,12 @@
   //
   module.directive(NS + 'Enum', function($compile) {
     return {
-      replace: true,
       scope: {
         model: '=',
         schema: '=',
         name: '@'
       },
+      replace: true,
       templateUrl: 'cr-enum.html'
     };
   });
@@ -90,18 +99,18 @@
   //
   module.directive(NS + 'Object', function($compile, cores) {
     return {
-      replace: 'true',
       scope: {
         model: '=',
         schema: '=',
         name: '@'
       },
+      
+      replace: 'true',
       templateUrl: 'cr-object.html',
 
       link: function postLink(scope, elem, attrs) {
-        // console.log('-- link object --', scope.schema, scope.model);
 
-        var tmpl = '<label>{{name}}</label><ul>';
+        var tmpl = '';
         angular.forEach(scope.schema.properties, function(subSchema, key) {
 
           // ignore some keys
@@ -112,14 +121,13 @@
           }
           
           tmpl += cores.buildTemplate(subSchema, scope.model[key],
-                                'schema.properties.' + key, 'model.' + key);
+                                      'schema.properties.' + key, 'model.' + key);
         });
-        tmpl += '</ul>';
         
         // compile and link
         var link = $compile(tmpl);
         var content = link(scope);
-        elem.append(content);
+        elem.find('ul').append(content);
       }
     };
   });
@@ -131,11 +139,12 @@
   module.directive(NS + 'AnyofItem', function($compile, cores) {
     return {
       require: '^' + NS + 'AnyofArray',
-      replace: true,
       scope: {
         model: '=',
         name: '@'
       },
+
+      replace: true,
       templateUrl: 'cr-anyof-item.html',
 
       link: function(scope, elem, attrs, anyof) {
@@ -146,7 +155,7 @@
           anyof.removeItem(scope.$parent.$index);
         });
         
-        var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model');
+        var tmpl = cores.buildTemplate(scope.schema, scope.model);
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
@@ -161,14 +170,13 @@
         schema: '=',
         name: '@'
       },
+
+      replace: true,
       templateUrl: 'cr-anyof-array.html',
       
       controller: function($scope, cores) {
 
         $scope.addItem = function addItem(schema) {
-          if (!schema.type === 'object' || !schema.properties) {
-            throw new Error('Schema must be of type object');
-          }
           var obj = cores.createModel(schema, schema.name);
           $scope.model.push(obj);
         };
@@ -195,9 +203,9 @@
         
         var tmpl = '';
         angular.forEach(scope.schema.items.anyOf, function(anySchema, index) {
-
-          if (anySchema.items.type !== 'object' && !anySchema.items.properties) {
-            throw new Error('AnyOf can only work with objects');
+          
+          if (!isObjectSchema(anySchema)) {
+            throw new Error('AnyOf schema must be of type object: ' + JSON.stringify(anySchema));
           }
           
           var type = anySchema.name;
@@ -218,13 +226,14 @@
   module.directive(NS + 'ArrayItem', function($compile, cores) {
     return {
       require: '^' + NS + 'Array',
-      replace: true,
       scope: {
         model: '=',
         schema: '=',
         $index: '='
       },
-      template: '<div><button ng-click="remove()">Remove</button></div>',
+
+      replace: true,
+      templateUrl: 'cr-array-item.html',
 
       link: function(scope, elem, attrs, array) {
 
@@ -232,7 +241,7 @@
           array.removeItem(scope.$parent.$index);
         });
         
-        var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model');
+        var tmpl = cores.buildTemplate(scope.schema, scope.model);
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
@@ -246,13 +255,14 @@
   //
   module.directive(NS + 'Array', function(cores) {
     return {
-      replace: true,
       scope: {
         model: '=',
         schema: '=',
         name: '@'
       },
-      template: '<div>{{name}}<button ng-click="addItem()">Add</button><ul><li ng-repeat="model in model"><div ' + NS + '-array-item schema="schema.items" model="model"></div></li></ul></div>',
+
+      replace: true,
+      templateUrl: 'cr-array.html',
 
       controller: function($scope, cores) {
         $scope.addItem = function() {
@@ -270,8 +280,8 @@
       link: function postLink(scope, elem, attrs) {
         // ngrepeat can only bind to references when it comes to form fields
         // thats why we can only work with items of type object
-        if (scope.schema.items.type !== 'object' && !scope.schema.items.properties) {
-          throw new Error('Array can only work with objects');
+        if (!isObjectSchema(scope.schema.items)) {
+          throw new Error('Array items schema is not of type object: ' + JSON.stringify(scope.schema.items));
         }
       }
     };
@@ -288,7 +298,7 @@
       },
       
       replace: true,
-      template: '<div><label>{{name}}<input type="file"/></label><img height="240"></div>',
+      templateUrl: 'cr-image.html',
       
       link: function postLink(scope, elem, attrs) {
         var input = elem.find('input[type="file"]');
@@ -331,7 +341,7 @@
       },
 
       replace: true,
-      template: '<div><button ng-click="save()">SNED</button></div>',
+      templateUrl: 'cr-model.html',
 
       controller: function($scope, $http) {
         $scope.$on('RegisterFile', function(event, file) {
@@ -345,26 +355,25 @@
           var doc = $scope.model;
           
           if ($scope.file) {
+
             // multipart request, put doc/file/id/rev/type on formdata
 
-            console.log('append', doc);
-            console.log('append', $scope.file);
-            
             var fd = new FormData();
             fd.append('type_', $scope.type);
             fd.append('doc', JSON.stringify(doc));
             fd.append('file', $scope.file);
 
-            // if (doc._id && doc._rev) {
-            //   // when updating, put the id/rev on the formdata container
-            //   fd.append('_id', doc._id);
-            //   fd.append('_rev', doc._rev);
-            // }
+            if (doc._id && doc._rev) {
+              // when updating, add the id and rev
+              fd.append('_id', doc._id);
+              fd.append('_rev', doc._rev);
+            }
             payload = fd;
 
             console.log('sending formdata', payload);
           }
           else {
+
             // application/json request
             
             payload = doc;
@@ -374,7 +383,7 @@
           r.save(payload).then(
             function(data) {
               console.log('success', data);
-              // $scope.model = JSON.parse(data);
+              $scope.model = data;
             },
             function(data) {
               console.log('error', data);
@@ -386,23 +395,25 @@
       
       link: function(scope, elem, attrs, controller) {
 
-        // console.log('-- link model --');
-        
-        // rebuild whenever the model reference changes
-        var currentModel;
+        // build only once
+        var isBuild = false;
         
         scope.$watch(function(scope) {
 
-          // check for changes
-          if (scope.model === currentModel) {
+          if (!scope.model) return;
+          if (isBuild) {
             return;
           }
+          isBuild = true;
+          
           if (!scope.schema) {
             throw new Error('No Schema defined');
           }
-          currentModel = scope.model;
-
-          var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model');
+          if (!isObjectSchema(scope.schema) && !isArraySchema(scope.schema)) {
+            throw new Error('Top level schema has to be a object or array');
+          }
+          
+          var tmpl = cores.buildTemplate(scope.schema, scope.model);
           var link = $compile(tmpl);
           var content = link(scope);
           elem.prepend(content);

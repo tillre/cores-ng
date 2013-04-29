@@ -10,18 +10,29 @@ function handlePayload(res, payload, callback) {
 
     var doc = payload.doc;
     var file = payload.file;
+
+    // file is a string when testing with fake file data
+    if (typeof file === 'string') file = JSON.parse(file);
+
     var targetFile = path.join(res.ext.upload.dir, file.name);
 
-    fs.rename(file.path, targetFile, function(err) {
-
-      if (err) {
-        err.code = 500;
-        return callback(err);
-      }
-      
-      doc.file.url = url.resolve(res.ext.upload.url, file.name);
+    if (file.isTest) {
+      // when testing no real file is send
+      doc.file.url = file.path;
       callback(null, doc);
-    });
+    }
+    else {
+      fs.rename(file.path, targetFile, function(err) {
+
+        if (err) {
+          err.code = 500;
+          return callback(err);
+        }
+        
+        doc.file.url = url.resolve(res.ext.upload.url, file.name);
+        callback(null, doc);
+      });
+    }
   }
   else {
     callback(null, payload);
