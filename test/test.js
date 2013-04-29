@@ -232,6 +232,29 @@ describe('cores angular', function() {
       );
     });
 
+
+    it('should load all docs', function(done) {
+      articleRes.load().then(
+        function(result) {
+          expect(result.total_rows).to.be.above(1);
+          done();
+        },
+        done
+      );
+    });
+
+
+    it('should load all docs with params', function(done) {
+      articleRes.load({ limit: 1 }).then(
+        function(result) {
+          expect(result.total_rows).to.be.above(1);
+          expect(result.rows.length).to.equal(1);
+          done();
+        },
+        done
+      );
+    });
+    
     
     it('should load the doc', function(done) {
       articleRes.load(savedArticle._id).then(

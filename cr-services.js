@@ -242,15 +242,23 @@
     // Load a resource from the server
     //
     
-    Resource.prototype.load = function(id) {
+    Resource.prototype.load = function(id, params) {
 
       var path = this.host + this.path;
+
       if (id) {
-        path += '/' + id;
+        if (typeof id === 'string') {
+          path += '/' + id;
+        }
+        else if (typeof id === 'object' && !params) {
+          // params passed as first arg
+          params = id;
+        }
       }
+      var config = { params: params || {} };
       var def = $q.defer();
 
-      $http.get(path).then(
+      $http.get(path, config).then(
         function(res) { def.resolve(res.data); },
         function(res) { def.reject(makeError(res)); }
       );
