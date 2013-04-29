@@ -7,14 +7,9 @@ var dbName = 'test-cores-angular';
 
 module.exports = function(grunt) {
 
-  // install angular with `grunt bower`
   // run `grunt test` to start tests
   
   grunt.initConfig({
-    bower: {
-      test: './public'
-    },
-    
     karma: {
       run: {
         configFile: './karma.conf.js'
@@ -31,28 +26,6 @@ module.exports = function(grunt) {
   grunt.registerTask('test', ['db:create', 'server:test', 'karma', 'db:destroy']);
   
   
-  grunt.registerMultiTask('bower', 'install components', function() {
-    var done = this.async();
-    var cwd = path.resolve(this.data);
-
-    console.log('running bower in directory:', cwd);
-
-    var child = grunt.util.spawn({
-      cmd: path.resolve('./node_modules/bower/bin/bower'),
-      args: ['install'],
-      opts: { cwd: cwd }
-    }, function(err, result, code) {
-      if (!err && code === 0) {
-        grunt.log.ok('bower install success');
-      }
-      done(err);
-    });
-    
-    child.stdout.on('data', function(data) { grunt.log.write(data); });
-    child.stderr.on('data', function(data) { grunt.log.write(data); });
-  });
-  
-
   grunt.registerTask('server:run', 'start server', function() {
     var done = this.async();
     var server = require('./server.js');

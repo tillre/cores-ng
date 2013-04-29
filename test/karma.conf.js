@@ -11,8 +11,8 @@ files = [
   MOCHA_ADAPTER,
   './node_modules/chai/chai.js',
 
-  './public/components/jquery/jquery.js',
-  './public/components/angular/angular.js',
+  './components/jquery/jquery.js',
+  './components/angular/angular.js',
 
   '../cr-templates.js',
   '../cr-services.js',
