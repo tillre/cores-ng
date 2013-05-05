@@ -30,21 +30,21 @@
 
     $templateCache.put(
       'cr-integer.html',
-      '<span><label>{{name}}:</label><input style="width:100%" type="number" ng-model="model"/></span>'
+      '<span><label>{{name}}:</label><input type="number" ng-model="model"/></span>'
     );
 
     // number
 
     $templateCache.put(
       'cr-number.html',
-      '<span><label>{{name}}:</label><input style="width:100%" type="number" ng-model="model"/></span>'
+      '<span><label>{{name}}:</label><input type="number" ng-model="model"/></span>'
     );
 
     // string
 
     $templateCache.put(
       'cr-string.html',
-      '<span><label>{{name}}:</label><input style="width:100%" type="text" ng-model="model"/></span>'
+      '<span><label>{{name}}:</label><input type="text" ng-model="model"/></span>'
     );
 
     // enum
