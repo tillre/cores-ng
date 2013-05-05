@@ -22,7 +22,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-karma');
 
 
-  grunt.registerTask('default', ['db:create', 'server:run', 'db:destroy']);
+  grunt.registerTask('server', ['db:create', 'server:run', 'db:destroy']);
   grunt.registerTask('test', ['db:create', 'server:test', 'karma', 'db:destroy']);
   
   

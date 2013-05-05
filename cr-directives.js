@@ -21,6 +21,7 @@
   //
   // boolean
   //
+  
   module.directive(NS + 'Boolean', function() {
     return {
       scope: {
@@ -36,6 +37,7 @@
   //
   // integer
   //
+  
   module.directive(NS + 'Integer', function() {
     return {
       scope: {
@@ -51,6 +53,7 @@
   //
   // number
   //
+  
   module.directive(NS + 'Number', function() {
     return {
       scope: {
@@ -66,6 +69,7 @@
   //
   // string
   //
+  
   module.directive(NS + 'String', function() {
     return {
       scope: {
@@ -81,6 +85,7 @@
   //
   // enum
   //
+  
   module.directive(NS + 'Enum', function($compile) {
     return {
       scope: {
@@ -97,12 +102,14 @@
   //
   // object
   //
+  
   module.directive(NS + 'Object', function($compile, cores) {
     return {
       scope: {
         model: '=',
         schema: '=',
-        name: '@'
+        name: '@',
+        nameHidden: '@'
       },
       
       replace: 'true',
@@ -110,24 +117,39 @@
 
       link: function postLink(scope, elem, attrs) {
 
-        var tmpl = '';
-        angular.forEach(scope.schema.properties, function(subSchema, key) {
+        var isBuild = false;
+        
+        scope.$watch(function(scope) {
 
-          // ignore some keys
-          if (key === '_id' || key === '_rev' || key === 'type_') return;
-          
-          if (!scope.model.hasOwnProperty(key)) {
-            scope.model[key] = cores.createModel(subSchema);
+          if (!scope.model || isBuild) {
+            return;
+          }
+          isBuild = true;
+
+          if (scope.nameHidden) {
+            elem.find('label').remove();
           }
           
-          tmpl += cores.buildTemplate(subSchema, scope.model[key],
-                                      'schema.properties.' + key, 'model.' + key);
+          var tmpl = '';
+          angular.forEach(scope.schema.properties, function(subSchema, key) {
+
+            // ignore some keys
+            if (key === '_id' || key === '_rev' || key === 'type_') return;
+            
+            if (!scope.model.hasOwnProperty(key)) {
+              scope.model[key] = cores.createModel(subSchema);
+            }
+
+            tmpl += cores.buildTemplate(subSchema, scope.model[key],
+                                        'schema.properties.' + key, 'model.' + key);
+          });
+
+          
+          // compile and link
+          var link = $compile(tmpl);
+          var content = link(scope);
+          elem.find('div').append(content);
         });
-        
-        // compile and link
-        var link = $compile(tmpl);
-        var content = link(scope);
-        elem.find('ul').append(content);
       }
     };
   });
@@ -136,6 +158,7 @@
   //
   // anyof array item
   //
+  
   module.directive(NS + 'AnyofItem', function($compile, cores) {
     return {
       require: '^' + NS + 'AnyofArray',
@@ -155,13 +178,19 @@
           anyof.removeItem(scope.$parent.$index);
         });
         
-        var tmpl = cores.buildTemplate(scope.schema, scope.model);
+        var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
+                                       { 'name-hidden': true });
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
       }
     };
   });
+
+
+  //
+  // anyof array
+  //
   
   module.directive(NS + 'AnyofArray', function($compile, cores) {
     return {
@@ -223,6 +252,7 @@
   //
   // array item
   //
+  
   module.directive(NS + 'ArrayItem', function($compile, cores) {
     return {
       require: '^' + NS + 'Array',
@@ -241,7 +271,9 @@
           array.removeItem(scope.$parent.$index);
         });
         
-        var tmpl = cores.buildTemplate(scope.schema, scope.model);
+        var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
+                                       { 'name-hidden': true });
+
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
@@ -253,6 +285,7 @@
   //
   // array
   //
+  
   module.directive(NS + 'Array', function(cores) {
     return {
       scope: {
@@ -279,7 +312,7 @@
       
       link: function postLink(scope, elem, attrs) {
         // ngrepeat can only bind to references when it comes to form fields
-        // thats why we can only work with items of type object
+        // thats why we can only work with items of type object not primitives
         if (!isObjectSchema(scope.schema.items)) {
           throw new Error('Array items schema is not of type object: ' + JSON.stringify(scope.schema.items));
         }
@@ -287,8 +320,21 @@
     };
   });
 
+
   // -- view directives --------------------------------------------------
 
+  module.directive(NS + 'Text', function() {
+    return {
+      scope: {
+        model: '=',
+        name: '@'
+      },
+      replace: true,
+      templateUrl: 'cr-text.html'
+    };
+  });
+
+  
   module.directive(NS + 'Image', function($compile, cores) {
     return {
       scope: {
@@ -389,7 +435,14 @@
               console.log('error', data);
             }
           );
-          
+        };
+
+
+        $scope.cancel = function() {
+        };
+        
+
+        $scope.destroy = function() {
         };
       },
       
@@ -400,8 +453,7 @@
         
         scope.$watch(function(scope) {
 
-          if (!scope.model) return;
-          if (isBuild) {
+          if (!scope.model || isBuild) {
             return;
           }
           isBuild = true;
@@ -412,11 +464,12 @@
           if (!isObjectSchema(scope.schema) && !isArraySchema(scope.schema)) {
             throw new Error('Top level schema has to be a object or array');
           }
-          
-          var tmpl = cores.buildTemplate(scope.schema, scope.model);
+
+          var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
+                                         { 'name-hidden': true});
           var link = $compile(tmpl);
           var content = link(scope);
-          elem.prepend(content);
+          elem.find('form').html(content);
         });
       }
     };

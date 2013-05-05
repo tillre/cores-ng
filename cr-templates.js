@@ -19,54 +19,70 @@
 
     $templateCache.put(
       'cr-boolean.html',
-      '<label>{{name}}<input type="checkbox" ng-model="model"/></label>'
+      '<div>' +
+        '<label class="checkbox">{{name}}' +
+          '<input type="checkbox" ng-model="model"/>' +
+        '</label>' + 
+      '</div>'
     );
 
     // integer
 
     $templateCache.put(
       'cr-integer.html',
-      '<label>{{name}}<input type="number" ng-model="model"/></label>'
+      '<div><label>{{name}}:</label><input type="number" ng-model="model"/></div>'
     );
 
     // number
 
     $templateCache.put(
       'cr-number.html',
-      '<label>{{name}}<input type="number" ng-model="model"/></label>'
+      '<div><label>{{name}}:</label><input type="number" ng-model="model"/></div>'
     );
 
     // string
 
     $templateCache.put(
       'cr-string.html',
-      '<label>{{name}}<input type="text" ng-model="model"/></label>'
+      '<div><label>{{name}}:</label><input type="text" ng-model="model"/></div>'
     );
 
     // enum
 
     $templateCache.put(
       'cr-enum.html',
-      '<label>{{name}}<select ng-model="model" ng-options="e for e in schema.enum"></select></label>'
+      '<div>' +
+        '<label>{{name}}:</label>' +
+        '<select ng-model="model" ng-options="e for e in schema.enum"></select>' +
+      '</div>'
     );
 
     // object
 
     $templateCache.put(
       'cr-object.html',
-      '<div><label>{{name}}</label><ul></ul></div>'
+      '<fieldset>' +
+        '<label><strong>{{name}}:<strong></label>' +
+        '<div style="padding-left: 12px; border-left: 10px solid #eee" class=""></div>' +
+      '</fieldset>'
     );
 
     // anyof
     
     $templateCache.put(
       'cr-anyof-item.html',
-      '<div><button ng-click="remove()">Remove</button></div>'
+      '<div><button class="btn" ng-click="remove()">Remove</button></div>'
     );
 
     $templateCache.put(
       'cr-anyof-array.html',
-      '<div><label>{{name}}</label><div class="controls"/><ul><li ng-repeat="model in model"><div ' + NS + '-anyof-item model="model"></div></li></ul></div>'
+      '<div>' +
+        '<label><strong>{{name}}</strong></label>' +
+        '<div class="controls"/><div>' +
+        '<div>' + 
+          '<div ng-repeat="model in model"><div ' + NS + '-anyof-item model="model"></div></div>' +
+        '</div>' + 
+      '</div>'
     );
 
     // array
@@ -78,7 +94,15 @@
 
     $templateCache.put(
       'cr-array.html',
-      '<div><label>{{name}}</label><button ng-click="addItem()">Add</button><ul><li ng-repeat="model in model"><div ' + NS + '-array-item schema="schema.items" model="model"></div></li></ul></div>'
+      '<div>' +
+        '<label><strong>{{name}}</strong></label>' +
+        '<button class="btn" ng-click="addItem()">Add</button>' +
+        '<ul class="unstyled">' +
+          '<li ng-repeat="model in model">' +
+            '<div ' + NS + '-array-item schema="schema.items" model="model"></div>' +
+          '</li>' +
+        '</ul>' +
+      '</div>'
     );
 
     // image
@@ -88,11 +112,25 @@
       '<div><label>{{name}}<input type="file"/></label><img height="240"></div>'
     );
 
+    // text
+    
+    $templateCache.put(
+      'cr-text.html',
+      '<div><label>{{name}}:</label><textarea ng-model="model"/></div>'
+    );
+    
     // model
 
     $templateCache.put(
       'cr-model.html',
-      '<div><button ng-click="save()">SNED</button></div>'
+      '<div>' +
+        '<form></form>' +
+        '<div class="form-actions">' +
+          '<button ng-click="save()" class="btn btn-primary">Save</button>' +
+          '<button ng-click="cancel()" class="btn">Cancel</button>' +
+          '<button ng-click="destroy()" class="btn btn-danger pull-right">Delete</button>' +
+        '</div>' +
+      '</div>'
     );
     
   }]);

@@ -4,6 +4,10 @@ module.exports = {
   
   properties: {
     title: { type: 'string', minLength: 1 },
+    publish: { type: 'boolean' },
+    seconds: { type: 'integer' },
+    average: { type: 'number' },
+    choose: { type: 'string', 'enum': ['one', 'two', 'three'] },
     author: {
       properties: {
         firstname: { type: 'string'},
@@ -15,6 +19,7 @@ module.exports = {
         properties: { name: {type: 'string' }}
       }
     },
+    content: { type: 'string', view: 'text' },
     body: {
       items: {
         anyOf: [

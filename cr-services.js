@@ -49,20 +49,46 @@
   
   function getModelName(schema, modelPath) {
     // use schema name if it exists
-    if (schema.name) return schema.name;
+    var name = schema.name || '';
 
     // otherwise use name from model path
-    var elems = modelPath.split('.');
-    return elems[elems.length - 1];
+    if (!name) {
+      var items = modelPath.split('.');
+      name = items[items.length - 1];
+      name = name.charAt(0).toUpperCase() + name.slice(1);
+    }
+    return name;
   }
 
 
+  //
+  // build the html element for the type
+  //
+  
+  function buildElement(type, schemaPath, modelPath, name, options) {
+    var e = '<div' +
+          ' ' + NS + '-' + type +
+          ' schema="' + schemaPath + '"' +
+          ' model="' + modelPath + '"' +
+          ' name="' + name + '"';
+
+    angular.forEach(options, function(value, key) {
+      e += ' ' + key + '="' + value + '"';
+    });
+    
+    e += '/>';
+
+    return e;
+  }
+
+  
   //
   // build a enum html template
   //
   
   function buildEnumTemplate(schema, model, schemaPath, modelPath, options) {
-      return '<div ' + NS + '-enum name="' + getModelName(schema, modelPath) + '" schema="' + schemaPath + '" model="' + modelPath + '"/>';
+    var name = getModelName(schema, modelPath);
+    return buildElement('enum', schemaPath, modelPath, name, options);
   }
 
 
@@ -71,9 +97,11 @@
   //
   
   function buildAnyOfTemplate(schema, model, schemaPath, modelPath, options) {
+
     if (!angular.isObject(model) || !model._type) {
       throw new Error('AnyOf model does not have a type property: ' + JSON.stringify(model));
     }
+
     // find subschema
     var index = -1;
     angular.forEach(schema.anyOf, function(ss, i) {
@@ -99,7 +127,8 @@
   //
   
   function buildViewTemplate(schema, model, schemaPath, modelPath, options) {
-    return '<div ' + NS + '-' + schema.view + ' name="' + getModelName(schema, modelPath) + '" schema="' + schemaPath + '" model="' + modelPath + '"/>';
+    var name = getModelName(schema, modelPath);
+    return buildElement(schema.view, schemaPath, modelPath, name, options);
   }
 
 
@@ -118,11 +147,10 @@
     }
     
     var name = getModelName(schema, modelPath);
-
-    return '<div ' + NS + '-' + type + ' name="' + name + '" schema="' + schemaPath + '" model="' + modelPath + '"/>';
+    return buildElement(type, schemaPath, modelPath, name, options);
   }
 
-  
+
   //
   // build a template for a schema/model combination
   //
@@ -133,7 +161,7 @@
     schemaPath = schemaPath || 'schema';
     modelPath = modelPath || 'model';
 
-    var args = [schema, model, schemaPath, modelPath];
+    var args = [schema, model, schemaPath, modelPath, options || {}];
     
     // infer type
     if (!schema.type) {
@@ -171,12 +199,10 @@
   // create the service module
   //
   
-  // var module = angular.module('cores.services', ['ng']);
-  
   module.service('cores', function($http, $q, $rootScope) {
 
     //
-    // Create error object from response
+    // Create an error object from a response
     //
 
     function makeError(response) {
@@ -289,7 +315,7 @@
 
         if (doc instanceof FormData) {
 
-          // send formdata multipart with a xhr for now, $http seems to have problems with it
+          // send multipart with a xhr for now, $http seems to have problems with it
           var xhr = new XMLHttpRequest();
 
           xhr.addEventListener('load', function() {

@@ -1,27 +1,6 @@
 var expect = chai.expect;
 
 
-// var schema = {
-//   properties: {
-//     boolean: { type: 'boolean' },
-//     integer: { type: 'integer' },
-//     number: { type: 'number' },
-//     string: { type: 'string' },
-//     stringarray: {
-//       type: 'array',
-//       items: { type: 'string' }
-//     },
-//     object: {
-//       type: 'object',
-//       properties: {
-//         foo: { type: 'number' },
-//         bar: { type: 'string' }
-//       }
-//     }
-//   }
-// };
-
-
 describe('cores angular', function() {
 
   var injector = angular.injector(['cores', 'ng']);
