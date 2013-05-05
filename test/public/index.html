@@ -7,10 +7,11 @@
   <body>
 
     <div class="container">
-      <div ng-controller="AppCtrl">
-        <div style="float:left" cr-model schema="schema" model="model" type="type">
+      <div class="row">
+        <div ng-controller="AppCtrl">
+          <div cr-model schema="schema" model="model" type="type"></div>
+          <pre>{{ model | json }}</pre>
         </div>
-        <pre style="float:left; margin-left:54px">{{ model | json }}</pre>
       </div>
     </div>
     

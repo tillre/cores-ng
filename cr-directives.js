@@ -112,7 +112,7 @@
         nameHidden: '@'
       },
       
-      replace: 'true',
+      replace: true,
       templateUrl: 'cr-object.html',
 
       link: function postLink(scope, elem, attrs) {

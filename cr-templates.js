@@ -19,52 +19,52 @@
 
     $templateCache.put(
       'cr-boolean.html',
-      '<div>' +
+      '<span>' +
         '<label class="checkbox">{{name}}' +
           '<input type="checkbox" ng-model="model"/>' +
         '</label>' + 
-      '</div>'
+      '</span>'
     );
 
     // integer
 
     $templateCache.put(
       'cr-integer.html',
-      '<div><label>{{name}}:</label><input type="number" ng-model="model"/></div>'
+      '<span><label>{{name}}:</label><input style="width:100%" type="number" ng-model="model"/></span>'
     );
 
     // number
 
     $templateCache.put(
       'cr-number.html',
-      '<div><label>{{name}}:</label><input type="number" ng-model="model"/></div>'
+      '<span><label>{{name}}:</label><input style="width:100%" type="number" ng-model="model"/></span>'
     );
 
     // string
 
     $templateCache.put(
       'cr-string.html',
-      '<div><label>{{name}}:</label><input type="text" ng-model="model"/></div>'
+      '<span><label>{{name}}:</label><input style="width:100%" type="text" ng-model="model"/></span>'
     );
 
     // enum
 
     $templateCache.put(
       'cr-enum.html',
-      '<div>' +
+      '<span>' +
         '<label>{{name}}:</label>' +
         '<select ng-model="model" ng-options="e for e in schema.enum"></select>' +
-      '</div>'
+      '</span>'
     );
 
     // object
 
     $templateCache.put(
       'cr-object.html',
-      '<fieldset>' +
+      '<form class="">' +
         '<label><strong>{{name}}:<strong></label>' +
-        '<div style="padding-left: 12px; border-left: 10px solid #eee" class=""></div>' +
-      '</fieldset>'
+        '<div style="padding-left: 12px; border-left: 10px solid #eee"></div>' +
+      '</form>'
     );
 
     // anyof

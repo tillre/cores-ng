@@ -5,6 +5,7 @@ module.exports = {
   properties: {
     title: { type: 'string', minLength: 1 },
     publish: { type: 'boolean' },
+    draft: { type: 'boolean' },
     seconds: { type: 'integer' },
     average: { type: 'number' },
     choose: { type: 'string', 'enum': ['one', 'two', 'three'] },
