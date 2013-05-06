@@ -98,7 +98,7 @@
     };
   });
 
-  
+
   //
   // object
   //
@@ -128,6 +128,7 @@
 
           if (scope.nameHidden) {
             elem.find('label').remove();
+            // elem.find('.crnested').removeClass('crnested');
           }
           
           var tmpl = '';
@@ -174,8 +175,16 @@
         // get the schema from the anyof-array
         scope.schema = anyof.getSchema(scope.model.type_);
         
-        elem.find('button').on('click', function(e) {
+        elem.find('.item-remove').on('click', function(e) {
           anyof.removeItem(scope.$parent.$index);
+        });
+
+        elem.find('.item-up').on('click', function(e) {
+          anyof.moveItemUp(scope.$parent.$index);
+        });
+
+        elem.find('.item-down').on('click', function(e) {
+          anyof.moveItemDown(scope.$parent.$index);
         });
         
         var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
@@ -225,25 +234,14 @@
           $scope.model.splice(index, 1);
           $scope.$apply();
         };
-      },
 
-      
-      link: function(scope, elem, attrs) {
-        
-        var tmpl = '';
-        angular.forEach(scope.schema.items.anyOf, function(anySchema, index) {
-          
-          if (!isObjectSchema(anySchema)) {
-            throw new Error('AnyOf schema must be of type object: ' + JSON.stringify(anySchema));
-          }
-          
-          var type = anySchema.name;
-          tmpl += '<button ng-click="addItem(schema.items.anyOf[' + index + '])">' + type + '</button>';
-        });
+        this.moveItemUp = function moveItemUp(index) {
+          console.log('move item up');
+        };
 
-        var link = $compile(tmpl);
-        var e = link(scope);
-        elem.find('.controls').append(e);
+        this.moveItemDown = function moveItemDown(index) {
+          console.log('move item down');
+        };
       }
     };
   });

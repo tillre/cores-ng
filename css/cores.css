@@ -4,5 +4,10 @@ input[type="number"] {
     width: 100%;
 }
 
+.crobject {
+    padding-left: 12px;
+    border-left: 1px solid #eee;
+}
+
 
 
