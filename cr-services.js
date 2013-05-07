@@ -80,88 +80,17 @@
 
     return e;
   }
-
   
-  //
-  // build a enum html template
-  //
-  
-  function buildEnumTemplate(schema, model, schemaPath, modelPath, options) {
-    var name = getModelName(schema, modelPath);
-    return buildElement('enum', schemaPath, modelPath, name, options);
-  }
-
 
   //
-  // build a anyOf html template
-  //
-  
-  function buildAnyOfTemplate(schema, model, schemaPath, modelPath, options) {
-
-    if (!angular.isObject(model) || !model._type) {
-      throw new Error('AnyOf model does not have a type property: ' + JSON.stringify(model));
-    }
-
-    // find subschema
-    var index = -1;
-    angular.forEach(schema.anyOf, function(ss, i) {
-      if (ss.name === model._type) {
-        return index = i;
-      }
-    });
-
-    if (index === -1) {
-      throw new Error('No anyOf schema with type found: ' + model._type);
-    }
-
-    var subSchema = schema.anyOf[index];
-
-    return buildTemplate(subSchema, model,
-                         schemaPath + '.anyOf[' + index + ']', modelPath,
-                         options);
-  }
-
-  
-  //
-  // build a template for a view
-  //
-  
-  function buildViewTemplate(schema, model, schemaPath, modelPath, options) {
-    var name = getModelName(schema, modelPath);
-    return buildElement(schema.view, schemaPath, modelPath, name, options);
-  }
-
-
-  //
-  // build a template for a type
-  //
-  
-  function buildTypeTemplate(schema, model, schemaPath, modelPath, options) {
-
-    if (angular.isArray(schema.type)) {
-      throw new Error('Union types are not supported');
-    }
-    var type = schema.type;
-    if (type === 'array' && schema.items && schema.items.anyOf) {
-      type = 'anyof-array';
-    }
-    
-    var name = getModelName(schema, modelPath);
-    return buildElement(type, schemaPath, modelPath, name, options);
-  }
-
-
-  //
-  // build a template for a schema/model combination
-  //
+  // Create a template for a schema with optional view configuration
+  // 
   
   function buildTemplate(schema, model, schemaPath, modelPath, options) {
 
     // default values for paths
     schemaPath = schemaPath || 'schema';
     modelPath = modelPath || 'model';
-
-    var args = [schema, model, schemaPath, modelPath, options || {}];
     
     // infer type
     if (!schema.type) {
@@ -169,30 +98,38 @@
       if (schema.items) schema.type = 'array';
     }
 
+    if (!angular.isString(schema.type)) {
+      throw new Error('Only single types are supported');
+    }
+
+    var viewType = schema.type;
+    var viewName = getModelName(schema, modelPath);
+
+    // handle extended types
+    
     if (schema.enum) {
-      return buildEnumTemplate.apply(null, args);
+      viewType = 'enum';
     }
-    else if (schema.oneOf) {
-      throw new Error('oneOf not implemented');
+    if (viewType === 'array' && schema.items.anyOf) {
+      viewType = 'anyof-array';
     }
-    else if (schema.allOf) {
-      throw new Error('allOf not implemented');
+
+    if (schema.view) {
+
+      // view can be a string or object with additional options
+      
+      if (angular.isObject(schema.view)) {
+        viewType = schema.view.type;
+        viewName = schema.view.name || viewName;
+      }
+      else if (angular.isString(schema.view)) {
+        viewType = schema.view;
+      }
+      else throw new Error('View has to be of type object or string');
     }
-    else if (schema.anyOf) {
-      return buildAnyOfTemplate.apply(null, args);
-    }
-    else if (schema.view) {
-      return buildViewTemplate.apply(null, args);
-    }
-    else if (schema.type) {
-      return buildTypeTemplate.apply(null, args);
-    }
-    else if (schema.$ref) {
-      throw new Error('$ref not implemented');
-    }
-    throw new Error('Unkown schema: ' + schemaPath + ': ' + JSON.stringify(schema));
+
+    return buildElement(viewType, schemaPath, modelPath, viewName, options);
   }
-  
 
   
   //

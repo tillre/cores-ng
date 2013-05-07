@@ -1,10 +1,28 @@
 textarea,
 input[type="text"],
 input[type="number"] {
-    width: 100%;
+    /* width: 100%; */
 }
 
-.crobject {
+[cr-anyof-item], [cr-array-item] {
+    position: relative;
+}
+
+[cr-anyof-item] hr, [cr-array-item] hr {
+    margin: 10px 0;
+}
+
+.item-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.item-controls .btn-group {
+    margin-right: 8px;
+}
+
+.indent {
     padding-left: 12px;
     border-left: 1px solid #eee;
 }

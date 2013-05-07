@@ -63,24 +63,61 @@
       'cr-object.html',
       '<fieldset class="">' +
         '<label><strong>{{name}}:<strong></label>' +
-        '<div class="crobject"></div>' +
+        '<div class="indent properties"></div>' +
       '</fieldset>'
+    );
+
+    $templateCache.put(
+      'cr-object-minimal.html',
+      '<fieldset class="">' +
+        '<div class="properties"></div>' +
+      '</fieldset>'
+    );
+
+    // array
+
+    $templateCache.put(
+      'cr-array-item.html',
+
+      '<div>' +
+        '<hr>' +
+        '<div class="item-controls">' +
+          '<div class="btn-group"">' +
+            '<button class="btn btn-small" ng-click="moveUp()">Up</button>' +
+            '<button class="btn btn-small" ng-click="moveDown()">Down</button>' +
+          '</div>' +
+          '<button class="btn btn-small btn-danger" ng-click="remove()">Remove</button>' +
+        '</div>' +
+      '</div>'
+    );
+
+    $templateCache.put(
+      'cr-array.html',
+
+      '<div>' +
+        '<label><strong>{{name}}</strong></label>' +
+
+        '<div class="indent">' +
+          '<button class="btn" ng-click="addItem()">Add</button>' +
+        '</div>' +
+
+        '<ul class="indent unstyled">' +
+          '<li ng-repeat="model in model">' +
+            '<div ' + NS + '-array-item schema="schema.items" model="model"></div>' +
+          '</li>' +
+        '</ul>' +
+      '</div>'
     );
 
     // anyof
     
     $templateCache.put(
-      'cr-anyof-item.html',
-      '<div><button class="btn" ng-click="remove()">Remove</button></div>'
-    );
-
-    $templateCache.put(
       'cr-anyof-array.html',
 
-      '<div class="crobject">' +
+      '<div>' +
         '<label><strong>{{name}}</strong></label>' +
 
-        '<div class="btn-group">' +
+        '<div class="indent btn-group">' +
           '<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Add <span class="caret"/></a>' +
           '<ul class="dropdown-menu">' +
              '<li ng-repeat="schema in schema.items.anyOf">' +
@@ -88,30 +125,9 @@
              '</li>' +
           '</ul>' +
         '</div>' +
-        '<hr>' +
-        '<ul class="unstyled">' + 
+        '<ul class="indent unstyled">' + 
           '<li ng-repeat="model in model"><div ' + NS + '-anyof-item model="model"></div></li>' +
         '</ul>' + 
-      '</div>'
-    );
-
-    // array
-
-    $templateCache.put(
-      'cr-array-item.html',
-      '<div><button class="btn" ng-click="remove()">Remove</button></div>'
-    );
-
-    $templateCache.put(
-      'cr-array.html',
-      '<div>' +
-        '<label><strong>{{name}}</strong></label>' +
-        '<button class="btn" ng-click="addItem()">Add</button>' +
-        '<ul class="unstyled">' +
-          '<li ng-repeat="model in model">' +
-            '<div ' + NS + '-array-item schema="schema.items" model="model"></div>' +
-          '</li>' +
-        '</ul>' +
       '</div>'
     );
 

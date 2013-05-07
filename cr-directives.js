@@ -103,58 +103,64 @@
   // object
   //
   
-  module.directive(NS + 'Object', function($compile, cores) {
+  module.directive(NS + 'Object', function($compile, $templateCache, cores) {
     return {
       scope: {
         model: '=',
         schema: '=',
         name: '@',
-        nameHidden: '@'
+        template: '@'
       },
       
-      replace: true,
-      templateUrl: 'cr-object.html',
+      compile: function(tElem, tAttrs) {
 
-      link: function postLink(scope, elem, attrs) {
-
-        var isBuild = false;
+        var templates = {
+          'default': 'cr-object.html',
+          'minimal': 'cr-object-minimal.html'
+        };
         
-        scope.$watch(function(scope) {
+        var mode = tAttrs.mode || 'default';
+        var template = $templateCache.get(templates[mode]);
+        // TODO: use replaceWith instead of append, as soon as angular supports it
+        tElem.append(template);
 
-          if (!scope.model || isBuild) {
-            return;
-          }
-          isBuild = true;
+        // Linking function
+        
+        return function link(scope, elem, attrs) {
 
-          if (scope.nameHidden) {
-            elem.find('label').remove();
-            // elem.find('.crnested').removeClass('crnested');
-          }
+          var isBuild = false;
           
-          var tmpl = '';
-          angular.forEach(scope.schema.properties, function(subSchema, key) {
+          scope.$watch(function(scope) {
 
-            // ignore some keys
-            if (key === '_id' || key === '_rev' || key === 'type_') return;
-            
-            if (!scope.model.hasOwnProperty(key)) {
-              scope.model[key] = cores.createModel(subSchema);
+            if (!scope.model || isBuild) {
+              return;
             }
+            isBuild = true;
 
-            tmpl += cores.buildTemplate(subSchema, scope.model[key],
-                                        'schema.properties.' + key, 'model.' + key);
+            // create templates for properties
+            var tmpl = '';
+            angular.forEach(scope.schema.properties, function(subSchema, key) {
+
+              // ignore some keys
+              if (key === '_id' || key === '_rev' || key === 'type_') return;
+              
+              if (!scope.model.hasOwnProperty(key)) {
+                scope.model[key] = cores.createModel(subSchema);
+              }
+
+              tmpl += cores.buildTemplate(subSchema, scope.model[key],
+                                          'schema.properties.' + key, 'model.' + key);
+            });
+
+            // compile and link templates
+            var link = $compile(tmpl);
+            var content = link(scope);
+            elem.find('.properties').append(content);
           });
-
-          
-          // compile and link
-          var link = $compile(tmpl);
-          var content = link(scope);
-          elem.find('div').append(content);
-        });
+        };
       }
     };
   });
-
   
   //
   // anyof array item
@@ -169,26 +175,33 @@
       },
 
       replace: true,
-      templateUrl: 'cr-anyof-item.html',
+      templateUrl: 'cr-array-item.html',
 
+      
+      controller: function($scope) {
+
+        $scope.moveUp = function() {
+          $scope.anyof.moveItemUp($scope.$parent.$index);
+        };
+
+        $scope.moveDown = function() {
+          $scope.anyof.moveItemDown($scope.$parent.$index);
+        };
+
+        $scope.remove = function() {
+          $scope.anyof.removeItem($scope.$parent.$index);
+        };
+      },
+
+      
       link: function(scope, elem, attrs, anyof) {
+
         // get the schema from the anyof-array
         scope.schema = anyof.getSchema(scope.model.type_);
-        
-        elem.find('.item-remove').on('click', function(e) {
-          anyof.removeItem(scope.$parent.$index);
-        });
-
-        elem.find('.item-up').on('click', function(e) {
-          anyof.moveItemUp(scope.$parent.$index);
-        });
-
-        elem.find('.item-down').on('click', function(e) {
-          anyof.moveItemDown(scope.$parent.$index);
-        });
+        scope.anyof = anyof;
         
         var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-                                       { 'name-hidden': true });
+                                       { 'mode': 'minimal' });
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
@@ -232,15 +245,16 @@
         
         this.removeItem = function removeItem(index) {
           $scope.model.splice(index, 1);
-          $scope.$apply();
         };
 
         this.moveItemUp = function moveItemUp(index) {
-          console.log('move item up');
+          if (index === 0) return;
+          $scope.model.splice(index - 1, 0, $scope.model.splice(index, 1)[0]);
         };
 
         this.moveItemDown = function moveItemDown(index) {
-          console.log('move item down');
+          if (index >= $scope.model.length) return;
+          $scope.model.splice(index + 1, 0, $scope.model.splice(index, 1)[0]);
         };
       }
     };
@@ -270,7 +284,7 @@
         });
         
         var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-                                       { 'name-hidden': true });
+                                       { mode: 'minimal' });
 
         var link = $compile(tmpl);
         var e = link(scope);
@@ -464,7 +478,7 @@
           }
 
           var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-                                         { 'name-hidden': true});
+                                         { mode: 'minimal'});
           var link = $compile(tmpl);
           var content = link(scope);
           elem.find('form').html(content);
