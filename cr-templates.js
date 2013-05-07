@@ -99,13 +99,13 @@
 
         '<div class="indent">' +
           '<button class="btn" ng-click="addItem()">Add</button>' +
-        '</div>' +
 
-        '<ul class="indent unstyled">' +
-          '<li ng-repeat="model in model">' +
-            '<div ' + NS + '-array-item schema="schema.items" model="model"></div>' +
-          '</li>' +
-        '</ul>' +
+          '<ul class="unstyled">' +
+            '<li ng-repeat="model in model">' +
+              '<div ' + NS + '-array-item schema="schema.items" model="model"></div>' +
+            '</li>' +
+          '</ul>' +
+        '</div>' +
       '</div>'
     );
 
@@ -117,17 +117,20 @@
       '<div>' +
         '<label><strong>{{name}}</strong></label>' +
 
-        '<div class="indent btn-group">' +
-          '<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Add <span class="caret"/></a>' +
-          '<ul class="dropdown-menu">' +
-             '<li ng-repeat="schema in schema.items.anyOf">' +
-               '<a ng-click="addItem(schema)">{{schema.name}}</a>' +
-             '</li>' +
+        '<div class="indent">' +
+          '<div class="btn-group">' +
+            '<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Add <span class="caret"/></a>' +
+            '<ul class="dropdown-menu">' +
+              '<li ng-repeat="schema in schema.items.anyOf">' +
+                '<a ng-click="addItem(schema)">{{schema.name}}</a>' +
+              '</li>' +
+            '</ul>' +
+          '</div>' +
+
+          '<ul class="unstyled">' + 
+            '<li ng-repeat="model in model"><div ' + NS + '-anyof-item model="model"></div></li>' +
           '</ul>' +
         '</div>' +
-        '<ul class="indent unstyled">' + 
-          '<li ng-repeat="model in model"><div ' + NS + '-anyof-item model="model"></div></li>' +
-        '</ul>' + 
       '</div>'
     );
 
@@ -135,7 +138,22 @@
     
     $templateCache.put(
       'cr-image.html',
-      '<div><label>{{name}}<input type="file"/></label><img height="240"></div>'
+      '<span>' +
+        '<label>{{name}}</label>' +
+        '<input type="file"/>' +
+        '<img class="img-rounded" height="140">' +
+      '</span>'
+    );
+
+    $templateCache.put(
+      'cr-image-ref.html',
+      '<div>' +
+        '<label>{{name}}</label>' +
+        '<div class="indent">' +
+          '<button class="btn">Change</button>' +
+          '<img style="display:block" height="64px">' +
+        '</div>' +
+      '</div>'
     );
 
     // text
@@ -157,6 +175,7 @@
           '<button ng-click="cancel()" class="btn">Cancel</button>' +
           '<button ng-click="destroy()" class="btn btn-danger pull-right">Delete</button>' +
         '</div>' +
+        '<pre>{{ model | json }}</pre>' +
       '</div>'
     );
     

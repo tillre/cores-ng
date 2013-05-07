@@ -17,6 +17,20 @@
     return schema.type === 'array' || schema.items;
   }
 
+
+  // -- type directives --------------------------------------------------
+
+
+  function StandardCtrl($scope) {
+
+    $scope.isReady = false;
+
+    $scope.$watch('model', function() {
+      if ($scope.isReady) return;
+      $scope.isReady = true;
+      $scope.$emit('ready');
+    });
+  }
   
   //
   // boolean
@@ -29,7 +43,8 @@
         name: '@'
       },
       replace: true,
-      templateUrl: 'cr-boolean.html'
+      templateUrl: 'cr-boolean.html',
+      controller: StandardCtrl
     };
   });
 
@@ -45,7 +60,8 @@
         name: '@'
       },
       replace: true,
-      templateUrl: 'cr-integer.html'
+      templateUrl: 'cr-integer.html',
+      controller: StandardCtrl
     };
   });
 
@@ -61,7 +77,8 @@
         name: '@'
       },
       replace: true,
-      templateUrl: 'cr-number.html'
+      templateUrl: 'cr-number.html',
+      controller: StandardCtrl
     };
   });
 
@@ -77,7 +94,8 @@
         name: '@'
       },
       replace: true,
-      templateUrl: 'cr-string.html'
+      templateUrl: 'cr-string.html',
+      controller: StandardCtrl
     };
   });
 
@@ -94,7 +112,8 @@
         name: '@'
       },
       replace: true,
-      templateUrl: 'cr-enum.html'
+      templateUrl: 'cr-enum.html',
+      controller: StandardCtrl
     };
   });
 
@@ -111,7 +130,7 @@
         name: '@',
         template: '@'
       },
-      
+
       compile: function(tElem, tAttrs) {
 
         var templates = {
@@ -128,14 +147,24 @@
         
         return function link(scope, elem, attrs) {
 
-          var isBuild = false;
+          scope.isReady = false;
+          scope.numProperties = 0;
+
+          // listen for ready status of childs and ready up when all fired
+          var offready = scope.$on('ready', function(e) {
+            e.stopPropagation();
+            if (--scope.numProperties === 0) {
+              offready();
+              scope.$emit('ready');
+            }
+          });
           
           scope.$watch(function(scope) {
 
-            if (!scope.model || isBuild) {
+            if (!scope.model || !scope.schema || scope.isReady) {
               return;
             }
-            isBuild = true;
+            scope.isReady = true;
 
             // create templates for properties
             var tmpl = '';
@@ -148,13 +177,14 @@
                 scope.model[key] = cores.createModel(subSchema);
               }
 
+              scope.numProperties += 1;
+              
               tmpl += cores.buildTemplate(subSchema, scope.model[key],
                                           'schema.properties.' + key, 'model.' + key);
             });
 
             // compile and link templates
-            var link = $compile(tmpl);
-            var content = link(scope);
+            var content = $compile(tmpl)(scope);
             elem.find('.properties').append(content);
           });
         };
@@ -335,6 +365,7 @@
 
   // -- view directives --------------------------------------------------
 
+  
   module.directive(NS + 'Text', function() {
     return {
       scope: {
@@ -346,6 +377,40 @@
     };
   });
 
+
+  module.directive(NS + 'ImageRef', function(cores) {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@'
+      },
+
+      replace: true,
+      templateUrl: 'cr-image-ref.html',
+
+      controller: function($scope) {
+
+        $scope.src = '';
+
+        if ($scope.model) {
+          console.log('model has value');
+
+          var id = $scope.model;
+
+          cores.getResource('Image').load(id).then(
+            function(doc) {
+              console.log('image', doc);
+            },
+            function(err) {
+              throw new Error(err);
+            }
+          );
+        }
+      }
+    };
+  });
+  
   
   module.directive(NS + 'Image', function($compile, cores) {
     return {
@@ -357,10 +422,17 @@
       
       replace: true,
       templateUrl: 'cr-image.html',
+
+      controller: StandardCtrl,
       
       link: function postLink(scope, elem, attrs) {
+
         var input = elem.find('input[type="file"]');
         var preview = elem.find('img');
+
+        scope.$watch('model.url', function(url) {
+          preview.attr('src', url);
+        });
         
         input.on('change', function(e) {
           var files = input[0].files;
@@ -389,24 +461,55 @@
   
   // -- model directive --------------------------------------------------
 
+  
   module.directive(NS + 'Model', function($compile, cores) {
 
     return {
       scope: {
-        model: '=',
-        schema: '=',
-        type: '='
+        // model: '=',
+        // schema: '=',
+        type: '@',
+        id: '@'
       },
 
       replace: true,
       templateUrl: 'cr-model.html',
 
       controller: function($scope, $http) {
+
+        // build/load when type has been set
+        
+        $scope.$watch('type', function(type) {
+
+          var res = cores.getResource(type);
+
+          res.schema().then(
+            function(schema) {
+              $scope.schema = schema;
+              
+              if (!$scope.id) {
+                // create empty model
+                $scope.model = cores.createModel(schema);
+                return;
+              }
+
+              // load the model
+              res.load($scope.id).then(
+                function(doc) {
+                  $scope.model = doc;
+                }
+              );
+            }
+          );
+        });
+
+        
         $scope.$on('RegisterFile', function(event, file) {
           console.log('RegisterFile Event', arguments);
           $scope.file = file;
         });
 
+        
         $scope.save = function() {
 
           var payload;
@@ -451,24 +554,26 @@
 
 
         $scope.cancel = function() {
+          throw new Error('not implemented');
         };
         
 
         $scope.destroy = function() {
+          throw new Error('not implemented');
         };
       },
       
       link: function(scope, elem, attrs, controller) {
 
         // build only once
-        var isBuild = false;
+        scope.isReady = false;
         
         scope.$watch(function(scope) {
 
-          if (!scope.model || isBuild) {
+          if (!scope.model || scope.isReady) {
             return;
           }
-          isBuild = true;
+          scope.isReady = true;
           
           if (!scope.schema) {
             throw new Error('No Schema defined');

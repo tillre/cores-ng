@@ -7,14 +7,23 @@
   </head>
   <body>
 
-    <div class="container">
+    <div class="container" ng-controller="AppCtrl">
       <div class="row">
-        <div ng-controller="AppCtrl">
-          <div cr-model schema="schema" model="model" type="type"></div>
-          <pre>{{ model | json }}</pre>
-        </div>
+        <p><a href="#/articles">Articles</a></p>
+        <p><a href="#/images">Images</a></p>
       </div>
-    </div>
+
+      <div class="row" ng-view></div>
+    </div>      
+    
+    <!-- <div class="container"> -->
+    <!--   <div class="row"> -->
+    <!--     <div ng-controller="AppCtrl"> -->
+    <!--       <div cr-model schema="schema" model="model" type="type"></div> -->
+    <!--       <pre>{{ model | json }}</pre> -->
+    <!--     </div> -->
+    <!--   </div> -->
+    <!-- </div> -->
 
     <script src="/test/components/jquery/jquery.js"></script>
     <script src="/test/components/angular/angular.js"></script>

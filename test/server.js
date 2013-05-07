@@ -1,5 +1,6 @@
 var path = require('path');
 var fs = require('fs');
+var async = require('async');
 
 var hapi = require('hapi');
 
@@ -8,8 +9,11 @@ var mountResources = require('cores-hapi');
 
 var port = 3333;
 
+
 function setupServer(db, callback) {
-  // run test server
+
+  // test server
+
   var server = new hapi.Server('0.0.0.0', port, {
     cors: {
       origin: ['*'],
@@ -22,16 +26,7 @@ function setupServer(db, callback) {
 
 
   // logging
-  // server.on('request', function(req) {
-  //   if (req.path === '/favicon.ico') return;
-  //   console.log('-- request', req.path, req);
-  // });
-  // server.on('response', function(res) {
-  //   console.log('-- response', res);
-  // });
-  // server.on('tail', function(event) {
-  //   console.log('-- tail');
-  // });
+  
   server.on('internalError', function(req, error) {
     console.log('-- internalError', error);
   });
@@ -41,6 +36,7 @@ function setupServer(db, callback) {
 
   
   // serve index.html
+  
   server.route({
     path: '/',
     method: 'GET',
@@ -48,12 +44,15 @@ function setupServer(db, callback) {
   });
   
   // serve files
+  
   server.route({
     path: '/{path*}',
     method: 'GET',
     handler: { directory: { path: '..', listing: true }}
   });
 
+  // hook extension
+  
   var ext = {
     upload: {
       dir: path.join(__dirname, '/upload'),
@@ -62,21 +61,35 @@ function setupServer(db, callback) {
   };
 
   // create upload dir
-  // fs.mkdirSync(ext.upload.dir);
+
   fs.mkdir(ext.upload.dir, function(err) {
     if (err && err.code !== 'EEXIST') {
       return callback(err);
     }
-    
+
     // load models and mount routes
-    loadResources(db, './models', ext, function(err, resources) {
 
-      if (err) return callback(err);
-      
-      mountResources(resources, server);
+    async.reduce(
 
-      callback(null, resources, server);
-    });
+      ['./models', './models/standard', './models/extended'],
+      {},
+
+      function(resources, path, callback) {
+        loadResources(db, path, ext, function(err, res) {
+          for (var x in res) {
+            if (!resources[x]) resources[x] = res[x];
+          }
+          callback(err, resources);
+        });
+      },
+
+      function(err, resources) {
+        if (err) return callback(err);
+
+        mountResources(resources, server);
+        callback(null, resources, server);
+      }
+    );
   });
 }
 

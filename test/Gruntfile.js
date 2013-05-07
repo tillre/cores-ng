@@ -30,7 +30,9 @@ module.exports = function(grunt) {
     var done = this.async();
     var server = require('./server.js');
     var db = nano.use(dbName);
-    server(db, function() {});
+    server(db, function(err) {
+      if (err) console.log(err);
+    });
     // never call done to run endlessly
   });
 

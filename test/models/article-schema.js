@@ -1,7 +1,5 @@
 module.exports = {
 
-  name: 'Article',
-  
   properties: {
     title: { type: 'string', minLength: 1 },
     publish: { type: 'boolean' },
@@ -9,6 +7,10 @@ module.exports = {
     seconds: { type: 'integer' },
     average: { type: 'number' },
     choose: { type: 'string', 'enum': ['one', 'two', 'three'] },
+    image: {
+      type: 'string',
+      view: 'image-ref'
+    },
     author: {
       properties: {
         firstname: { type: 'string'},

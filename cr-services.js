@@ -340,6 +340,7 @@
       var def = $q.defer();
 
       $http.get(host + '/_index').then(
+
         function(res) {
           angular.forEach(res.data, function(value, key) {
             resources[key] = new Resource(value, { host: host });
@@ -367,7 +368,7 @@
       }
       return r;
     }
-
+    
 
     //
     // public

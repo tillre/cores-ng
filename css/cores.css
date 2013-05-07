@@ -12,6 +12,15 @@ input[type="number"] {
     margin: 10px 0;
 }
 
+[cr-image] img {
+    float: left;
+    display: block;
+    background-color: #ddd;
+    max-height: 140px;
+    min-width: 140px;
+    margin-right: 12px;
+}
+
 .item-controls {
     position: absolute;
     top: 0;
@@ -24,6 +33,7 @@ input[type="number"] {
 
 .indent {
     padding-left: 12px;
+    margin-bottom: 10px;
     border-left: 1px solid #eee;
 }
 
