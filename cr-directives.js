@@ -8,6 +8,9 @@
                                                    'cores.templates',
                                                    'cores.services']);
 
+
+  var READY_EVENT = 'ready';
+  
   
   function isObjectSchema(schema) {
     return schema.type === 'object' || schema.properties;
@@ -28,7 +31,7 @@
     $scope.$watch('model', function() {
       if ($scope.isReady) return;
       $scope.isReady = true;
-      $scope.$emit('ready');
+      $scope.$emit(READY_EVENT);
     });
   }
   
@@ -150,12 +153,12 @@
           scope.isReady = false;
           scope.numProperties = 0;
 
-          // listen for ready status of childs and ready up when all fired
-          var offready = scope.$on('ready', function(e) {
+          // listen for childs ready event and ready up when all fired
+          var offready = scope.$on(READY_EVENT, function(e) {
             e.stopPropagation();
             if (--scope.numProperties === 0) {
               offready();
-              scope.$emit('ready');
+              scope.$emit(READY_EVENT);
             }
           });
           
@@ -286,6 +289,11 @@
           if (index >= $scope.model.length) return;
           $scope.model.splice(index + 1, 0, $scope.model.splice(index, 1)[0]);
         };
+      },
+
+
+      link: function(scope, elem, attrs) {
+        scope.$emit(READY_EVENT);
       }
     };
   });
@@ -358,6 +366,8 @@
         if (!isObjectSchema(scope.schema.items)) {
           throw new Error('Array items schema is not of type object: ' + JSON.stringify(scope.schema.items));
         }
+
+        scope.$emit(READY_EVENT);
       }
     };
   });
@@ -373,7 +383,8 @@
         name: '@'
       },
       replace: true,
-      templateUrl: 'cr-text.html'
+      templateUrl: 'cr-text.html',
+      controller: StandardCtrl
     };
   });
 
@@ -390,7 +401,6 @@
       templateUrl: 'cr-image-ref.html',
 
       controller: function($scope) {
-
         $scope.src = '';
 
         if ($scope.model) {
@@ -407,6 +417,10 @@
             }
           );
         }
+      },
+
+      link: function(scope, elem, attrs) {
+        scope.$emit(READY_EVENT);
       }
     };
   });
@@ -423,8 +437,6 @@
       replace: true,
       templateUrl: 'cr-image.html',
 
-      controller: StandardCtrl,
-      
       link: function postLink(scope, elem, attrs) {
 
         var input = elem.find('input[type="file"]');
@@ -454,6 +466,8 @@
           scope.$emit('RegisterFile', file);
           scope.$apply();
         });
+
+        scope.$emit(READY_EVENT);
       }
     };
   });
@@ -567,6 +581,11 @@
 
         // build only once
         scope.isReady = false;
+
+        var offready = scope.$on(READY_EVENT, function(e) {
+          // let the event bubble as it is the final ready event
+          offready();
+        });
         
         scope.$watch(function(scope) {
 
