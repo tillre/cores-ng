@@ -22,31 +22,11 @@
         console.log('cores initialized');
       });
     })
-
-    .controller('ModelCtrl', function($scope, cores) {
-      
-    })
   
     .controller('ArticlesCtrl', function($scope, cores) {
-      // var r = cores.getResource('Article');
-      // r.schema().then(function(schema) {
-      //   $scope.model = {
-      //     schema: schema,
-      //     value: cores.createModel(schema),
-      //     type: r.type
-      //   };
-      // });
     })
 
     .controller('ImagesCtrl', function($scope, cores) {
-      // var r = cores.getResource('Image');
-      // r.schema().then(function(schema) {
-      //   $scope.model = {
-      //     schema: schema,
-      //     value: cores.createModel(schema),
-      //     type: r.type
-      //   };
-      // });
     })
   
   ;

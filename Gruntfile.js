@@ -7,28 +7,31 @@ var dbName = 'test-cores-angular';
 
 module.exports = function(grunt) {
 
-  // run `grunt test` to start tests
-  
   grunt.initConfig({
     karma: {
       run: {
-        configFile: './karma.conf.js'
+        configFile: './test/karma.conf.js'
       }
     }
   });
 
-
-  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-karma');
 
-
+  //
+  // main tasks
+  //
+  
   grunt.registerTask('server', ['db:create', 'server:run', 'db:destroy']);
   grunt.registerTask('test', ['db:create', 'server:test', 'karma', 'db:destroy']);
+
   
+  //
+  // server tasks
+  //
   
   grunt.registerTask('server:run', 'start server', function() {
     var done = this.async();
-    var server = require('./server.js');
+    var server = require('./test/server.js');
     var db = nano.use(dbName);
     server(db, function(err) {
       if (err) console.log(err);
@@ -38,11 +41,15 @@ module.exports = function(grunt) {
 
   grunt.registerTask('server:test', 'start test server', function() {
     var done = this.async();
-    var server = require('./server.js');
+    var server = require('./test/server.js');
     var db = nano.use(dbName);          
     server(db, done);
   });
 
+  
+  //
+  // db tasks
+  //
   
   grunt.registerTask('db:create', 'create test DB', function() {
     var done = this.async();
@@ -63,7 +70,6 @@ module.exports = function(grunt) {
       else done(err);
     });
   });
-
   
   grunt.registerTask('db:destroy', 'destroy test DB', function() {
     var done = this.async();

@@ -7,10 +7,9 @@ basePath = '';
 
 // list of files / patterns to load in the browser
 files = [
-  MOCHA,
-  MOCHA_ADAPTER,
-  './node_modules/chai/chai.js',
-
+  JASMINE,
+  JASMINE_ADAPTER,
+  
   './components/jquery/jquery.js',
   './components/angular/angular.js',
 
@@ -18,7 +17,7 @@ files = [
   '../cr-services.js',
   '../cr-directives.js',
   
-  './test.js'
+  './unit/test.js'
 ];
 
 
@@ -74,6 +73,3 @@ captureTimeout = 60000;
 singleRun = false;
 
 
-plugins = [
-  'karma-mocha'
-];

@@ -40,7 +40,7 @@ function setupServer(db, callback) {
   server.route({
     path: '/',
     method: 'GET',
-    handler: { file: './public/index.html' }
+    handler: { file: './test/public/index.html' }
   });
   
   // serve files
@@ -48,48 +48,33 @@ function setupServer(db, callback) {
   server.route({
     path: '/{path*}',
     method: 'GET',
-    handler: { directory: { path: '..', listing: true }}
+    handler: { directory: { path: '.', listing: true }}
   });
 
-  // hook extension
+  // app data
   
-  var ext = {
+  var app = {
     upload: {
-      dir: path.join(__dirname, '/upload'),
-      url: '/test/upload/'
+      dir: path.join(__dirname, '/public/upload'),
+      url: '/test/public/upload/'
     }
   };
 
   // create upload dir
 
-  fs.mkdir(ext.upload.dir, function(err) {
+  fs.mkdir(app.upload.dir, function(err) {
     if (err && err.code !== 'EEXIST') {
       return callback(err);
     }
 
     // load models and mount routes
 
-    async.reduce(
-
-      ['./models', './models/standard', './models/extended'],
-      {},
-
-      function(resources, path, callback) {
-        loadResources(db, path, ext, function(err, res) {
-          for (var x in res) {
-            if (!resources[x]) resources[x] = res[x];
-          }
-          callback(err, resources);
-        });
-      },
-
-      function(err, resources) {
-        if (err) return callback(err);
-
-        mountResources(resources, server);
-        callback(null, resources, server);
-      }
-    );
+    loadResources(db, './test/models', { app: app, recursive: true }, function(err, res) {
+      if (err) return callback(err);
+      
+      mountResources(res, server);
+      callback(null, res, server);
+    });
   });
 }
 

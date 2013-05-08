@@ -11,13 +11,11 @@
   "license": "BSD",
   "devDependencies": {
     "nano": "~3.3.8",
-    "mocha": "1.x.x",
-    "chai": "1.x.x",
     "karma": "~0.9.0",
-    "karma-mocha": "~0.0.1",
     "grunt": "~0.4.1",
     "grunt-karma": "~0.4.3",
     "bower": "~0.8.6",
-    "grunt-contrib-clean": "~0.4.0"
+    "async": "~0.2.8",
+    "hapi": "~1.0.3"
   }
 }

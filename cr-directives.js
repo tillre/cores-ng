@@ -320,7 +320,7 @@
         elem.find('button').on('click', function(e) {
           array.removeItem(scope.$parent.$index);
         });
-        
+
         var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
                                        { mode: 'minimal' });
 
@@ -363,9 +363,11 @@
       link: function postLink(scope, elem, attrs) {
         // ngrepeat can only bind to references when it comes to form fields
         // thats why we can only work with items of type object not primitives
+        // this may change in a feature release
         if (!isObjectSchema(scope.schema.items)) {
           throw new Error('Array items schema is not of type object: ' + JSON.stringify(scope.schema.items));
         }
+        console.log('array model', scope.model);
 
         scope.$emit(READY_EVENT);
       }
@@ -480,9 +482,8 @@
 
     return {
       scope: {
-        // model: '=',
-        // schema: '=',
         type: '@',
+        model: '=?',
         id: '@'
       },
 
@@ -500,19 +501,24 @@
           res.schema().then(
             function(schema) {
               $scope.schema = schema;
-              
-              if (!$scope.id) {
-                // create empty model
-                $scope.model = cores.createModel(schema);
+
+              if ($scope.value) {
+                // use provided model value
                 return;
               }
 
-              // load the model
-              res.load($scope.id).then(
-                function(doc) {
-                  $scope.model = doc;
-                }
-              );
+              if ($scope.id) {
+                // load the model
+                res.load($scope.id).then(
+                  function(doc) {
+                    $scope.model = doc;
+                  }
+                );
+                return;
+              }
+              
+              // create a new model
+              $scope.model = cores.createModel(schema);
             }
           );
         });
@@ -589,10 +595,12 @@
         
         scope.$watch(function(scope) {
 
-          if (!scope.model || scope.isReady) {
+          if (!scope.model || !scope.schema || scope.isReady) {
             return;
           }
           scope.isReady = true;
+
+          console.log('build model', scope.model, scope.schema);
           
           if (!scope.schema) {
             throw new Error('No Schema defined');
@@ -603,6 +611,7 @@
 
           var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
                                          { mode: 'minimal'});
+          
           var link = $compile(tmpl);
           var content = link(scope);
           elem.find('form').html(content);

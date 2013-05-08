@@ -1,5 +1,5 @@
 module.exports = {
-  save: function(res, doc, callback) {
+  save: function(app, doc, callback) {
     doc.author.firstname = 'Tom';
 
     // cut of arrays for testing html model form update
