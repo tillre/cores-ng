@@ -7,11 +7,16 @@ basePath = '';
 
 // list of files / patterns to load in the browser
 files = [
-  JASMINE,
-  JASMINE_ADAPTER,
+  // JASMINE,
+  // JASMINE_ADAPTER,
+  MOCHA,
+  MOCHA_ADAPTER,
   
   './components/jquery/jquery.js',
   './components/angular/angular.js',
+  // './components/angular/angular-mocks.js',
+
+  '../node_modules/chai/chai.js',
 
   '../cr-templates.js',
   '../cr-services.js',

@@ -1,12 +1,119 @@
 
+var assert = chai.assert;
+
+
 describe('cores', function() {
 
-  it('should pass this test', function() {
-    expect(true).toBe(true);
-  });
+  // beforeEach(module('cores'));
+  // beforeEach(angular.module('cores'));
+
+  // var injector = angular
+  var injector = angular.injector(['cores', 'ng']);
 
   
+  it('should get cores service', injector.invoke(function(cores) {
+    assert(typeof cores === 'object');
+    assert(typeof cores.initialize === 'function');
+    assert(typeof cores.getResource === 'function');
+    assert(typeof cores.createModel === 'function');
+    assert(typeof cores.buildTemplate === 'function');
+  }));
+
+
+  describe('services', function() {
+
+    it('should initialize', function(done) {
+      injector.invoke(function(cores) {
+        cores.initialize('http://localhost:3333').then(
+          // done, done
+          function() { console.log('success'); done(); },
+          function() { console.log('error'); done(); }
+        );
+      });
+    });
+  });
 });
+
+// describe('cores', function() {
+
+//   beforeEach(module('cores'));
+  
+//   it('should inject cores', inject(function(cores) {
+//     expect(typeof cores).toEqual('object');
+//   }));
+
+
+//   describe('services', function() {
+
+//     it('should initialize', function() {
+      
+//       runs(inject(function(cores) {
+//         cores.initialize('http://localhost:3333').then(
+          
+//         );
+//       }));
+
+      
+//     });
+    
+//     // it('should initialize', function(done) {
+//     //   injector.invoke(function(cores) {
+//     //     console.log('cores', cores);
+//     //     cores.initialize('http://localhost:3333').then(done, done);
+//     //   });
+//     // });
+
+
+//     // it('should have the resources', function(done) {
+//     //   injector.invoke(function(cores) {
+//     //     expect(cores.getResource('Article')).to.be.a('object');
+//     //     expect(cores.getResource('Image')).to.be.a('object');
+//     //     done();
+//     //   });
+//     // });
+
+
+//     // it('should create default model', function(done) {
+//     //   injector.invoke(function(cores) {
+//     //     expect(cores.createModel({ type: 'boolean' })).to.be.a('boolean');
+//     //     expect(cores.createModel({ type: 'integer' })).to.be.a('number');
+//     //     expect(cores.createModel({ type: 'number' })).to.be.a('number');
+//     //     expect(cores.createModel({ type: 'string' })).to.be.a('string');
+
+//     //     var obj = cores.createModel({
+//     //       properties: {
+//     //         foo: { type: 'boolean' }, bar: { type: 'number'}
+//     //       }
+//     //     });
+//     //     expect(obj).to.be.a('object');
+//     //     expect(obj.foo).to.be.a('boolean');
+//     //     expect(obj.bar).to.be.a('number');
+
+//     //     expect(cores.createModel({ items: { type: 'string' }})).to.be.a('array');
+        
+//     //     done();
+//     //   });
+//     // });
+    
+//     // it('should build the template', function(done) {
+//     //   injector.invoke(function(cores) {
+//     //     var schema = { properties: {
+//     //       foo: { type: 'boolean' }, bar: { type: 'number' }
+//     //     }};
+//     //     var model = cores.createModel(schema);
+//     //     var template = cores.buildTemplate(schema, model);
+
+//     //     expect(template.match('cr-object').length).to.equal(1);
+//     //     expect(template.match('model="model"').length).to.equal(1);
+//     //     expect(template.match('schema="schema"').length).to.equal(1);
+        
+//     //     done();
+//     //   });
+//     // });
+//   });
+  
+  
+// });
 
 
 // describe('cores angular', function() {
