@@ -339,12 +339,9 @@
       
       var def = $q.defer();
 
-      console.log('loading index');
-      
       $http.get(host + '/_index').then(
 
         function(res) {
-          console.log('success');
           angular.forEach(res.data, function(value, key) {
             resources[key] = new Resource(value, { host: host });
           });
@@ -352,7 +349,6 @@
         },
         
         function(res) {
-          console.log('error');
           def.reject(makeError(res));
         }
       );

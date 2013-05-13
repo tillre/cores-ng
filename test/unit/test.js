@@ -4,529 +4,447 @@ var assert = chai.assert;
 
 describe('cores', function() {
 
-  // beforeEach(module('cores'));
-  // beforeEach(angular.module('cores'));
-
-  // var injector = angular
   var injector = angular.injector(['cores', 'ng']);
 
+  //
+  // gets the dependencies and triggers a digest cycle on the rootscope
+  //
+  // (deps, async, callback(done))
+  // (deps, callback)
+  // (async, callback(done))
+  //
   
-  it('should get cores service', injector.invoke(function(cores) {
-    assert(typeof cores === 'object');
-    assert(typeof cores.initialize === 'function');
-    assert(typeof cores.getResource === 'function');
-    assert(typeof cores.createModel === 'function');
-    assert(typeof cores.buildTemplate === 'function');
-  }));
+  function inject(deps, async, callback) {
+
+    if (typeof deps === 'function') {
+      callback = deps;
+      deps = [];
+      async = false;
+    }
+
+    if (typeof deps === 'boolean') {
+      callback = async;
+      async = deps;
+      deps = [];
+    }
+    
+    if (typeof async === 'function') {
+      callback = async;
+      async = false;
+    }
+
+    var run;
+    
+    deps.unshift('$rootScope');
+    injector.invoke(deps.concat(function($rootScope) {
+
+      var args = Array.prototype.slice.call(arguments, 1);
+      
+      if (async) {
+        run = function(done) {
+          args.push(done);
+          callback.apply(null, args);
+          $rootScope.$apply();
+        };
+      }
+      else {
+        run = function() {
+          callback.apply(null, args);
+          $rootScope.$apply();
+        };
+      }
+      
+    }));
+
+    return run;
+  };
+  
+
+  describe('api', function() {
+
+    it('should have api defined', inject(['cores'], function(cores) {
+      assert(angular.isObject(cores));
+      assert(angular.isFunction(cores.initialize));
+      assert(angular.isFunction(cores.getResource));
+      assert(angular.isFunction(cores.createModel));
+      assert(angular.isFunction(cores.buildTemplate));
+    }));
+
+    
+    it('should initialize', inject(['cores'], true, function(cores, done) {
+      cores.initialize('http://localhost:3333').then(done, done);
+    }));
 
 
-  describe('services', function() {
+    it('should have the resources', inject(['cores'], function(cores) {
+      assert(angular.isObject(cores.getResource('Article')));
+      assert(angular.isObject(cores.getResource('Image')));
+    }));
 
-    it('should initialize', function(done) {
-      injector.invoke(function(cores) {
-        cores.initialize('http://localhost:3333').then(
-          // done, done
-          function() { console.log('success'); done(); },
-          function() { console.log('error'); done(); }
-        );
+
+    it('should create default model', inject(['cores'], function(cores) {
+      assert(typeof cores.createModel({ type: 'boolean' }) === 'boolean');
+      assert(angular.isNumber(cores.createModel({ type: 'integer' })));
+      assert(angular.isNumber(cores.createModel({ type: 'number' })));
+      assert(angular.isString(cores.createModel({ type: 'string' })));
+      
+      var obj = cores.createModel({
+        properties: {
+          foo: { type: 'boolean' }, bar: { type: 'number'}
+        }
+      });
+      assert(angular.isObject(obj));
+      assert(typeof obj.foo === 'boolean');
+      assert(angular.isNumber(obj.bar));
+
+      var arr = cores.createModel({ items: { type: 'string' }});
+      assert(angular.isArray(arr));
+    }));
+
+    
+    it('should build the template', inject(['cores'], function(cores) {
+      var schema = { properties: {
+        foo: { type: 'boolean' }, bar: { type: 'number' }
+      }};
+      var model = cores.createModel(schema);
+      var template = cores.buildTemplate(schema, model);
+
+      assert(template.match('cr-object').length === 1);
+      assert(template.match('model="model"').length === 1);
+      assert(template.match('schema="schema"').length === 1);
+    }));
+  });
+
+  
+  describe('resource', function() {
+
+    var articleDoc = {
+      type_: 'Article',
+      title: 'Some Title',
+      author: { firstname: 'Bob', lastname: 'Bobsen' },
+      tags: [],
+      body: []
+    };
+    var fileDoc = {
+      title: 'Some Image',
+      file: { name: 'test.jpg', url: '' }
+    };
+
+    var savedArticle, savedImage;
+    var articleRes, imageRes;
+
+
+    before(inject(['cores'], true, function(cores, done) {
+      articleRes = cores.getResource('Article');
+      imageRes = cores.getResource('Image');
+      done();
+    }));
+
+    it('should get the schema', inject(true, function(done) {
+      articleRes.schema().then(
+        function(schema) {
+          assert(angular.isObject(schema));
+          assert(angular.isObject(schema.properties));
+          assert(schema.name === 'Article');
+          done();
+        },
+        done
+      );
+    }));
+
+    
+    it('should save the doc', inject(true, function(done) {
+      articleRes.save(articleDoc).then(
+        function(doc) {
+          assert(angular.isObject(doc));
+          assert(angular.isString(doc._id));
+          assert(angular.isString(doc._rev));
+
+          savedArticle = doc;
+          
+          done();
+        },
+        done
+      );
+    }));
+
+    
+    it('should save another doc', inject(true, function(done) {
+      articleRes.save(articleDoc).then(
+        function(doc) {
+          assert(angular.isObject(doc));
+          done();
+        },
+        done
+      );
+    }));
+
+
+    it('should update the doc', inject(true, function(done) {
+      savedArticle.title = 'New Title';
+      
+      articleRes.save(savedArticle).then(
+        function(doc) {
+          assert(doc._id === savedArticle._id);
+          assert(doc._rev !== savedArticle._rev);
+          assert(doc.title === 'New Title');
+
+          savedArticle = doc;
+          
+          done();
+        },
+        done
+      );
+    }));
+
+    
+    it('should return error when doc not valid', inject(true, function(done) {
+      articleDoc.title = '';
+      articleRes.save(articleDoc).then(
+        done(),
+        function(err) {
+          assert()
+          expect(err).to.exist;
+          expect(err.message === 'Validation failed').to.be(true);
+
+          articleDoc.title = 'Some Title';
+          
+          done();
+        }
+      );
+      done();
+    }));
+
+    
+    it('should save multipart doc', inject(true, function(done) {
+      var fd = new FormData();
+      fd.append('type_', fileDoc.type_);
+      fd.append('doc', JSON.stringify(fileDoc));
+      fd.append('file', JSON.stringify({ name: 'foo.jpg', path: '/upload/foo.jpg', isTest: true }));
+
+      imageRes.save(fd).then(
+        function(doc) {
+          assert(angular.isObject(doc));
+          assert(angular.isString(doc._id));
+          assert(angular.isString(doc._rev));
+          assert(doc.file.url === '/upload/foo.jpg');
+          
+          savedImage = doc;
+          
+          done();
+        },
+        done
+      );
+    }));
+
+    
+    it('should update multipart doc', inject(true, function(done) {
+      var fd = new FormData();
+      fd.append('type_', savedImage.type_);
+      fd.append('doc', JSON.stringify(savedImage));
+      fd.append('file', JSON.stringify({ name: 'bar.jpg', path: '/upload/bar.jpg', isTest: true}));
+
+      imageRes.save(fd).then(
+        function(doc) {
+          assert(doc._id === savedImage._id);
+          assert(doc._rev !== savedImage._rev);
+          assert(doc.file.url === '/upload/bar.jpg');
+
+          savedImage = doc;
+
+          done();
+        },
+        done
+      );
+    }));
+
+
+    it('should load all docs', inject(true, function(done) {
+      articleRes.load().then(
+        function(result) {
+          assert(result.total_rows > 1);
+          done();
+        },
+        done
+      );
+    }));
+
+
+    it('should load all docs with params', inject(true, function(done) {
+      articleRes.load({ limit: 1 }).then(
+        function(result) {
+          assert(result.total_rows > 1);
+          assert(result.rows.length === 1);
+          done();
+        },
+        done
+      );
+    }));
+    
+    
+    it('should load the doc', inject(true, function(done) {
+      articleRes.load(savedArticle._id).then(
+        function(doc) {
+          assert(doc._id === savedArticle._id);
+          assert(doc._rev === savedArticle._rev);
+          done();
+        },
+        done
+      );
+    }));
+
+    
+    it('should call the view', inject(true, function(done) {
+      articleRes.view('titles').then(
+        function(result) {
+          assert(result.total_rows > 1);
+          assert(result.rows.length > 1);
+          done();
+        },
+        done
+      );
+    }));
+
+    
+    it('should call the view with params', inject(true, function(done) {
+      articleRes.view('titles', { limit: 1 }).then(
+        function(result) {
+          assert(result.total_rows > 1);
+          assert(result.rows.length === 1);
+          done();
+        },
+        done
+      );
+    }));
+
+    
+    it('should destroy the doc', inject(true, function(done) {
+      articleRes.destroy(savedArticle).then(done, done);
+    }));
+
+    
+    it('should not load destroyed doc', inject(true, function(done) {
+      articleRes.load(savedArticle._id).then(
+        function(doc) {
+          assert(false);
+          done();
+        },
+        function() {
+          done();
+        }
+      );
+    }));
+  });
+
+
+  describe('directives', function() {
+
+    function buildFromSchema(type, model, callback) {
+
+      if (typeof model === 'function') {
+        callback = model;
+        model = null;
+      }
+      
+      injector.invoke(function($rootScope, $compile, cores) {
+        var scope = $rootScope.$new();
+        if (model) {
+          scope.model = model;
+        }
+        
+        var elem = angular.element('<div cr-model type="' + type + '" model="model"/>');
+        
+        $compile(elem)(scope);
+        scope.$apply();
+
+        $('body').append(elem);
+        $('body').append($('<hr>'));
+
+        var offready = scope.$on('ready', function() {
+          offready();
+          callback(scope, elem);
+        });
+      });
+    }
+
+    
+    it('should build boolean input', function(done) {
+      buildFromSchema('Boolean', function(scope, elem) {
+        assert(elem.find('input[type="checkbox"]').length === 1);
+        done();
       });
     });
+
+    
+    it('should build integer input', function(done) {
+      buildFromSchema('Integer', function(scope, elem) {
+        assert(elem.find('input[type="number"]').length === 1);
+        done();
+      });
+    });
+
+    
+    it('should build number input', function(done) {
+      buildFromSchema('Number', function(scope, elem) {
+        assert(elem.find('input[type="number"]').length === 1);
+        done();
+      });
+    });
+
+    
+    it('should build string input', function(done) {
+      buildFromSchema('String', function(scope, elem) {
+        assert(elem.find('input[type="text"]').length === 1);
+        done();
+      });
+    });
+
+    
+    it('should build enum form', function(done) {
+      buildFromSchema('Enum', function(scope, elem) {
+        assert(elem.find('select').length === 1);
+        done();
+      });
+    });
+
+    
+    it('should build object form', function(done) {
+      buildFromSchema(
+        'Object',
+        function(scope, elem) {
+          assert(elem.find('input[type="text"]').length === 1);
+          assert(elem.find('input[type="number"]').length === 1);
+          done();
+        });
+    });
+
+    it('should build array form', function(done) {
+      buildFromSchema(
+        'Array',
+        { foo: [ {bar:'a'}, {bar:'b'}, {bar:'c'} ] },
+
+        function(scope, elem) {
+          assert(elem.find('ul').length === 1);
+          done();
+        }
+      );
+    });
+
+    
+    it('should build anyOf array', function(done) {
+      buildFromSchema(
+        'Anyof',
+        [ { type_: 'one', foo: 'hello' }, { type_: 'two', bar: 42 }],
+
+        function(scope, elem) {
+          assert(elem.find('ul'));
+          done();
+        }
+      );
+    });
+    
   });
 });
-
-// describe('cores', function() {
-
-//   beforeEach(module('cores'));
-  
-//   it('should inject cores', inject(function(cores) {
-//     expect(typeof cores).toEqual('object');
-//   }));
-
-
-//   describe('services', function() {
-
-//     it('should initialize', function() {
-      
-//       runs(inject(function(cores) {
-//         cores.initialize('http://localhost:3333').then(
-          
-//         );
-//       }));
-
-      
-//     });
-    
-//     // it('should initialize', function(done) {
-//     //   injector.invoke(function(cores) {
-//     //     console.log('cores', cores);
-//     //     cores.initialize('http://localhost:3333').then(done, done);
-//     //   });
-//     // });
-
-
-//     // it('should have the resources', function(done) {
-//     //   injector.invoke(function(cores) {
-//     //     expect(cores.getResource('Article')).to.be.a('object');
-//     //     expect(cores.getResource('Image')).to.be.a('object');
-//     //     done();
-//     //   });
-//     // });
-
-
-//     // it('should create default model', function(done) {
-//     //   injector.invoke(function(cores) {
-//     //     expect(cores.createModel({ type: 'boolean' })).to.be.a('boolean');
-//     //     expect(cores.createModel({ type: 'integer' })).to.be.a('number');
-//     //     expect(cores.createModel({ type: 'number' })).to.be.a('number');
-//     //     expect(cores.createModel({ type: 'string' })).to.be.a('string');
-
-//     //     var obj = cores.createModel({
-//     //       properties: {
-//     //         foo: { type: 'boolean' }, bar: { type: 'number'}
-//     //       }
-//     //     });
-//     //     expect(obj).to.be.a('object');
-//     //     expect(obj.foo).to.be.a('boolean');
-//     //     expect(obj.bar).to.be.a('number');
-
-//     //     expect(cores.createModel({ items: { type: 'string' }})).to.be.a('array');
-        
-//     //     done();
-//     //   });
-//     // });
-    
-//     // it('should build the template', function(done) {
-//     //   injector.invoke(function(cores) {
-//     //     var schema = { properties: {
-//     //       foo: { type: 'boolean' }, bar: { type: 'number' }
-//     //     }};
-//     //     var model = cores.createModel(schema);
-//     //     var template = cores.buildTemplate(schema, model);
-
-//     //     expect(template.match('cr-object').length).to.equal(1);
-//     //     expect(template.match('model="model"').length).to.equal(1);
-//     //     expect(template.match('schema="schema"').length).to.equal(1);
-        
-//     //     done();
-//     //   });
-//     // });
-//   });
-  
-  
-// });
-
-
-// describe('cores angular', function() {
-
-//   var injector = angular.injector(['cores', 'ng']);
-//   // injector.invoke(function($http) {
-//   //   console.log($http);
-//   // });
-
-//   injector.invoke(['$http', function($http) {
-//     console.log('$http', $http);
-//   }]);
-
-
-//   var cores;
-  
-
-//   describe('services', function() {
-
-//     it('should initialize', function(done) {
-//       injector.invoke(function(cores) {
-//         console.log('cores', cores);
-//         cores.initialize('http://localhost:3333').then(done, done);
-//       });
-//     });
-
-//     return;
-
-//     it('should have the resources', function(done) {
-//       injector.invoke(function(cores) {
-//         expect(cores.getResource('Article')).to.be.a('object');
-//         expect(cores.getResource('Image')).to.be.a('object');
-//         done();
-//       });
-//     });
-
-
-//     it('should create default model', function(done) {
-//       injector.invoke(function(cores) {
-//         expect(cores.createModel({ type: 'boolean' })).to.be.a('boolean');
-//         expect(cores.createModel({ type: 'integer' })).to.be.a('number');
-//         expect(cores.createModel({ type: 'number' })).to.be.a('number');
-//         expect(cores.createModel({ type: 'string' })).to.be.a('string');
-
-//         var obj = cores.createModel({
-//           properties: {
-//             foo: { type: 'boolean' }, bar: { type: 'number'}
-//           }
-//         });
-//         expect(obj).to.be.a('object');
-//         expect(obj.foo).to.be.a('boolean');
-//         expect(obj.bar).to.be.a('number');
-
-//         expect(cores.createModel({ items: { type: 'string' }})).to.be.a('array');
-        
-//         done();
-//       });
-//     });
-    
-//     it('should build the template', function(done) {
-//       injector.invoke(function(cores) {
-//         var schema = { properties: {
-//           foo: { type: 'boolean' }, bar: { type: 'number' }
-//         }};
-//         var model = cores.createModel(schema);
-//         var template = cores.buildTemplate(schema, model);
-
-//         expect(template.match('cr-object').length).to.equal(1);
-//         expect(template.match('model="model"').length).to.equal(1);
-//         expect(template.match('schema="schema"').length).to.equal(1);
-        
-//         done();
-//       });
-//     });
-//   });
-
-
-//   describe('resource', function() {
-
-//     return;
-    
-//     var articleDoc = {
-//       type_: 'Article',
-//       title: 'Some Title',
-//       author: { firstname: 'Bob', lastname: 'Bobsen' },
-//       tags: [],
-//       body: []
-//     };
-//     var fileDoc = {
-//       title: 'Some Image',
-//       file: { name: 'test.jpg', url: '' }
-//     };
-
-//     var savedArticle, savedImage;
-//     var articleRes, imageRes;
-
-    
-//     before(function(done) {
-//       injector.invoke(function(cores) {
-//         articleRes = cores.getResource('Article');
-//         imageRes = cores.getResource('Image');
-//         done();
-//       });
-//     });
-
-    
-//     it('should get the schema', function(done) {
-//       articleRes.schema().then(
-//         function(schema) {
-//           expect(schema).to.be.a('object');
-//           expect(schema.name).to.equal('Article');
-//           expect(schema.properties).to.be.a('object');
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-    
-//     it('should save the doc', function(done) {
-//       articleRes.save(articleDoc).then(
-//         function(doc) {
-//           expect(doc).to.be.a('object');
-//           expect(doc._id).to.be.a('string');
-//           expect(doc._rev).to.be.a('string');
-
-//           savedArticle = doc;
-          
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-    
-//     it('should save another doc', function(done) {
-//       articleRes.save(articleDoc).then(
-//         function(doc) {
-//           expect(doc._id).to.be.a('string');
-//           expect(doc._id).to.not.equal(savedArticle._id);
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-    
-//     it('should update the doc', function(done) {
-//       savedArticle.title = 'New Title';
-      
-//       articleRes.save(savedArticle).then(
-//         function(doc) {
-//           expect(doc._id).to.equal(savedArticle._id);
-//           expect(doc._rev).to.not.equal(savedArticle._rev);
-//           expect(doc.title).to.equal('New Title');
-
-//           savedArticle = doc;
-          
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-    
-//     it('should return error when doc not valid', function(done) {
-//       articleDoc.title = '';
-//       articleRes.save(articleDoc).then(
-//         done(),
-//         function(err) {
-//           expect(err).to.exist;
-//           expect(err.message === 'Validation failed').to.be(true);
-
-//           articleDoc.title = 'Some Title';
-          
-//           done();
-//         }
-//       );
-//       done();
-//     });
-
-    
-//     it('should save multipart doc', function(done) {
-//       var fd = new FormData();
-//       fd.append('type_', fileDoc.type_);
-//       fd.append('doc', JSON.stringify(fileDoc));
-//       fd.append('file', JSON.stringify({ name: 'foo.jpg', path: '/upload/foo.jpg', isTest: true }));
-
-//       imageRes.save(fd).then(
-//         function(doc) {
-//           expect(doc).to.be.a('object');
-//           expect(doc._id).to.be.a('string');
-//           expect(doc._rev).to.be.a('string');
-//           expect(doc.file.url).to.equal('/upload/foo.jpg');
-          
-//           savedImage = doc;
-          
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-    
-//     it('should update multipart doc', function(done) {
-//       var fd = new FormData();
-//       fd.append('type_', savedImage.type_);
-//       fd.append('doc', JSON.stringify(savedImage));
-//       fd.append('file', JSON.stringify({ name: 'bar.jpg', path: '/upload/bar.jpg', isTest: true}));
-
-//       imageRes.save(fd).then(
-//         function(doc) {
-//           expect(doc._id).to.equal(savedImage._id);
-//           expect(doc._rev).to.not.equal(savedImage._rev);
-//           expect(doc.file.url).to.equal('/upload/bar.jpg');
-
-//           savedImage = doc;
-
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-
-//     it('should load all docs', function(done) {
-//       articleRes.load().then(
-//         function(result) {
-//           expect(result.total_rows).to.be.above(1);
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-
-//     it('should load all docs with params', function(done) {
-//       articleRes.load({ limit: 1 }).then(
-//         function(result) {
-//           expect(result.total_rows).to.be.above(1);
-//           expect(result.rows.length).to.equal(1);
-//           done();
-//         },
-//         done
-//       );
-//     });
-    
-    
-//     it('should load the doc', function(done) {
-//       articleRes.load(savedArticle._id).then(
-//         function(doc) {
-//           expect(doc._id).to.equal(savedArticle._id);
-//           expect(doc._rev).to.equal(savedArticle._rev);
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-    
-//     it('should call the view', function(done) {
-//       articleRes.view('titles').then(
-//         function(result) {
-//           expect(result.total_rows).to.be.above(1);
-//           expect(result.rows.length).to.be.above(1);
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-    
-//     it('should call the view with params', function(done) {
-//       articleRes.view('titles', { limit: 1 }).then(
-//         function(result) {
-//           expect(result.total_rows).to.be.above(1);
-//           expect(result.rows.length).to.be.equal(1);
-//           done();
-//         },
-//         done
-//       );
-//     });
-
-    
-//     it('should destroy the doc', function(done) {
-//       articleRes.destroy(savedArticle).then(done, done);
-//     });
-
-    
-//     it('should not load destroyed doc', function(done) {
-//       articleRes.load(savedArticle._id).then(
-//         function(doc) {
-//           expect(doc).to.not.exist;
-//           done();
-//         },
-//         function() {
-//           done();
-//         }
-//       );
-//     });
-//   });
-  
-  
-//   describe('directives', function() {
-
-//     return;
-    
-//     function buildFromSchema(type, value, callback) {
-
-//       if (typeof value === 'function') {
-//         callback = value;
-//         value = null;
-//       }
-      
-//       injector.invoke(function($rootScope, $compile, cores) {
-//         var scope = $rootScope.$new();
-//         if (value) scope.value = value;
-        
-//         var elem = angular.element('<div cr-model type="' + type + '" value="value"/>');
-        
-//         $compile(elem)(scope);
-//         scope.$apply();
-
-//         $('body').append(elem);
-//         $('body').append($('<hr>'));
-
-//         var offready = scope.$on('ready', function() {
-//           offready();
-//           callback(scope, elem);
-//         });
-//       });
-//     }
-
-    
-//     it('should build boolean input', function(done) {
-//       buildFromSchema('Boolean', function(scope, elem) {
-//         expect(elem.find('input[type="checkbox"]').length).to.equal(1);
-//         done();
-//       });
-//     });
-
-    
-//     it('should build integer input', function(done) {
-//       buildFromSchema('Integer', function(scope, elem) {
-//         expect(elem.find('input[type="number"]').length).to.equal(1);
-//         done();
-//       });
-//     });
-
-    
-//     it('should build number input', function(done) {
-//       buildFromSchema('Number', function(scope, elem) {
-//         expect(elem.find('input[type="number"]').length).to.equal(1);
-//         done();
-//       });
-//     });
-
-    
-//     it('should build string input', function(done) {
-//       buildFromSchema('String', function(scope, elem) {
-//         expect(elem.find('input[type="text"]').length).to.equal(1);
-//         done();
-//       });
-//     });
-
-    
-//     it('should build enum form', function(done) {
-//       buildFromSchema('Enum', function(scope, elem) {
-//         expect(elem.find('select').length).to.equal(1);
-//         done();
-//       });
-//     });
-
-    
-//     it('should build object form', function(done) {
-//       buildFromSchema(
-//         'Object',
-//         function(scope, elem) {
-//           expect(elem.find('input[type="text"]').length).to.equal(1);
-//           expect(elem.find('input[type="number"]').length).to.equal(1);
-//           done();
-//         });
-//     });
-
-    
-//     it('should build array form', function(done) {
-//       buildFromSchema(
-//         'Array',
-//         [ {bar:'a'}, {bar:'b'}, {bar:'c'} ],
-
-//         function(scope, elem) {
-//           console.log('elem', elem[0]);
-//           expect(elem.find('input[type="text"]').length).to.equal(3);
-//           done();
-//         }
-//       );
-//     });
-
-    
-//     // it('should build anyOf form', function(done) {
-//     //   buildFromSchema(
-//     //     { items: { anyOf: [
-//     //       { name: 'one', properties: { foo: { type: 'string' }}},
-//     //       { name: 'two', properties: { bar: { type: 'number' }}}
-//     //     ]}},
-//     //     [ { type_: 'one', foo: 'hello' }, { type_: 'two', bar: 42 }],
-//     //     function(scope, elem) {
-//     //       expect(elem.find('input[type="text"]').length).to.equal(1);
-//     //       expect(elem.find('input[type="number"]').length).to.equal(1);
-//     //       done();
-//     //     }
-//     //   );
-//     // });
 
 
 //     // it('should build image form', function(done) {
@@ -555,8 +473,5 @@ describe('cores', function() {
 //     //   //   }
 //     //   // );
 //     // });
-//   }); // build
 
 
-  
-// });

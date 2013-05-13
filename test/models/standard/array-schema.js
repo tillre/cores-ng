@@ -1,5 +1,5 @@
 module.exports = {
   properties: {
-    foo: { type: 'array', items: { properties: { bar: { type: 'string' }} } }
+    foo: { items: { properties: { baz: { type: 'string' } } } }
   }
 };

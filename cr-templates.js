@@ -98,7 +98,7 @@
         '<label><strong>{{name}}</strong></label>' +
 
         '<div class="indent">' +
-          '<button class="btn" ng-click="addItem()">Add</button>' +
+          '<button class="btn" ng-click="addItem(schema)">Add</button>' +
 
           '<ul class="unstyled">' +
             '<li ng-repeat="model in model">' +

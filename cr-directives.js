@@ -194,7 +194,102 @@
       }
     };
   });
+
+
+
+
+  function ArrayItemCtrl($scope) {
+
+    $scope.moveUp = function() {
+      $scope.array.moveItemUp($scope.$parent.$index);
+    };
+
+    $scope.moveDown = function() {
+      $scope.array.moveItemDown($scope.$parent.$index);
+    };
+
+    $scope.remove = function() {
+      $scope.array.removeItem($scope.$parent.$index);
+    };
+  }
+
+
+  function ArrayCtrl($scope, cores) {
+
+    $scope.addItem = function addItem(schema) {
+      var obj = cores.createModel(schema, schema.name);
+      $scope.model.push(obj);
+    };
+
+    // methods called by the array item controller
+    
+    this.removeItem = function removeItem(index) {
+      $scope.model.splice(index, 1);
+    };
+
+    this.moveItemUp = function moveItemUp(index) {
+      if (index === 0) return;
+      $scope.model.splice(index - 1, 0, $scope.model.splice(index, 1)[0]);
+    };
+
+    this.moveItemDown = function moveItemDown(index) {
+      if (index >= $scope.model.length) return;
+      $scope.model.splice(index + 1, 0, $scope.model.splice(index, 1)[0]);
+    };
+  }
+
+
+  function AnyofArrayCtrl($scope, cores) {
+
+    // Inherit from ArrayCtrl
+    ArrayCtrl.apply(this, arguments);
+
+    this.getSchema = function getSchema(type) {
+      var schema;
+      angular.forEach($scope.schema.items.anyOf, function(anySchema) {
+        if (anySchema.name === type) {
+          schema = anySchema;
+        }
+      });
+      if (!schema) throw new Error('No schema for type found: ' + type);
+      return schema;
+    };
+  }
   
+  
+  //
+  // array item
+  //
+  
+  module.directive(NS + 'ArrayItem', function($compile, cores) {
+    return {
+      require: '^' + NS + 'Array',
+      scope: {
+        model: '=',
+        schema: '=',
+        $index: '='
+      },
+
+      replace: true,
+      templateUrl: 'cr-array-item.html',
+
+      controller: ArrayItemCtrl,
+
+      link: function(scope, elem, attrs, array) {
+
+        scope.array = array;
+        
+        var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
+                                       { mode: 'minimal' });
+
+        var link = $compile(tmpl);
+        var e = link(scope);
+        elem.append(e);
+      }
+    };
+  });
+
+
   //
   // anyof array item
   //
@@ -210,34 +305,49 @@
       replace: true,
       templateUrl: 'cr-array-item.html',
 
-      
-      controller: function($scope) {
-
-        $scope.moveUp = function() {
-          $scope.anyof.moveItemUp($scope.$parent.$index);
-        };
-
-        $scope.moveDown = function() {
-          $scope.anyof.moveItemDown($scope.$parent.$index);
-        };
-
-        $scope.remove = function() {
-          $scope.anyof.removeItem($scope.$parent.$index);
-        };
-      },
-
+      controller: ArrayItemCtrl,
       
       link: function(scope, elem, attrs, anyof) {
 
         // get the schema from the anyof-array
         scope.schema = anyof.getSchema(scope.model.type_);
-        scope.anyof = anyof;
+        scope.array = anyof;
         
         var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
                                        { 'mode': 'minimal' });
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
+      }
+    };
+  });
+
+  
+  //
+  // array
+  //
+  
+  module.directive(NS + 'Array', function(cores) {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@'
+      },
+
+      replace: true,
+      templateUrl: 'cr-array.html',
+
+      controller: ArrayCtrl,
+      
+      link: function postLink(scope, elem, attrs) {
+        // ngrepeat can only bind to references when it comes to form fields
+        // thats why we can only work with items of type object not primitives
+        // this may change in a feature release
+        if (!isObjectSchema(scope.schema.items)) {
+          throw new Error('Array items schema is not of type object: ' + JSON.stringify(scope.schema.items));
+        }
+        scope.$emit(READY_EVENT);
       }
     };
   });
@@ -257,118 +367,10 @@
 
       replace: true,
       templateUrl: 'cr-anyof-array.html',
-      
-      controller: function($scope, cores) {
 
-        $scope.addItem = function addItem(schema) {
-          var obj = cores.createModel(schema, schema.name);
-          $scope.model.push(obj);
-        };
-
-        this.getSchema = function getSchema(type) {
-          var schema;
-          angular.forEach($scope.schema.items.anyOf, function(anySchema) {
-            if (anySchema.name === type) {
-              schema = anySchema;
-            }
-          });
-          if (!schema) throw new Error('No schema for type found: ' + type);
-          return schema;
-        };
-        
-        this.removeItem = function removeItem(index) {
-          $scope.model.splice(index, 1);
-        };
-
-        this.moveItemUp = function moveItemUp(index) {
-          if (index === 0) return;
-          $scope.model.splice(index - 1, 0, $scope.model.splice(index, 1)[0]);
-        };
-
-        this.moveItemDown = function moveItemDown(index) {
-          if (index >= $scope.model.length) return;
-          $scope.model.splice(index + 1, 0, $scope.model.splice(index, 1)[0]);
-        };
-      },
-
+      controller: AnyofArrayCtrl,
 
       link: function(scope, elem, attrs) {
-        scope.$emit(READY_EVENT);
-      }
-    };
-  });
-
-
-  //
-  // array item
-  //
-  
-  module.directive(NS + 'ArrayItem', function($compile, cores) {
-    return {
-      require: '^' + NS + 'Array',
-      scope: {
-        model: '=',
-        schema: '=',
-        $index: '='
-      },
-
-      replace: true,
-      templateUrl: 'cr-array-item.html',
-
-      link: function(scope, elem, attrs, array) {
-
-        elem.find('button').on('click', function(e) {
-          array.removeItem(scope.$parent.$index);
-        });
-
-        var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-                                       { mode: 'minimal' });
-
-        var link = $compile(tmpl);
-        var e = link(scope);
-        elem.append(e);
-      }
-    };
-  });
-
-
-  //
-  // array
-  //
-  
-  module.directive(NS + 'Array', function(cores) {
-    return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@'
-      },
-
-      replace: true,
-      templateUrl: 'cr-array.html',
-
-      controller: function($scope, cores) {
-        $scope.addItem = function() {
-          $scope.model.push(
-            cores.createModel($scope.schema.items)
-          );
-        };
-
-        this.removeItem = function removeItem(index) {
-          $scope.model.splice(index, 1);
-          $scope.$apply();
-        };
-      },
-      
-      link: function postLink(scope, elem, attrs) {
-        // ngrepeat can only bind to references when it comes to form fields
-        // thats why we can only work with items of type object not primitives
-        // this may change in a feature release
-        if (!isObjectSchema(scope.schema.items)) {
-          throw new Error('Array items schema is not of type object: ' + JSON.stringify(scope.schema.items));
-        }
-        console.log('array model', scope.model);
-
         scope.$emit(READY_EVENT);
       }
     };
@@ -502,7 +504,7 @@
             function(schema) {
               $scope.schema = schema;
 
-              if ($scope.value) {
+              if ($scope.model) {
                 // use provided model value
                 return;
               }
@@ -600,8 +602,6 @@
           }
           scope.isReady = true;
 
-          console.log('build model', scope.model, scope.schema);
-          
           if (!scope.schema) {
             throw new Error('No Schema defined');
           }
