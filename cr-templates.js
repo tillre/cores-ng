@@ -61,7 +61,7 @@
 
     $templateCache.put(
       'cr-object.html',
-      '<fieldset class="">' +
+      '<fieldset>' +
         '<label><strong>{{name}}:<strong></label>' +
         '<div class="indent properties"></div>' +
       '</fieldset>'
@@ -69,7 +69,7 @@
 
     $templateCache.put(
       'cr-object-minimal.html',
-      '<fieldset class="">' +
+      '<fieldset>' +
         '<div class="properties"></div>' +
       '</fieldset>'
     );
@@ -98,7 +98,7 @@
         '<label><strong>{{name}}</strong></label>' +
 
         '<div class="indent">' +
-          '<button class="btn" ng-click="addItem(schema)">Add</button>' +
+          '<button class="btn" ng-click="addItem(schema.items)">Add</button>' +
 
           '<ul class="unstyled">' +
             '<li ng-repeat="model in model">' +
@@ -145,17 +145,25 @@
       '</span>'
     );
 
+    // $templateCache.put(
+    //   'cr-image-ref.html',
+    //   '<div>' +
+    //     '<label>{{name}}</label>' +
+    //     '<div class="indent">' +
+    //       '<button class="btn">Change</button>' +
+    //       '<img style="display:block" height="64px">' +
+    //     '</div>' +
+    //   '</div>'
+    // );
+
     $templateCache.put(
-      'cr-image-ref.html',
+      'cr-model-ref.html',
       '<div>' +
-        '<label>{{name}}</label>' +
-        '<div class="indent">' +
-          '<button class="btn">Change</button>' +
-          '<img style="display:block" height="64px">' +
-        '</div>' +
+        '<label><strong>{{name}}:<strong></label>' +
+        '<div class="indent properties"></div>' +
       '</div>'
     );
-
+    
     // text
     
     $templateCache.put(
@@ -168,8 +176,7 @@
     $templateCache.put(
       'cr-model.html',
       '<div>' +
-        '<form>' +
-        '</form>' +
+        '<div cr-model-form schema="schema" model="model"></div>' +
         '<div class="form-actions">' +
           '<button ng-click="save()" class="btn btn-primary">Save</button>' +
           '<button ng-click="cancel()" class="btn">Cancel</button>' +
@@ -177,6 +184,31 @@
         '</div>' +
         '<pre>{{ model | json }}</pre>' +
       '</div>'
+    );
+
+    $templateCache.put(
+      'cr-modal-model.html',
+      '<div>' +
+        '<button href="#crmodal" class="btn" data-toggle="modal">Change</button>' +
+
+        '<div id="crmodal" class="modal hide fade" tabindex="-1" role="dialog">' +
+          '<div class="modal-header">' +
+            '<button class="close" data-dismiss="modal">x</button>' +
+            '<h3>{{type}}</h3>' +
+          '</div>' +
+          '<div class="modal-body">' +
+             '<div cr-model-form schema="schema" model="model"></div>' +
+          '</div>' +
+          '<div class="modal-footer">' +
+            '<button ng-click="save()" class="btn btn-primary pull-left">Save</button>' +
+            '<button ng-click="cancel()" class="btn pull-right" data-dismiss="modal">Cancel</button>' +
+        '</div>' +
+      '</div>'
+    );
+
+    $templateCache.put(
+      'cr-model-form.html',
+      '<form></form>'
     );
     
   }]);

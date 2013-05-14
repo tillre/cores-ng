@@ -88,9 +88,9 @@
   
   function buildTemplate(schema, model, schemaPath, modelPath, options) {
 
-    // default values for paths
     schemaPath = schemaPath || 'schema';
     modelPath = modelPath || 'model';
+    options = options || {};
     
     // infer type
     if (!schema.type) {
@@ -121,6 +121,13 @@
       if (angular.isObject(schema.view)) {
         viewType = schema.view.type;
         viewName = schema.view.name || viewName;
+
+        // add view properties to options
+        angular.forEach(schema.view, function(value, key) {
+          if (key !== 'type' && key !== 'name') {
+            options[key] = value;
+          }
+        });
       }
       else if (angular.isString(schema.view)) {
         viewType = schema.view;
@@ -167,8 +174,10 @@
     // Resource class
     //
 
-    var Resource = function(config, options) {
+    var Resource = function(type, config, options) {
 
+      this.type = type;
+      
       // add config to this
       angular.extend(
         this,
@@ -233,10 +242,26 @@
     // Save/update a resource on the server
     //
     
-    Resource.prototype.save = function(doc) {
+    Resource.prototype.save = function(doc, file) {
 
       var def = $q.defer();
 
+      // create multipart formdata when saving files
+
+      if (file) {
+        var fd = new FormData();
+        fd.append('type_', this.type);
+        fd.append('doc', JSON.stringify(doc));
+        fd.append('file', file);
+
+        if (doc._id && doc._rev) {
+          // when updating, add the id and rev
+          fd.append('_id', doc._id);
+          fd.append('_rev', doc._rev);
+        }
+        doc = fd;
+      }
+      
       if (doc._id && doc._rev) {
 
         // update
@@ -343,7 +368,7 @@
 
         function(res) {
           angular.forEach(res.data, function(value, key) {
-            resources[key] = new Resource(value, { host: host });
+            resources[key] = new Resource(key, value, { host: host });
           });
           def.resolve();
         },

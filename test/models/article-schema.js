@@ -8,8 +8,11 @@ module.exports = {
     average: { type: 'number' },
     choose: { type: 'string', 'enum': ['one', 'two', 'three'] },
     image: {
-      type: 'string',
-      view: 'image-ref'
+      type: 'object',
+      view: {
+        type: 'model-ref',
+        refType: 'Image'
+      }
     },
     author: {
       properties: {
