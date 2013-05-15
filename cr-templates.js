@@ -44,7 +44,7 @@
 
     $templateCache.put(
       'cr-string.html',
-      '<span><label>{{name}}:</label><input type="text" ng-model="model"/></span>'
+      '<span><label>{{name}}:</label><input class="input-xlarge" type="text" ng-model="model"/></span>'
     );
 
     // enum
@@ -145,23 +145,9 @@
       '</span>'
     );
 
-    // $templateCache.put(
-    //   'cr-image-ref.html',
-    //   '<div>' +
-    //     '<label>{{name}}</label>' +
-    //     '<div class="indent">' +
-    //       '<button class="btn">Change</button>' +
-    //       '<img style="display:block" height="64px">' +
-    //     '</div>' +
-    //   '</div>'
-    // );
-
     $templateCache.put(
-      'cr-model-ref.html',
-      '<div>' +
-        '<label><strong>{{name}}:<strong></label>' +
-        '<div class="indent properties"></div>' +
-      '</div>'
+      'cr-image-preview.html',
+      '<div><img></div>'
     );
     
     // text
@@ -169,6 +155,19 @@
     $templateCache.put(
       'cr-text.html',
       '<div><label>{{name}}:</label><textarea ng-model="model"/></div>'
+    );
+    
+    // model-ref
+    
+    $templateCache.put(
+      'cr-model-ref.html',
+      '<div>' +
+        '<label><strong>{{name}}:</strong></label>' +
+        '<div class="indent">' +
+          '<button href="#{{modalId}}" class="btn" data-toggle="modal">Change</button>' +
+          '<div cr-modal-model modal-id="{{modalId}}" type="{{schema.view.refType}}"></div>' +
+        '</div>' +
+      '</div>'
     );
     
     // model
@@ -189,15 +188,14 @@
     $templateCache.put(
       'cr-modal-model.html',
       '<div>' +
-        '<button href="#crmodal" class="btn" data-toggle="modal">Change</button>' +
-
-        '<div id="crmodal" class="modal hide fade" tabindex="-1" role="dialog">' +
+        '<div id="{{modalId}}" class="modal hide fade" tabindex="-1" role="dialog">' +
           '<div class="modal-header">' +
             '<button class="close" data-dismiss="modal">x</button>' +
             '<h3>{{type}}</h3>' +
           '</div>' +
           '<div class="modal-body">' +
-             '<div cr-model-form schema="schema" model="model"></div>' +
+            '<div cr-model-form schema="schema" model="model"></div>' +
+            '<pre>{{ model | json }}</pre>' +
           '</div>' +
           '<div class="modal-footer">' +
             '<button ng-click="save()" class="btn btn-primary pull-left">Save</button>' +

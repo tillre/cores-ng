@@ -20,7 +20,20 @@
     return schema.type === 'array' || schema.items;
   }
 
+  
+  // watch the scope for changes until condition() returns true and call then()
 
+  function watchUntil(scope, condition, then) {
+    var unwatch = scope.$watch(function watchUntil(scope) {
+      if (condition(scope)) {
+        unwatch();
+        then(scope);
+      }
+    });
+  }
+
+
+  
   // -- type directives --------------------------------------------------
 
 
@@ -140,6 +153,7 @@
         var mode = tAttrs.mode || 'default';
         var template = $templateCache.get(templates[mode]);
         // TODO: use replaceWith instead of append, as soon as angular supports it
+        // tElem.replaceWith(template);
         tElem.append(template);
 
         // Linking function
@@ -156,35 +170,34 @@
               scope.$emit(READY_EVENT);
             }
           });
-          
-          var unwatch = scope.$watch(function objWatch(scope) {
 
-            if (!scope.model || !scope.schema || scope.isReady) {
-              return;
+          watchUntil(
+            scope,
+            function condition(scope) { return scope.model && scope.schema; },
+            function then(scope) {
+
+              // create templates for properties
+              var tmpl = '';
+              angular.forEach(scope.schema.properties, function(subSchema, key) {
+
+                // ignore some keys
+                if (key === '_id' || key === '_rev' || key === 'type_') return;
+                
+                if (!scope.model.hasOwnProperty(key)) {
+                  scope.model[key] = cores.createModel(subSchema);
+                }
+
+                scope.numProperties += 1;
+                
+                tmpl += cores.buildTemplate(subSchema, scope.model[key],
+                                            'schema.properties.' + key, 'model.' + key);
+              });
+
+              // compile and link templates
+              var content = $compile(tmpl)(scope);
+              elem.find('.properties').append(content);
             }
-            unwatch();
-
-            // create templates for properties
-            var tmpl = '';
-            angular.forEach(scope.schema.properties, function(subSchema, key) {
-
-              // ignore some keys
-              if (key === '_id' || key === '_rev' || key === 'type_') return;
-              
-              if (!scope.model.hasOwnProperty(key)) {
-                scope.model[key] = cores.createModel(subSchema);
-              }
-
-              scope.numProperties += 1;
-              
-              tmpl += cores.buildTemplate(subSchema, scope.model[key],
-                                          'schema.properties.' + key, 'model.' + key);
-            });
-
-            // compile and link templates
-            var content = $compile(tmpl)(scope);
-            elem.find('.properties').append(content);
-          });
+          );
         };
       }
     };
@@ -388,43 +401,6 @@
   });
 
 
-  // module.directive(NS + 'ImageRef', function(cores) {
-  //   return {
-  //     scope: {
-  //       model: '=',
-  //       schema: '=',
-  //       name: '@'
-  //     },
-
-  //     replace: true,
-  //     templateUrl: 'cr-image-ref.html',
-
-  //     controller: function($scope) {
-  //       $scope.src = '';
-
-  //       if ($scope.model) {
-  //         console.log('model has value');
-
-  //         var id = $scope.model;
-
-  //         cores.getResource('Image').load(id).then(
-  //           function(doc) {
-  //             console.log('image', doc);
-  //           },
-  //           function(err) {
-  //             throw new Error(err);
-  //           }
-  //         );
-  //       }
-  //     },
-
-  //     link: function(scope, elem, attrs) {
-  //       scope.$emit(READY_EVENT);
-  //     }
-  //   };
-  // });
-
-
   module.directive(NS + 'ModelRef', function($compile, cores) {
     return {
       scope: {
@@ -437,33 +413,44 @@
       templateUrl: 'cr-model-ref.html',
 
       controller: function($scope) {
-        
+
+        $scope.$on('save', function(e, doc) {
+          e.stopPropagation();
+          // deep copy cloned doc to model
+          angular.copy(doc, $scope.model);
+          $scope.closeModal();
+        });
+
+        $scope.$on('cancel', function(e) {
+          e.stopPropagation();
+          console.log('on cancel');
+        });
       },
 
-      link : function(scope, elem, attrs) {
+      
+      link: function(scope, elem, attrs) {
 
-        var unwatch = scope.$watch (function refWatch(scope) {
-
-          if (!scope.model || !scope.schema) {
-            return;
+        scope.modalId = 'model-ref-modal';
+        scope.closeModal = function() {
+          elem.find('.modal').modal('hide');
+        };
+        
+        watchUntil(
+          scope,
+          function condition(scope) { return scope.model && scope.schema; },
+          function then(scope) {
+            if (scope.schema.view.preview) {
+              var tmpl = '<div ' + scope.schema.view.preview + ' model="model"/>';
+              var e = $compile(tmpl)(scope);
+              elem.find('.indent').append(e);
+            }
           }
-          unwatch();
-
-          console.log('link model ref');
-          
-          // var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-          //                                { mode: 'minimal' });
-
-          // var link = $compile(tmpl);
-          // var e = link(scope);
-          // elem.find('properties').append(e);
-
-        });
+        );
       }
-    }
+    };
   });
   
-  
+
   module.directive(NS + 'Image', function($compile, cores) {
     return {
       scope: {
@@ -501,7 +488,7 @@
           reader.readAsDataURL(file);
 
           scope.model.name = file.name;
-          scope.$emit('RegisterFile', file);
+          scope.$emit('file', file);
           scope.$apply();
         });
 
@@ -509,6 +496,29 @@
       }
     };
   });
+
+
+  module.directive(NS + 'ImagePreview', function() {
+    return {
+      scope: {
+        model: '='
+      },
+
+      replace: true,
+      templateUrl: 'cr-image-preview.html',
+
+      link: function(scope, elem, attr) {
+        scope.$watch('model.file.url', function(url) {
+          if (url) {
+            elem.find('img').attr('src', url);
+          }
+        });
+      }
+    };
+  });
+  
+  
+  
 
   
   // -- model directive --------------------------------------------------
@@ -518,20 +528,21 @@
 
     var resource;
     
-    // watch until type and id(optional) are set and create/load the model
+    // create when type and id(optional) are set
     
-    var unwatch = $scope.$watch(function modelCtrlWatch(scope) {
-      if (!scope.type) {
-        return;
+
+    watchUntil(
+      $scope,
+      function condition(scope) { return scope.type; },
+      function then(scope) {
+        load(scope.type, scope.id);
       }
-      unwatch();
-      load(scope.type, scope.id);
-    });
+    );
 
     function load(type, id) {
       resource = cores.getResource(type);
       resource.schema().then(
-        function(schema) {
+        function success(schema) {
           $scope.schema = schema;
 
           if (!id) {
@@ -546,29 +557,41 @@
               }
             );
           }
+        },
+        function error(err) {
+          throw new Error(err);
         }
       );
     };
+
+    // events
+
+    $scope.$on('file', function(e, file) {
+      e.stopPropagation();
+      console.log('add file', arguments);
+      $scope.file = file;
+    });
+
     
     // button click functions
     
     $scope.save = function() {
 
       resource.save($scope.model, $scope.file).then(
-        function(data) {
-          console.log('success', data);
-          $scope.model = data;
-          $scope.$emit('saved');
+        function success(doc) {
+          console.log('success', doc);
+          $scope.model = doc;
+          $scope.$emit('save', doc);
         },
-        function(data) {
-          console.log('error', data);
+        function error(err) {
+          throw new Error(err);
         }
       );
     };
 
 
     $scope.cancel = function() {
-      throw new Error('not implemented');
+      $scope.$emit('cancel', 1, 2, 3);
     };
     
 
@@ -576,8 +599,10 @@
       throw new Error('not implemented');
 
       resource.destroy($scope.model).then(
-        function() { console.log('destroy success'); },
-        function(err) { console.log('destroy error', err); }
+        function success() { console.log('destroy success'); },
+        function error(err) {
+          throw new Error(err);
+        }
       );
     };
   }
@@ -585,6 +610,10 @@
 
   module.directive(NS + 'Model', function(cores) {
     return {
+      scope: {
+        type: '@',
+        id: '@'
+      },
       replace: true,
       templateUrl: 'cr-model.html',
       controller: ModelCtrl
@@ -594,6 +623,11 @@
   
   module.directive(NS + 'ModalModel', function(cores) {
     return {
+      scope: {
+        type: '@',
+        id: '@',
+        modalId: '@'
+      },
       replace: true,
       templateUrl: 'cr-modal-model.html',
       controller: ModelCtrl
@@ -605,43 +639,31 @@
     return {
       scope: {
         schema: '=',
-        model: '=',
-        file: '=?'
+        model: '='
       },
 
       replace: true,
       templateUrl: 'cr-model-form.html',
 
-      
-      controller: function($scope) {
-
-        $scope.$on('RegisterFile', function(event, file) {
-          console.log('RegisterFile Event', arguments);
-          $scope.file = file;
-        });
-      },
-
-      
       link: function(scope, elem, attrs) {
 
-        var unwatch = scope.$watch(function modelWatch(scope) {
+        watchUntil(
+          scope,
+          function condition(scope) { return scope.model && scope.schema; },
+          function then(scope) {
 
-          if (!scope.model || !scope.schema) {
-            return;
+            if (!isObjectSchema(scope.schema) && !isArraySchema(scope.schema)) {
+              throw new Error('Top level schema has to be a object or array');
+            }
+
+            var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
+                                           { mode: 'minimal'});
+            
+            var link = $compile(tmpl);
+            var content = link(scope);
+            elem.html(content);
           }
-          unwatch();
-
-          if (!isObjectSchema(scope.schema) && !isArraySchema(scope.schema)) {
-            throw new Error('Top level schema has to be a object or array');
-          }
-
-          var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-                                         { mode: 'minimal'});
-          
-          var link = $compile(tmpl);
-          var content = link(scope);
-          elem.html(content);
-        });
+        );
       }
     };
   });

@@ -12,6 +12,12 @@ input[type="number"] {
     margin: 10px 0;
 }
 
+[cr-image-preview] img {
+    max-height: 64px;
+    min-width: 64px;
+    margin-top: 8px;
+}
+
 [cr-image] img {
     float: left;
     display: block;

@@ -1,19 +1,22 @@
 module.exports = {
 
   properties: {
+
+    image: {
+      type: 'object',
+      view: {
+        type: 'model-ref',
+        refType: 'Image',
+        preview: 'cr-image-preview'
+      }
+    },
+    
     title: { type: 'string', minLength: 1 },
     publish: { type: 'boolean' },
     draft: { type: 'boolean' },
     seconds: { type: 'integer' },
     average: { type: 'number' },
     choose: { type: 'string', 'enum': ['one', 'two', 'three'] },
-    image: {
-      type: 'object',
-      view: {
-        type: 'model-ref',
-        refType: 'Image'
-      }
-    },
     author: {
       properties: {
         firstname: { type: 'string'},

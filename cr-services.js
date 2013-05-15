@@ -249,6 +249,7 @@
       // create multipart formdata when saving files
 
       if (file) {
+        console.log('create multipart data');
         var fd = new FormData();
         fd.append('type_', this.type);
         fd.append('doc', JSON.stringify(doc));
