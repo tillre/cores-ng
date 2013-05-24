@@ -12,10 +12,18 @@ module.exports = function(grunt) {
       run: {
         configFile: './test/karma.conf.js'
       }
+    },
+
+    concat: {
+      dist: {
+        src: ['lib/templates.js', 'lib/services.js', 'lib/directives.js'],
+        dest: 'cores.js'
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-karma');
+  grunt.loadNpmTasks('grunt-contrib-concat');
 
   //
   // main tasks

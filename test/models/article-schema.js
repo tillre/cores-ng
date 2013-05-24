@@ -7,17 +7,11 @@ module.exports = {
       view: {
         preview: 'cr-image-preview'
       }
-      // type: 'object',
-      // view: {
-      //   type: 'model-ref',
-      //   refType: 'Image',
-      //   preview: 'cr-image-preview'
-      // }
     },
     
     title: { type: 'string', minLength: 1 },
     publish: { type: 'boolean' },
-    draft: { type: 'boolean' },
+    draft: { type: 'boolean', default: false },
     seconds: { type: 'integer' },
     average: { type: 'number' },
     choose: { type: 'string', 'enum': ['one', 'two', 'three'] },

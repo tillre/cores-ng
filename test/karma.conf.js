@@ -16,9 +16,9 @@ files = [
 
   '../node_modules/chai/chai.js',
 
-  '../cr-templates.js',
-  '../cr-services.js',
-  '../cr-directives.js',
+  '../lib/templates.js',
+  '../lib/services.js',
+  '../lib/directives.js',
   
   './unit/test.js'
 ];
