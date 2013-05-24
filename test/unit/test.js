@@ -145,7 +145,6 @@ describe('cores', function() {
         function(schema) {
           assert(angular.isObject(schema));
           assert(angular.isObject(schema.properties));
-          assert(schema.name === 'Article');
           done();
         },
         done

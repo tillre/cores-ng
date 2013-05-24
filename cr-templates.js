@@ -165,7 +165,7 @@
         '<label><strong>{{name}}:</strong></label>' +
         '<div class="indent">' +
           '<button href="#{{modalId}}" class="btn" data-toggle="modal">Change</button>' +
-          '<div cr-modal-model modal-id="{{modalId}}" type="{{schema.view.refType}}"></div>' +
+          '<div cr-modal-model modal-id="{{modalId}}" type="{{schema.$ref}}"></div>' +
         '</div>' +
       '</div>'
     );

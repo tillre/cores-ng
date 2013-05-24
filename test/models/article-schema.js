@@ -3,12 +3,16 @@ module.exports = {
   properties: {
 
     image: {
-      type: 'object',
+      $ref: 'Image',
       view: {
-        type: 'model-ref',
-        refType: 'Image',
         preview: 'cr-image-preview'
       }
+      // type: 'object',
+      // view: {
+      //   type: 'model-ref',
+      //   refType: 'Image',
+      //   preview: 'cr-image-preview'
+      // }
     },
     
     title: { type: 'string', minLength: 1 },

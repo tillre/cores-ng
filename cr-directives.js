@@ -416,7 +416,7 @@
 
         $scope.$on('save', function(e, doc) {
           e.stopPropagation();
-          // deep copy cloned doc to model
+          // deep copy doc to model
           angular.copy(doc, $scope.model);
           $scope.closeModal();
         });
@@ -529,17 +529,16 @@
     var resource;
     
     // create when type and id(optional) are set
-    
 
     watchUntil(
       $scope,
       function condition(scope) { return scope.type; },
       function then(scope) {
-        load(scope.type, scope.id);
+        create(scope.type, scope.id);
       }
     );
 
-    function load(type, id) {
+    function create(type, id) {
       resource = cores.getResource(type);
       resource.schema().then(
         function success(schema) {
@@ -646,7 +645,6 @@
       templateUrl: 'cr-model-form.html',
 
       link: function(scope, elem, attrs) {
-
         watchUntil(
           scope,
           function condition(scope) { return scope.model && scope.schema; },
@@ -667,149 +665,4 @@
       }
     };
   });
-
-  
-  
-  // module.directive(NS + 'Model', function($compile, cores) {
-
-  //   return {
-  //     scope: {
-  //       type: '@',
-  //       model: '=?',
-  //       id: '@'
-  //     },
-
-  //     replace: true,
-  //     templateUrl: 'cr-model.html',
-
-  //     controller: function($scope, $http) {
-
-  //       // build/load when type has been set
-        
-  //       $scope.$watch('type', function(type) {
-
-  //         var res = cores.getResource(type);
-
-  //         res.schema().then(
-  //           function(schema) {
-  //             $scope.schema = schema;
-
-  //             if ($scope.model) {
-  //               // use provided model value
-  //               return;
-  //             }
-
-  //             if ($scope.id) {
-  //               // load the model
-  //               res.load($scope.id).then(
-  //                 function(doc) {
-  //                   $scope.model = doc;
-  //                 }
-  //               );
-  //               return;
-  //             }
-              
-  //             // create a new model
-  //             $scope.model = cores.createModel(schema);
-  //           }
-  //         );
-  //       });
-
-        
-  //       $scope.$on('RegisterFile', function(event, file) {
-  //         console.log('RegisterFile Event', arguments);
-  //         $scope.file = file;
-  //       });
-
-        
-  //       $scope.save = function() {
-
-  //         var payload;
-  //         var doc = $scope.model;
-          
-  //         if ($scope.file) {
-
-  //           // multipart request, put doc/file/id/rev/type on formdata
-
-  //           var fd = new FormData();
-  //           fd.append('type_', $scope.type);
-  //           fd.append('doc', JSON.stringify(doc));
-  //           fd.append('file', $scope.file);
-
-  //           if (doc._id && doc._rev) {
-  //             // when updating, add the id and rev
-  //             fd.append('_id', doc._id);
-  //             fd.append('_rev', doc._rev);
-  //           }
-  //           payload = fd;
-
-  //           console.log('sending formdata', payload);
-  //         }
-  //         else {
-
-  //           // application/json request
-            
-  //           payload = doc;
-  //         }
-
-  //         var r = cores.getResource($scope.type);
-  //         r.save(payload).then(
-  //           function(data) {
-  //             console.log('success', data);
-  //             $scope.model = data;
-  //             $scope.$emit('saved');
-  //           },
-  //           function(data) {
-  //             console.log('error', data);
-  //           }
-  //         );
-  //       };
-
-
-  //       $scope.cancel = function() {
-  //         throw new Error('not implemented');
-  //       };
-        
-
-  //       $scope.destroy = function() {
-  //         throw new Error('not implemented');
-  //       };
-  //     },
-
-      
-  //     link: function(scope, elem, attrs, controller) {
-
-  //       // build only once
-  //       scope.isReady = false;
-
-  //       var offready = scope.$on(READY_EVENT, function(e) {
-  //         // let the event bubble as it is the final ready event
-  //         offready();
-  //       });
-        
-  //       scope.$watch(function(scope) {
-
-  //         if (!scope.model || !scope.schema || scope.isReady) {
-  //           return;
-  //         }
-  //         scope.isReady = true;
-
-  //         if (!scope.schema) {
-  //           throw new Error('No Schema defined');
-  //         }
-  //         if (!isObjectSchema(scope.schema) && !isArraySchema(scope.schema)) {
-  //           throw new Error('Top level schema has to be a object or array');
-  //         }
-
-  //         var tmpl = cores.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-  //                                        { mode: 'minimal'});
-          
-  //         var link = $compile(tmpl);
-  //         var content = link(scope);
-  //         elem.find('form').html(content);
-  //       });
-  //     }
-  //   };
-  // });
-  
 })();

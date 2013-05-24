@@ -12,7 +12,9 @@
     if (schema.enum) {
       return schema.enum[0];
     }
-    
+    if (schema.$ref) {
+      return {};
+    }
     // infer object and array
     if (!schema.type) {
       if (schema.properties) schema.type = 'object';
@@ -21,12 +23,16 @@
     
     if (!schema.type) throw new Error('Cannot create default value for schema without type');
 
+    var hasDefaultValue = schema.hasOwnProperty('default');
+    
     switch(schema.type) {
-    case 'boolean': return true;
-    case 'integer': return 0;
-    case 'number': return 0;
-    case 'string': return '';
+    case 'boolean': return hasDefaultValue ? schema.default : true;
+    case 'integer': return hasDefaultValue ? schema.default : 0;
+    case 'number': return hasDefaultValue ? schema.default : 0;
+    case 'string': return hasDefaultValue ? schema.default : '';
     case 'object':
+      if (hasDefaultValue) return schema.default;
+      
       var obj = {};
       angular.forEach(schema.properties, function(propSchema, name) {
         // ignore some vals
@@ -37,7 +43,7 @@
         obj.type_ = typeName;
       }
       return obj;
-    case 'array': return [];
+    case 'array': return hasDefaultValue ? schema.default : [];
     default: throw new Error('Cannot create default value for unknown type: ' + schema.type);
     }
   }
@@ -49,7 +55,7 @@
   
   function getModelName(schema, modelPath) {
     // use schema name if it exists
-    var name = schema.name || '';
+    var name = schema.title || '';
 
     // otherwise use name from model path
     if (!name) {
@@ -98,7 +104,7 @@
       if (schema.items) schema.type = 'array';
     }
 
-    if (!angular.isString(schema.type)) {
+    if (!schema.$ref && !angular.isString(schema.type)) {
       throw new Error('Only single types are supported');
     }
 
@@ -110,6 +116,9 @@
     if (schema.enum) {
       viewType = 'enum';
     }
+    if (schema.$ref) {
+      viewType = 'model-ref';
+    }
     if (viewType === 'array' && schema.items.anyOf) {
       viewType = 'anyof-array';
     }
@@ -119,7 +128,7 @@
       // view can be a string or object with additional options
       
       if (angular.isObject(schema.view)) {
-        viewType = schema.view.type;
+        viewType = schema.view.type || viewType;
         viewName = schema.view.name || viewName;
 
         // add view properties to options

@@ -6,8 +6,6 @@ var url = require('url');
 
 function handlePayload(app, payload, callback) {
 
-  console.log('handlePayload', payload);
-  
   if (payload.isMultipart) {
 
     var doc = payload.doc;
