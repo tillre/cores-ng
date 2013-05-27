@@ -1,52 +1,36 @@
-module.exports = {
+var js = require('jski');
 
-  properties: {
+module.exports = js.object({
 
-    image: {
-      $ref: 'Image',
-      view: {
-        preview: 'cr-image-preview'
-      }
-    },
-    
-    title: { type: 'string', minLength: 1 },
-    publish: { type: 'boolean' },
-    draft: { type: 'boolean', default: false },
-    seconds: { type: 'integer' },
-    average: { type: 'number' },
-    choose: { type: 'string', 'enum': ['one', 'two', 'three'] },
-    author: {
-      properties: {
-        firstname: { type: 'string'},
-        lastname: { type: 'string' }
-      }
-    },
-    tags: {
-      items: {
-        properties: { name: {type: 'string' }}
-      }
-    },
-    content: { type: 'string', view: 'text' },
-    body: {
-      items: {
-        anyOf: [
-          {
-            name: 'paragraph',
-            properties: {
-              text: { type: 'string' }
-            }
-          },
-          {
-            name: 'doit',
-            properties: {
-              check: { type: 'boolean' }
-            }
-          }
-        ]
-      }
-    }
-  },
-  required: ['title', 'author', 'body']
-};
+  image: js.ref('Image').custom('view', { preview: 'cr-image-preview' }),
 
+  title: js.string(),
 
+  publish: js.boolean(),
+  draft: js.boolean().default(false),
+
+  seconds: js.integer(),
+  average: js.number(),
+
+  choose: js.enum(['one', 'two', 'three']),
+
+  author: js.object({
+    firstname: js.string(),
+    lastname: js.string()
+  }),
+
+  tags: js.array(js.object({ name: js.string() })),
+
+  content: js.string().custom('view', 'text'),
+
+  body: js.array(js.anyOf([
+    js.object({
+      text: js.string()
+    }).custom('name', 'paragraph'),
+
+    js.object({
+      check: js.boolean()
+    }).custom('name', 'doit')
+  ]))
+  
+}).required(['title', 'author', 'body']);

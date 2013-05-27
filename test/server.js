@@ -4,13 +4,15 @@ var async = require('async');
 
 var hapi = require('hapi');
 
-var loadResources = require('cores-load');
+var cores = require('cores');
 var mountResources = require('cores-hapi');
 
 var port = 3333;
 
 
 function setupServer(db, callback) {
+
+  var resources = cores(db);
 
   // test server
 
@@ -69,7 +71,7 @@ function setupServer(db, callback) {
 
     // load models and mount routes
 
-    loadResources(db, './test/models', { app: app, recursive: true }, function(err, res) {
+    resources.load('./test/models', { app: app, recursive: true }, function(err, res) {
       if (err) return callback(err);
       
       mountResources(res, server);
