@@ -75,6 +75,15 @@ describe('cores', function() {
       cores.initialize('http://localhost:3333').then(done, done);
     }));
 
+    it('should get a id', inject(['cores'], true, function(cores, done) {
+      cores.getIds().then(
+        function(ids) {
+          assert(ids.uuids.length === 1);
+          done();
+        },
+        done
+      );
+    }));
 
     it('should have the resources', inject(['cores'], function(cores) {
       assert(angular.isObject(cores.getResource('Article')));
@@ -350,7 +359,6 @@ describe('cores', function() {
         if (model) {
           scope.model = model;
         }
-        
         var elem = angular.element('<div cr-model type="' + type + '" model="model"/>');
         
         $compile(elem)(scope);

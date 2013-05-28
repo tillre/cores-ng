@@ -5,14 +5,14 @@ var async = require('async');
 var hapi = require('hapi');
 
 var cores = require('cores');
-var mountResources = require('cores-hapi');
+var coresApi = require('cores-hapi');
 
 var port = 3333;
 
 
 function setupServer(db, callback) {
 
-  var resources = cores(db);
+  cores = cores(db);
 
   // test server
 
@@ -66,16 +66,22 @@ function setupServer(db, callback) {
 
   fs.mkdir(app.upload.dir, function(err) {
     if (err && err.code !== 'EEXIST') {
-      return callback(err);
+      callback(err);
+      return;
     }
 
-    // load models and mount routes
+    // load models and create the api
+    console.log('loading models');
+    
+    cores.load('./test/models', { app: app, recursive: true }, function(err, resources) {
+      if (err) {
+        callback(err);
+        return;
+      }
 
-    resources.load('./test/models', { app: app, recursive: true }, function(err, res) {
-      if (err) return callback(err);
-      
-      mountResources(res, server);
-      callback(null, res, server);
+      console.log('creating api');
+      coresApi(cores, resources, server);
+      callback(null, resources, server);
     });
   });
 }
@@ -85,7 +91,10 @@ module.exports = function(db, callback) {
 
   setupServer(db, function(err, resources, server) {
 
-    if (err) return callback(err);
+    if (err) {
+      callback(err);
+      return;
+    }
 
     server.start();
     console.log('started server on port:', port);
