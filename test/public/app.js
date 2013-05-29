@@ -17,16 +17,16 @@
       $routeProvider.otherwise({ redirectTo: '/' });
     })
 
-    .controller('AppCtrl', function($scope, cores) {
-      cores.initialize().then(function() {
+    .controller('AppCtrl', function($scope, crInit) {
+      crInit.then(function() {
         console.log('cores initialized');
       });
     })
   
-    .controller('ArticlesCtrl', function($scope, cores) {
+    .controller('ArticlesCtrl', function($scope) {
     })
 
-    .controller('ImagesCtrl', function($scope, cores) {
+    .controller('ImagesCtrl', function($scope) {
     })
   
   ;

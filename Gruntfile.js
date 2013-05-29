@@ -16,7 +16,8 @@ module.exports = function(grunt) {
 
     concat: {
       dist: {
-        src: ['lib/templates.js', 'lib/services.js', 'lib/directives.js'],
+        // order matters!
+        src: ['lib/index.js', 'lib/templates.js', 'lib/services/*.js', 'lib/directives/*.js'],
         dest: 'cores.js'
       }
     }
