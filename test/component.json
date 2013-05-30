@@ -1,9 +1,9 @@
 {
-  "name": "cores-angular",
+  "name": "cores-ng",
   "version": "0.0.0",
   "dependencies": {
     "jquery": "~1.9.1",
-    "angular": "git@github.com:PatternConsulting/bower-angular.git#1.1.4",
+    "angular": "git@github.com:PatternConsulting/bower-angular.git#1.1.5",
     "bootstrap": "~2.3.1"
   }
 }

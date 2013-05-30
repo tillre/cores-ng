@@ -19,6 +19,9 @@
     "karma": "~0.9.2",
     "karma-mocha": "0.0.1",
     "chai": "~1.6.0",
-    "grunt-contrib-concat": "~0.3.0"
+    "grunt-contrib-concat": "~0.3.0",
+    "cores-hapi": "0.0.4",
+    "cores": "0.0.4",
+    "jski": "~0.1.1"
   }
 }
