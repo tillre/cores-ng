@@ -2,8 +2,12 @@ var js = require('jski');
 
 module.exports = js.object({
 
-  image: js.ref('Image').custom('view', { preview: 'cr-image-preview' }),
+  image: js.ref('Image')
+    .custom('view', { preview: 'cr-image-ref-preview' }),
 
+  // category: js.ref('Category')
+  //   .custom('view', { type: 'select-model-ref', attribute: 'title' }),
+  
   title: js.string(),
 
   publish: js.boolean(),

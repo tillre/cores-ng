@@ -4,6 +4,6 @@
   "dependencies": {
     "jquery": "~1.9.1",
     "angular": "git@github.com:PatternConsulting/bower-angular.git#1.1.5",
-    "bootstrap": "~2.3.2"
+    "angular-bootstrap": "~0.3.0"
   }
 }

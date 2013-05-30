@@ -138,7 +138,7 @@
         '<div class="indent">' +
           '<div class="btn-group">' +
             '<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Add <span class="caret"/></a>' +
-            '<ul class="dropdown-menu">' +
+            '<ul class="dropdown-menu" role="menu">' +
               '<li ng-repeat="schema in schema.items.anyOf">' +
                 '<a ng-click="addItem(schema)">{{schema.name}}</a>' +
               '</li>' +
@@ -279,18 +279,18 @@
   
   function buildTemplate(schema, model, schemaPath, modelPath, options) {
 
-    // infer type
-    if (!schema.type) {
-      if (schema.properties) schema.type = 'object';
-      if (schema.items) schema.type = 'array';
-    }
-
-    if (schema.type && !angular.isString(schema.type)) {
-      throw new Error('Only single types are supported');
-    }
-
     var viewType = schema.type;
     var viewName = getModelName(schema, modelPath);
+
+    // infer some types
+    if (!schema.type) {
+      if (schema.properties) viewType = 'object';
+      if (schema.items) viewType = 'array';
+    }
+
+    if (viewType && !angular.isString(viewType)) {
+      throw new Error('Only single types are supported');
+    }
 
     // handle extended types
     
@@ -853,6 +853,7 @@
   function ArrayCtrl($scope, crSchema) {
 
     $scope.addItem = function(schema) {
+      console.log('scope', $scope);
       var obj = crSchema.createModel(schema, schema.name);
       $scope.model.push(obj);
     };
@@ -875,9 +876,9 @@
   }
 
 
-  function AnyofArrayCtrl($scope) {
+  function AnyofArrayCtrl($scope, crSchema) {
 
-    // Inherit from ArrayCtrl
+    // Inherit from ArrayCtrl, keep in mind to pass all deps
     ArrayCtrl.apply(this, arguments);
 
     this.getSchema = function(type) {
@@ -1007,6 +1008,9 @@
       controller: AnyofArrayCtrl,
 
       link: function(scope, elem, attrs) {
+
+        elem.find('.dropdown-toggle').dropdown();
+
         scope.$emit('ready');
       }
     };
@@ -1070,7 +1074,7 @@
   });
 
 
-  module.directive('crImagePreview', function() {
+  module.directive('crImageRefPreview', function() {
     return {
       scope: {
         model: '=',
@@ -1081,7 +1085,7 @@
       templateUrl: 'cr-image-preview.html',
 
       link: function(scope, elem, attr) {
-        scope.$watch('subFile', function(file) {
+        scope.$watch('file', function(file) {
           if (file) {
             var fr = new FileReader();
             fr.onload = function(e) {
@@ -1283,6 +1287,30 @@
     };
   });
 
+
+  module.directive('crSelectModelRef', function() {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@'
+      },
+      
+      replace: true,
+      templateUrl: 'cr-select-model-ref.html',
+
+      link: function(scope, elem, attrs) {
+        crCommon.watchUntil(
+          function condition(scope) { return scope.model && scope.schema },
+          function then(scope) {
+            console.log('attrs', attrs);
+            console.log('showattr', attrs.attribute);
+          }
+        );
+      }
+    };
+  });
+  
   
   module.directive('crModelRef', function($compile, crCommon) {
     return {
