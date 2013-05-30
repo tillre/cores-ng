@@ -5,8 +5,8 @@ module.exports = js.object({
   image: js.ref('Image')
     .custom('view', { preview: 'cr-image-ref-preview' }),
 
-  // category: js.ref('Category')
-  //   .custom('view', { type: 'select-model-ref', attribute: 'title' }),
+  category: js.ref('Category')
+    .custom('view', { type: 'model-select-ref', property: 'title' }),
   
   title: js.string(),
 

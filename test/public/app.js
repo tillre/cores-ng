@@ -14,6 +14,10 @@
         templateUrl: '/test/public/images.html', controller: 'ImagesCtrl'
       });
 
+      $routeProvider.when('/categories', {
+        templateUrl: '/test/public/categories.html', controller: 'CategoriesCtrl'
+      });
+      
       $routeProvider.otherwise({ redirectTo: '/' });
     })
 
@@ -29,6 +33,8 @@
     .controller('ImagesCtrl', function($scope) {
     })
   
+    .controller('CategoriesCtrl', function($scope) {
+    })
   ;
   
 })();
