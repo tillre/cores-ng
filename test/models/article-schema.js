@@ -7,7 +7,7 @@ module.exports = js.object({
 
   category: js.ref('Category')
     .custom('view', { type: 'model-select-ref', property: 'title' }),
-  
+
   title: js.string(),
 
   publish: js.boolean(),
