@@ -18,6 +18,10 @@
         templateUrl: '/test/public/categories-list.html', controller: 'CategoriesListCtrl'
       });
       
+      $routeProvider.when('/categories/new', {
+        templateUrl: '/test/public/categories.html', controller: 'CategoriesDetailCtrl'
+      });
+      
       $routeProvider.when('/categories/:id', {
         templateUrl: '/test/public/categories.html', controller: 'CategoriesDetailCtrl'
       });
