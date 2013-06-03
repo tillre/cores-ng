@@ -14,6 +14,14 @@
       //   templateUrl: '/test/public/images.html', controller: 'ImagesCtrl'
       // });
 
+      $routeProvider.when('/foos', {
+        templateUrl: '/test/public/foos.html', controller: 'FoosCtrl'
+      });
+      $routeProvider.when('/foos/:id', {
+        templateUrl: '/test/public/foos.html', controller: 'FoosCtrl'
+      });
+
+      
       $routeProvider.when('/categories', {
         templateUrl: '/test/public/categories-list.html', controller: 'CategoriesListCtrl'
       });
@@ -43,7 +51,7 @@
   
     .controller('CategoriesListCtrl', function($scope, $location) {
       $scope.type = 'Category';
-      $scope.$on('select', function(e, id) {
+      $scope.$on('model:select', function(e, id) {
         e.stopPropagation();
         $location.path('/categories/' + id);
       });
@@ -53,6 +61,16 @@
       console.log('CategoriesDetailCtrl', $routeParams.id);
       $scope.type = 'Category';
       $scope.id = $routeParams.id;
+    })
+
+    .controller('FoosCtrl', function($scope, $routeParams, $location) {
+      $scope.type = 'Foo';
+      $scope.id = $routeParams.id;
+      
+      $scope.$on('model:select', function(e, id) {
+        e.stopPropagation();
+        $location.path('/foos/' + id);
+      });
     })
   ;
   
