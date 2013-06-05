@@ -6,6 +6,8 @@ describe('cores', function() {
 
   var injector = angular.injector(['cores', 'ng']);
 
+  var host = 'http://localhost:3333';
+
   //
   // gets the dependencies and triggers a digest cycle on the rootscope
   //
@@ -58,295 +60,273 @@ describe('cores', function() {
 
     return run;
   };
-  
 
-  describe('api', function() {
 
-    it('should have api defined', inject(['cores'], function(cores) {
-      assert(angular.isObject(cores));
-      assert(angular.isFunction(cores.initialize));
-      assert(angular.isFunction(cores.getResource));
-      assert(angular.isFunction(cores.createModel));
-      assert(angular.isFunction(cores.buildTemplate));
+  describe('crResources', function() {
+
+    it('should init', inject(['crResources'], true, function(crResources, done) {
+      crResources.init(host).then(
+        function(resources) {
+          assert(angular.isObject(resources));
+          assert(resources.hasOwnProperty('Boolean'));
+          assert(resources.hasOwnProperty('String'));
+          assert(resources.hasOwnProperty('Object'));
+          done();
+        },
+        done
+      );
     }));
 
-    
-    it('should initialize', inject(['cores'], true, function(cores, done) {
-      cores.initialize('http://localhost:3333').then(done, done);
-    }));
-
-    it('should get a id', inject(['cores'], true, function(cores, done) {
-      cores.getIds().then(
+    it('should get a single id', inject(['crResources'], true, function(crResources, done) {
+      crResources.getIds().then(
         function(ids) {
-          assert(ids.uuids.length === 1);
+          assert(ids.length === 1);
           done();
         },
         done
       );
     }));
 
-    it('should have the resources', inject(['cores'], function(cores) {
-      assert(angular.isObject(cores.getResource('Article')));
-      assert(angular.isObject(cores.getResource('Image')));
+    it('should get a some ids', inject(['crResources'], true, function(crResources, done) {
+      crResources.getIds(5).then(
+        function(ids) {
+          assert(ids.length === 5);
+          done();
+        },
+        done
+      );
     }));
 
+    it('should get the resource', inject(['crResources'], function(crResources) {
+      assert(crResources.get('Boolean').type === 'Boolean');
+      assert(crResources.get('Number').type === 'Number');
+    }));
+  });
 
-    it('should create default model', inject(['cores'], function(cores) {
-      assert(typeof cores.createModel({ type: 'boolean' }) === 'boolean');
-      assert(angular.isNumber(cores.createModel({ type: 'integer' })));
-      assert(angular.isNumber(cores.createModel({ type: 'number' })));
-      assert(angular.isString(cores.createModel({ type: 'string' })));
-      
-      var obj = cores.createModel({
-        properties: {
-          foo: { type: 'boolean' }, bar: { type: 'number'}
-        }
+
+  describe('crResource', function() {
+
+    var res;
+    var customId = 'id_' + (new Date().getTime());
+    
+    var doc = {
+      title: 'Hello Article',
+      author: { firstname: 'No', lastname: 'Mono' },
+      content: 'Bla bla bla'
+    };
+
+    
+    it('should create', inject(['crResource'], function(crResource) {
+      res = new crResource('Article', {
+        path: '/articles',
+        schemaPath: '/articles/_schema',
+        viewPaths: { titles: '/articles/_views/titles' }
+      }, {
+        host: host
       });
-      assert(angular.isObject(obj));
-      assert(typeof obj.foo === 'boolean');
-      assert(angular.isNumber(obj.bar));
-
-      var arr = cores.createModel({ items: { type: 'string' }});
-      assert(angular.isArray(arr));
     }));
 
     
-    it('should build the template', inject(['cores'], function(cores) {
-      var schema = { properties: {
-        foo: { type: 'boolean' }, bar: { type: 'number' }
-      }};
-      var model = cores.createModel(schema);
-      var template = cores.buildTemplate(schema, model);
-
-      assert(template.match('cr-object').length === 1);
-      assert(template.match('model="model"').length === 1);
-      assert(template.match('schema="schema"').length === 1);
+    it('should save without id', inject(true, function(done) {
+      res.save(doc).then(
+        function(d) {
+          assert(typeof d._id === 'string');
+          assert(typeof d._rev === 'string');
+          done();
+        },
+        done
+      );
     }));
+
+    
+    it('should save with id', inject(true, function(done) {
+      var doc2 = JSON.parse(JSON.stringify(doc));
+      doc2._id = customId;
+      res.save(doc2).then(
+        function(d) {
+          assert(d._id === doc2._id);
+          assert(typeof d._rev === 'string');
+          done();
+        },
+        done
+      );
+    }));
+
+
+    it('should load', inject(true, function(done) {
+      res.load(customId).then(
+        function(d) {
+          assert(d._id === customId);
+          done();
+        },
+        done
+      );
+    }));
+
+
+    it('should load all', inject(true, function(done) {
+      res.load().then(
+        function(res) {
+          assert(res.total_rows > 1);
+          done();
+        },
+        done
+      );
+    }));
+
+
+    it('should load all with params', inject(true, function(done) {
+      res.load({ limit: 1 }).then(
+        function(res) {
+          assert(res.total_rows > 1);
+          assert(res.rows.length === 1);
+          done();
+        },
+        done
+      );
+    }));
+    
+    
+    it('should load and update', inject(true, function(done) {
+      res.load(customId).then(
+        function(d) {
+
+          assert(typeof d._id === 'string');
+          assert(typeof d._rev === 'string');
+          d.title = 'yoyoyo';
+
+          res.save(d).then(
+            function(d2) {
+              assert(d2._id === d._id);
+              assert(d2._rev !== d._rev);
+              assert(d2.title === d.title);
+              done();
+            },
+            done
+          );
+        },
+        done
+      );
+    }));
+
+
+    it('should call the view', inject(true, function(done) {
+      res.view('titles').then(
+        function(res) {
+          assert(res.total_rows > 1);
+          done();
+        },
+        done
+      );
+    }));
+
+
+    it('should call the view with params', inject(true, function(done) {
+      res.view('titles', { limit: 1 }).then(
+        function(res) {
+          assert(res.total_rows > 1);
+          assert(res.rows.length === 1);
+          done();
+        },
+        done
+      );
+    }));
+
+
+    it('should destroy', inject(true, function(done) {
+      res.load(customId).then(
+        function(d) {
+          return res.destroy(d._id, d._rev);
+        }
+      ).then(
+        function() {
+          return res.load(customId);
+        }
+      ).then(
+        function() {
+          done(new Error('Should not exist'));
+        },
+        function(err) {
+          assert(err);
+          done();
+        }
+      );
+    }));
+
+    
+    describe('multipart', function() {
+
+      var doc = {
+        _id: 'multipart_' + (new Date().getTime()),
+        title: 'Some image',
+        file: { name: 'test.jpg', url: '' }
+      };
+
+      var file = JSON.stringify({
+        name: 'foo.jpg',
+        path: '/upload/foo.jpg',
+        isTest: true
+      });
+
+      
+      it('should save multipart data', inject(['crResources'], true, function(crResources, done) {
+        crResources.get('Image').save(doc, file).then(
+          function(doc) {
+            assert(doc);
+            done();
+          },
+          done
+        );
+      }));
+
+      
+      it('should update multipart data', inject(['crResources'], true, function(crResources, done) {
+        var res = crResources.get('Image');
+
+        res.load(doc._id).then(
+          function(doc) {
+            doc.title = 'Im Multiman';
+
+            res.save(doc, file).then(
+              function(doc) {
+                assert(doc);
+                done();
+              },
+              done
+            );
+          },
+          done
+        );
+      }));
+
+      // ////////////////////////////////////////
+      // TODO !!! multiple files 
+      // ////////////////////////////////////////
+      
+      
+      // it('should save multiple files', inject(['crResources'], true, function(crResources, done) {
+      //   var doc2 = JSON.parse(JSON.stringify(doc));
+      //   doc2._id += 2;
+      //   var files = [file, file];
+
+      //   res.save(doc2, files).then(
+      //     function(res) {
+      //       console.log(res);
+      //     },
+      //     done
+      //   );
+      // }));
+    });
   });
+
 
   
-  describe('resource', function() {
-
-    var articleDoc = {
-      type_: 'Article',
-      title: 'Some Title',
-      author: { firstname: 'Bob', lastname: 'Bobsen' },
-      tags: [],
-      body: []
-    };
-    var fileDoc = {
-      title: 'Some Image',
-      file: { name: 'test.jpg', url: '' }
-    };
-
-    var savedArticle, savedImage;
-    var articleRes, imageRes;
-
-
-    before(inject(['cores'], true, function(cores, done) {
-      articleRes = cores.getResource('Article');
-      imageRes = cores.getResource('Image');
-      done();
-    }));
-
-    it('should get the schema', inject(true, function(done) {
-      articleRes.schema().then(
-        function(schema) {
-          assert(angular.isObject(schema));
-          assert(angular.isObject(schema.properties));
-          done();
-        },
-        done
-      );
-    }));
-
-    
-    it('should save the doc', inject(true, function(done) {
-      articleRes.save(articleDoc).then(
-        function(doc) {
-          assert(angular.isObject(doc));
-          assert(angular.isString(doc._id));
-          assert(angular.isString(doc._rev));
-
-          savedArticle = doc;
-          
-          done();
-        },
-        done
-      );
-    }));
-
-    
-    it('should save another doc', inject(true, function(done) {
-      articleRes.save(articleDoc).then(
-        function(doc) {
-          assert(angular.isObject(doc));
-          done();
-        },
-        done
-      );
-    }));
-
-
-    it('should update the doc', inject(true, function(done) {
-      savedArticle.title = 'New Title';
-      
-      articleRes.save(savedArticle).then(
-        function(doc) {
-          assert(doc._id === savedArticle._id);
-          assert(doc._rev !== savedArticle._rev);
-          assert(doc.title === 'New Title');
-
-          savedArticle = doc;
-          
-          done();
-        },
-        done
-      );
-    }));
-
-    
-    it('should return error when doc not valid', inject(true, function(done) {
-      articleDoc.title = '';
-      articleRes.save(articleDoc).then(
-        done(),
-        function(err) {
-          assert()
-          expect(err).to.exist;
-          expect(err.message === 'Validation failed').to.be(true);
-
-          articleDoc.title = 'Some Title';
-          
-          done();
-        }
-      );
-      done();
-    }));
-
-    
-    it('should save multipart doc', inject(true, function(done) {
-      var fd = new FormData();
-      fd.append('type_', fileDoc.type_);
-      fd.append('doc', JSON.stringify(fileDoc));
-      fd.append('file', JSON.stringify({ name: 'foo.jpg', path: '/upload/foo.jpg', isTest: true }));
-
-      imageRes.save(fd).then(
-        function(doc) {
-          assert(angular.isObject(doc));
-          assert(angular.isString(doc._id));
-          assert(angular.isString(doc._rev));
-          assert(doc.file.url === '/upload/foo.jpg');
-          
-          savedImage = doc;
-          
-          done();
-        },
-        done
-      );
-    }));
-
-    
-    it('should update multipart doc', inject(true, function(done) {
-      var fd = new FormData();
-      fd.append('type_', savedImage.type_);
-      fd.append('doc', JSON.stringify(savedImage));
-      fd.append('file', JSON.stringify({ name: 'bar.jpg', path: '/upload/bar.jpg', isTest: true}));
-
-      imageRes.save(fd).then(
-        function(doc) {
-          assert(doc._id === savedImage._id);
-          assert(doc._rev !== savedImage._rev);
-          assert(doc.file.url === '/upload/bar.jpg');
-
-          savedImage = doc;
-
-          done();
-        },
-        done
-      );
-    }));
-
-
-    it('should load all docs', inject(true, function(done) {
-      articleRes.load().then(
-        function(result) {
-          assert(result.total_rows > 1);
-          done();
-        },
-        done
-      );
-    }));
-
-
-    it('should load all docs with params', inject(true, function(done) {
-      articleRes.load({ limit: 1 }).then(
-        function(result) {
-          assert(result.total_rows > 1);
-          assert(result.rows.length === 1);
-          done();
-        },
-        done
-      );
-    }));
-    
-    
-    it('should load the doc', inject(true, function(done) {
-      articleRes.load(savedArticle._id).then(
-        function(doc) {
-          assert(doc._id === savedArticle._id);
-          assert(doc._rev === savedArticle._rev);
-          done();
-        },
-        done
-      );
-    }));
-
-    
-    it('should call the view', inject(true, function(done) {
-      articleRes.view('titles').then(
-        function(result) {
-          assert(result.total_rows > 1);
-          assert(result.rows.length > 1);
-          done();
-        },
-        done
-      );
-    }));
-
-    
-    it('should call the view with params', inject(true, function(done) {
-      articleRes.view('titles', { limit: 1 }).then(
-        function(result) {
-          assert(result.total_rows > 1);
-          assert(result.rows.length === 1);
-          done();
-        },
-        done
-      );
-    }));
-
-    
-    it('should destroy the doc', inject(true, function(done) {
-      articleRes.destroy(savedArticle).then(done, done);
-    }));
-
-    
-    it('should not load destroyed doc', inject(true, function(done) {
-      articleRes.load(savedArticle._id).then(
-        function(doc) {
-          assert(false);
-          done();
-        },
-        function() {
-          done();
-        }
-      );
-    }));
-  });
 
 
   describe('directives', function() {
 
+    return;
+    
     function buildFromSchema(type, model, callback) {
 
       if (typeof model === 'function') {

@@ -2,12 +2,6 @@ var js = require('jski');
 
 module.exports = js.object({
 
-  image: js.ref('Image')
-    .custom('view', { preview: 'cr-image-ref-preview' }),
-
-  category: js.ref('Category')
-    .custom('view', { type: 'model-select-ref', property: 'title' }),
-
   title: js.string(),
 
   publish: js.boolean(),
@@ -17,6 +11,9 @@ module.exports = js.object({
   average: js.number(),
 
   choose: js.enum(['one', 'two', 'three']),
+
+  category: js.ref('Category')
+    .custom('view', { type: 'model-select-ref', property: 'title' }),
 
   author: js.object({
     firstname: js.string(),
@@ -37,4 +34,4 @@ module.exports = js.object({
     }).custom('name', 'doit')
   ]))
   
-}).required(['title', 'author', 'body']);
+}).required(['title', 'author', 'content']);

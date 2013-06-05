@@ -175,16 +175,26 @@
       '<div><label>{{name}}:</label><textarea ng-model="model"/></div>'
     );
     
-    // model-ref
+    // model-create-ref
     
     $templateCache.put(
-      'cr-model-ref.html',
+      'cr-model-create-ref.html',
       '<div>' +
         '<label><strong>{{name}}:</strong></label>' +
         '<div class="indent">' +
           '<button href="#{{modalId}}" class="btn" data-toggle="modal">Change</button>' +
-          '<div cr-modal-model modal-id="{{modalId}}" type="{{schema.$ref}}"></div>' +
+          '<div cr-model-modal modal-id="{{modalId}}" type="schema.$ref"></div>' +
         '</div>' +
+      '</div>'
+    );
+
+    // model-select-ref
+    
+    $templateCache.put(
+      'cr-model-select-ref.html',
+      '<div>' +
+        '<label>{{name}}:</label>' +
+        '<select ng-model="selectedItem" ng-options="i for i in items"></select>' +
       '</div>'
     );
     
@@ -203,8 +213,10 @@
       '</div>'
     );
 
+    // model modal
+    
     $templateCache.put(
-      'cr-modal-model.html',
+      'cr-model-modal.html',
       '<div>' +
         '<div id="{{modalId}}" class="modal hide fade" tabindex="-1" role="dialog">' +
           '<div class="modal-header">' +
@@ -222,9 +234,30 @@
       '</div>'
     );
 
+    
+    // model form
+    
     $templateCache.put(
       'cr-model-form.html',
       '<form></form>'
+    );
+
+    // model list
+
+    $templateCache.put(
+      'cr-model-list.html',
+      '<table class="table">' +
+        '<thead>' +
+          '<tr>' +
+            '<th ng-repeat="header in headers">{{header}}</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>' +
+          '<tr ng-repeat="row in rows">' +
+             '<td ng-click="select(item.id)" ng-repeat="item in row">{{item.value}}</td>' +
+          '</tr>' +
+        '</tbody>' +
+      '</table>'
     );
     
   }]);
@@ -297,14 +330,14 @@
     if (schema.enum) {
       viewType = 'enum';
     }
-    if (schema.$ref) {
-      viewType = 'model-ref';
+    else if (schema.$ref) {
+      viewType = 'model-create-ref';
     }
-    if (viewType === 'array' && schema.items.anyOf) {
+    else if (viewType === 'array' && schema.items.anyOf) {
       viewType = 'anyof-array';
     }
-
-    if (schema.view) {
+    
+    if (schema.hasOwnProperty('view')) {
 
       // view can be a string or object with additional options
       
@@ -349,16 +382,24 @@
   // Get a new file id
 
   var getFileId = (function(id) {
-    return function() { return ++id; };
+    return function() { return 'file' + ++id; };
   })(0);
 
 
   // Get a new ref/submodule id
 
   var getRefId = (function(id) {
-    return function() { return ++id; };
+    return function() { return 'ref' + ++id; };
   })(0);
 
+
+  // Get a new modal id
+
+  var getModalId = (function(id) {
+    return function() { return 'modal-' + ++id; };
+  })(0);
+
+  
   // watch the scope for changes until condition() returns true and call then()
 
   function watchUntil(scope, condition, then) {
@@ -383,6 +424,7 @@
     return {
       getFileId: getFileId,
       getRefId: getRefId,
+      getModalId: getModalId,
 
       watchUntil: watchUntil,
       
@@ -497,12 +539,12 @@
     
     Resource.prototype.save = function(doc, file) {
 
-      var def = $q.defer();
+      // var def = $q.defer();
 
       // create multipart formdata when saving files
 
       if (file) {
-        console.log('create multipart data');
+        console.log('creating multipart data');
         var fd = new FormData();
         fd.append('type_', this.type);
         fd.append('doc', JSON.stringify(doc));
@@ -514,49 +556,95 @@
 
         doc = fd;
       }
+
+      var req  = {
+        url: this.host + this.path,
+        method: 'POST',
+        data: doc
+      };
+
+      if (doc._id) {
+        req.method = 'PUT';
+        req.url += '/' + doc._id;
+      }
+      if (doc._rev) {
+        req.url += '/' + doc._rev;
+      }
+      if (file) {
+        req.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+      }
+
+      return $http(req).then(
+        function(res) { return res.data; },
+        function(res) { return makeError(res); }
+      );
       
-      if (doc._id && doc._rev) {
+      // if (doc._id && doc._rev) {
+      //   // update
+      //   console.log('save update', doc._id, doc._rev);
+      //   $http.put(this.host + this.path + '/' + doc._id + '/' + doc._rev, doc).then(
+      //     function(res) { def.resolve(res.data); },
+      //     function(res) { def.reject(makeError(res)); }
+      //   );
+      // }
+      // else if (doc._id) {
+      //   // save with id
+      //   console.log('save new', doc._id);
+      //   $http.put(this.host + this.path + '/' + doc._id, doc).then(
+      //     function(res) { def.resolve(res.data); },
+      //     function(res) { def.reject(makeError(res)); }
+      //   );
+      // }
+      // else {
+      //   // post without id
+      //   console.log('save new');
+      //   $http.post(this.host + this.path, doc).then(
+      //     function(res) { def.resolve(res.data); },
+      //     function(res) { def.reject(makeError(res.data)); }
+      //   );
+      // }
+      // if (doc._id && doc._rev) {
 
-        // update
+      //   // update
         
-        $http.put(this.host + this.path + '/' + doc._id + '/' + doc._rev, doc).then(
-          function(res) { def.resolve(res.data); },
-          function(res) { def.reject(makeError(res)); }
-        );
-      }
-      else {
+      //   $http.put(this.host + this.path + '/' + doc._id + '/' + doc._rev, doc).then(
+      //     function(res) { def.resolve(res.data); },
+      //     function(res) { def.reject(makeError(res)); }
+      //   );
+      // }
+      // else {
 
-        // create
+      //   // create
 
-        if (doc instanceof FormData) {
+      //   if (doc instanceof FormData) {
 
-          // send multipart with a xhr for now, $http seems to have problems with it
-          var xhr = new XMLHttpRequest();
+      //     // send multipart with a xhr for now, $http seems to have problems with it
+      //     var xhr = new XMLHttpRequest();
 
-          xhr.addEventListener('load', function() {
+      //     xhr.addEventListener('load', function() {
 
-            var data = typeof xhr.response === 'string' ? JSON.parse(xhr.response) : xhr.response;
+      //       var data = typeof xhr.response === 'string' ? JSON.parse(xhr.response) : xhr.response;
 
-            if (xhr.status === 200) {
-              def.resolve(data);
-            }
-            else {
-              def.reject(makeError(data));
-            }
-            // call apply, because we are outside the angular life-cycle
-            $rootScope.$apply();
-          });
-          
-          xhr.open('POST', this.host + this.path);
-          xhr.send(doc);
-        }
-        else {
-          $http.post(this.host + this.path, doc).then(
-            function(res) { def.resolve(res.data); },
-            function(res) { def.reject(makeError(res.data)); }
-          );
-        }
-      }
+      //       if (xhr.status === 200) {
+      //         def.resolve(data);
+      //       }
+      //       else {
+      //         def.reject(makeError(data));
+      //       }
+      //       // call apply, because we are outside the angular life-cycle
+      //       $rootScope.$apply();
+      //     });
+
+      //     xhr.open('POST', this.host + this.path);
+      //     xhr.send(doc);
+      //   }
+      //   else {
+      //     $http.post(this.host + this.path, doc).then(
+      //       function(res) { def.resolve(res.data); },
+      //       function(res) { def.reject(makeError(res.data)); }
+      //     );
+      //   }
+      // }
       return def.promise;
     };
 
@@ -600,6 +688,7 @@
       return def.promise;
     };
 
+    
     //
     // internal module state
     //
@@ -608,6 +697,7 @@
       resources: {},
       host: ''
     };
+
     
     //
     // loads model config(urls) and create resources from it
@@ -648,7 +738,7 @@
       $http.get(internal.host + '/_uuids?count=' + count).then(
 
         function(res) {
-          def.resolve(res.data);
+          def.resolve(res.data.uuids);
         },
         function(res) {
           def.reject(makeError(res));
@@ -751,7 +841,8 @@
     return {
       index: loadIndex,
       get: getResource,
-      save: saveWithRefs
+      save: saveWithRefs,
+      getIds: getUUIds
     };
   });
 
@@ -769,6 +860,11 @@
     return schema.type === 'array' || schema.items;
   }
 
+
+  function isPrivateProperty(key) {
+    return key === '_id' || key === '_rev' || key === 'type_' || key === 'parent_';
+  }
+  
   //
   // create a object with default values from schema
   //
@@ -824,7 +920,9 @@
       createModel: createModel,
       
       isObjectSchema: isObjectSchema,
-      isArraySchema: isArraySchema
+      isArraySchema: isArraySchema,
+
+      isPrivateProperty: isPrivateProperty
     };
   });
 
@@ -861,6 +959,7 @@
     // methods called by the array item controller
     
     this.removeItem = function(index) {
+      $scope.$broadcast('item:remove', $scope.model[index]);
       $scope.model.splice(index, 1);
     };
 
@@ -1033,6 +1132,7 @@
       replace: true,
       templateUrl: 'cr-image.html',
 
+
       link: function(scope, elem, attrs) {
 
         var fileId = crCommon.getFileId();
@@ -1063,8 +1163,9 @@
           fr.readAsDataURL(file);
 
           scope.model.name = file.name;
+
           // notify model about file
-          scope.$emit('file', file, fileId);
+          scope.$emit('file:set', fileId, file);
           scope.$apply();
         });
 
@@ -1104,155 +1205,458 @@
   var module = angular.module('cores.directives');
   
   
-  function ModelCtrl($scope, crResource, crSchema, crCommon) {
+  module.directive('crModelList', function(crCommon, crResource, crSchema) {
+    return {
+      scope: {
+        type: '='
+      },
 
-    var resource;
-    var refCtrls = {};
-    var self = this;
-    
-    // create when type and id(optional) are set
+      replace: true,
+      templateUrl: 'cr-model-list.html',
 
-    crCommon.watchUntil(
-      $scope,
-      function condition(scope) { return scope.type; },
-      function then(scope) {
-        create(scope.type, scope.id);
+      link: function(scope, elem, attrs) {
+
+        var init = function(scope) {
+
+          crResource.get(scope.type).view('all', { limit: 10 }).then(
+            function success(result) {
+
+              if(result.total_rows === 0) return;
+
+              var firstVal = result.rows[0].value;
+
+              // headers array with property names
+              
+              scope.headers = Object.keys(firstVal).filter(function(key) {
+                return !crSchema.isPrivateProperty(key);
+              });
+
+              // rows array with property values for each row
+              
+              scope.rows = result.rows.map(function(row) {
+                return scope.headers.map(function(key) {
+                  return { id: row.id, value: row.value[key] };
+                });
+              });
+            }
+          );
+        };
+
+        crCommon.watchUntil(
+          scope, function(scope) { return !!scope.type; }, init
+        );
+
+        scope.select = function(id) {
+          scope.$emit('model:select', id);
+        };
       }
-    );
+    };
+  });
+  
+})();
+(function() {
 
-    function create(type, id) {
-      resource = crResource.get(type);
-      resource.schema().then(
-        function success(schema) {
-          $scope.schema = schema;
+  var module = angular.module('cores.directives');
+  
+  
+  module.directive('crModelSelectRef', function(crCommon, crResource) {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@'
+      },
+      
+      replace: true,
+      templateUrl: 'cr-model-select-ref.html',
 
-          if (!id) {
-            // create a new empty model
-            $scope.model = crSchema.createModel(schema);
-          }
-          else {
-            // load the model with the id
-            resource.load(id).then(
-              function(doc) {
-                $scope.model = doc;
-              }
-            );
-          }
-        },
-        function error(err) {
-          throw new Error(err);
+      
+      link: function(scope, elem, attrs) {
+
+        scope.$on('item:remove', function(e, model) {
+          console.log('got item:remove', model, scope.model);
+          console.log('is me', model === scope.model);
+        });
+        
+        scope.selectedItem = '';
+        scope.items = [];
+
+        var modelsByName = {};
+
+        var init = function(scope) {
+
+          // property name to display in selectbox
+          var property = attrs.property || 'title';
+
+          crResource.get(scope.schema.$ref).view('all').then(
+            function success(models) {
+
+              models.rows.forEach(function(row) {
+
+                var name = row.value[property];
+                modelsByName[name] = row.value;
+                
+                scope.items.push(name);
+
+                // set selected
+                if (scope.model.id && scope.model.id === row.id) {
+                  scope.selectedItem = name;
+                }
+              });
+            }
+          );
         }
+        
+        crCommon.watchUntil(
+          scope, function(scope) { return scope.model && scope.schema; }, init
+        );
+
+        scope.$watch('selectedItem', function(newValue, oldValue) {
+          if (newValue) {
+            scope.model.id = modelsByName[newValue]._id;
+          }
+        });
+      }
+    };
+  });
+  
+  
+  module.directive('crModelCreateRef', function($compile, crCommon) {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@'
+      },
+
+      replace: true,
+      templateUrl: 'cr-model-create-ref.html',
+
+      controller: function($scope) {
+
+        var refId = crCommon.getRefId();
+        var off;
+        
+        // events
+        
+        $scope.$on('submit', function(e, model) {
+          e.stopPropagation();
+
+          $scope.subModel = model.model();
+          $scope.subFiles = model.files();
+          $scope.closeModal();
+
+          // listen to changes of models id
+          
+          if (off) off();
+          off = model.scope().$on('model:set:id', function(e, id) {
+            console.log('setting id to ref', id);
+            e.stopPropagation();
+            $scope.model.id = id;
+          });
+          
+          // notify model
+          
+          $scope.$emit('ref:set', refId, model);
+        });
+
+        
+        $scope.$on('cancel', function(e) {
+          e.stopPropagation();
+          console.log('on cancel');
+        });
+      },
+
+      
+      link: function(scope, elem, attrs) {
+
+        scope.modalId = crCommon.getModalId();
+        scope.closeModal = function() {
+          elem.find('.modal').modal('hide');
+        };
+        
+        crCommon.watchUntil(
+          scope,
+          function condition(scope) { return scope.model && scope.schema; },
+          function then(scope) {
+            if (scope.schema.view.preview) {
+              var tmpl = '<div ' + scope.schema.view.preview + ' model="subModel" files="subFiles"/>';
+              var e = $compile(tmpl)(scope);
+              elem.find('.indent').append(e);
+            }
+          }
+        );
+      }
+    };
+  });
+
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+  
+  module.controller('crModelCtrl', function($scope, $q, crResource, crSchema, crCommon) {
+
+    var ModelCtrl = function() {
+
+      var self = this;
+      
+      this._refs = {};
+      this._files = {};
+
+      crCommon.watchUntil(
+        $scope,
+        function(scope) { return !!scope.type; },
+        function(scope) { self._init(); }
       );
-    }
+    };
+    
 
-    // events
+    ModelCtrl.prototype._init = function() {
 
-    $scope.$on('file', function(e, file, fileId) {
+      this._resource = crResource.get($scope.type);
+
+      // add/update/remove files from the model
+      $scope.$on('file:set', angular.bind(this, this.onFileSet));
+      $scope.$on('file:remove', angular.bind(this, this.onFileRemove));
+
+      // add/update/remove submodels
+      $scope.$on('ref:set', angular.bind(this, this.onRefSet));
+      $scope.$on('ref:remove', angular.bind(this, this.onRefRemove));
+
+      this._initScopeFunctions();
+      
+      this.load().then(
+        function() { console.log('model load success'); },
+        function() { console.log('model load error'); }
+      );
+    };
+
+
+    ModelCtrl.prototype._initScopeFunctions = function() {
+
+      var self = this;
+      
+      $scope.save = function() {
+        self.save();
+      };
+
+      $scope.submit = function() {
+        $scope.$emit('submit', self);
+      };
+
+      $scope.cancel = function() {
+        $scope.$emit('cancel');
+      };
+
+      $scope.destroy = function() {
+        throw new Error('not implemented');
+        self.destroy();
+      };
+    };
+
+    
+    //
+    // event handlers
+    //
+    
+    ModelCtrl.prototype.onFileSet = function(e, id, file) {
       e.stopPropagation();
-      console.log('add file', arguments);
-      $scope.file = file;
-    });
-
-    $scope.$on('ref', function(e, id, ctrl) {
-      console.log('ref ctrl', ctrl.getId());
-      refCtrls[id] = ctrl;
-    });
-
-    // controller methods
-
-    this.save = function() {
-      return resource.save($scope.model, $scope.file);
+      console.log('set file', id, file);
+      this._files[id] = file;
     };
 
-    this.setId = function(id) {
+    
+    ModelCtrl.prototype.onFileRemove = function(e, id) {
+      e.stopPropagation();
+      console.log('remove file', id);
+      if (!this._files.hasOwnProperty(id)) {
+        throw new Error('Cannot remove file which does not exist');
+      }
+      delete this._files[id];
+    };
+
+    
+    ModelCtrl.prototype.onRefSet = function(e, id, ref) {
+      e.stopPropagation();
+      this._refs[id] = ref;
+    };
+
+    
+    ModelCtrl.prototype.onRefRemove = function(e, id) {
+      e.stopPropagation();
+      if (!this._refs.hasOwnProperty(id)) {
+        throw new Error('Cannot remove ref which does not exist');
+      }
+      delete this._refs[id];
+    };
+
+
+    //
+    // getters/setters
+    //
+    
+    ModelCtrl.prototype.id = function(id) {
+      if (!id) {
+        return $scope.model._id;
+      }
       $scope.model._id = id;
+      $scope.$emit('model:set:id', id);
+    };
+    
+
+    ModelCtrl.prototype.parentId = function(id) {
+      if (!id) {
+        return $scope.model.parentId_;
+      }
+      return $scope.model.parentId_ = id;
     };
 
-    this.getId = function() {
-      return $scope.model._id;
-    };
 
-    this.setParentId = function(id) {
-      $scope.model.parentId_ = id;
+    ModelCtrl.prototype.scope = function() {
+      return $scope;
     };
+    
 
-    this.setModel = function(model) {
-      $scope.model = model;
-    };
-
-    this.getModel = function() {
+    ModelCtrl.prototype.model = function() {
       return $scope.model;
     };
 
-    this.getFile = function() {
-      return $scope.file;
-    };
-    
-    // scope functions
-    
-    $scope.save = function() {
 
-      var ctrls = Object.keys(refCtrls).map(function(key) {
-        return refCtrls[key];
+    ModelCtrl.prototype.files = function() {
+      return this._files;
+    };
+
+    
+    //
+    // methods
+    //
+    
+    ModelCtrl.prototype.load = function() {
+
+      // load model
+      
+      var self = this;
+      var id = $scope.id;
+
+      return this._resource.schema().then(function(schema) {
+        console.log('id', id);
+        if (!id) {
+          $scope.schema = schema;
+          $scope.model = crSchema.createModel(schema);
+        }
+        else {
+          return self._resource.load(id).then(function(doc) {
+            console.log('loaded doc', doc);
+            $scope.schema = schema;
+            $scope.model = doc;
+          });
+        }
+      });
+    };
+
+
+    ModelCtrl.prototype.save = function() {
+
+      // trigger saving on this and all referenced models
+      
+      var self = this;
+      var refModels = Object.keys(this._refs).map(function(k) { return self._refs[k]; });
+      console.log('refs: ', refModels);
+
+      // collect all new models that need an id
+      
+      var newModels = refModels.filter(function(model) {
+        return !model.id();
+      });
+      if (!this.id()) {
+        newModels.push(this);
+      }
+      
+      if (newModels.length === 0) {
+
+        // no new models, just save all
+
+        return this._saveAll(refModels);
+      }
+      else {
+
+        // get and set ids for new models and then save them
+
+        return crResource.getIds(newModels.length).then(
+          function(ids) {
+
+            newModels.forEach(function(model) {
+              console.log('setting model id');
+              model.id(ids.pop());
+            });
+
+            refModels.forEach(function(model) {
+              model.parentId(self.id());
+            });
+
+            return self._saveAll(refModels);
+          }
+        );
+      }
+    };
+
+
+    ModelCtrl.prototype._saveAll = function(refModels) {
+
+      // collect save promises for $q.all and return that promise
+
+      var self = this;
+      
+      var promises = refModels.map(function(model) {
+        return model.save();
       });
       
-      crResource.save(self, ctrls).then(
-        function() {
-          console.log('save success');
-        },
-        function(reason) {
-          throw new Error(reason);
-        }
-      );
+      promises.push(this._resource.save($scope.model).then(function(doc) {
+        $scope.model = doc;
+      }));
+
+      return $q.all.apply($q, promises);
     };
 
-    $scope.submit = function() {
-      $scope.$emit('submit', self);
-    };
+    return new ModelCtrl();
+  });
 
-    $scope.cancel = function() {
-      $scope.$emit('cancel', 1, 2, 3);
-    };
-
-    $scope.destroy = function() {
-      throw new Error('not implemented');
-
-      resource.destroy($scope.model).then(
-        function success() { console.log('destroy success'); },
-        function error(err) {
-          throw new Error(err);
-        }
-      );
-    };
-  }
   
 
-  module.directive('crModel', function() {
+  module.directive('crModel', function($templateCache) {
     return {
       scope: {
-        type: '@',
-        id: '@'
+        type: '=',
+        id: '=',
+        actions: '@'
       },
+
       replace: true,
       templateUrl: 'cr-model.html',
-      controller: ModelCtrl
+
+      controller: 'crModelCtrl'
     };
   });
 
-  
-  module.directive('crModalModel', function() {
+
+  module.directive('crModelModal', function() {
     return {
       scope: {
-        type: '@',
-        id: '@',
+        type: '=',
+        id: '=',
+        actions: '@',
         modalId: '@'
       },
+
       replace: true,
-      templateUrl: 'cr-modal-model.html',
-      controller: ModelCtrl
+      templateUrl: 'cr-model-modal.html',
+
+      controller: 'crModelCtrl'
     };
   });
-
+  
   
   module.directive('crModelForm', function($compile, crBuild, crSchema, crCommon) {
     return {
@@ -1265,136 +1669,24 @@
       templateUrl: 'cr-model-form.html',
 
       link: function(scope, elem, attrs) {
-        crCommon.watchUntil(
-          scope,
-          function condition(scope) { return scope.model && scope.schema; },
-          function then(scope) {
 
-            if (!crSchema.isObjectSchema(scope.schema) &&
-                !crSchema.isArraySchema(scope.schema)) {
-              throw new Error('Top level schema has to be a object or array');
-            }
-
-            var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
-                               { mode: 'minimal'});
-            
-            var link = $compile(tmpl);
-            var content = link(scope);
-            elem.html(content);
+        var init = function(scope) {
+          if (!crSchema.isObjectSchema(scope.schema) &&
+              !crSchema.isArraySchema(scope.schema)) {
+            throw new Error('Top level schema has to be a object or array');
           }
-        );
-      }
-    };
-  });
 
-
-  module.directive('crSelectModelRef', function() {
-    return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@'
-      },
-      
-      replace: true,
-      templateUrl: 'cr-select-model-ref.html',
-
-      link: function(scope, elem, attrs) {
-        crCommon.watchUntil(
-          function condition(scope) { return scope.model && scope.schema },
-          function then(scope) {
-            console.log('attrs', attrs);
-            console.log('showattr', attrs.attribute);
-          }
-        );
-      }
-    };
-  });
-  
-  
-  module.directive('crModelRef', function($compile, crCommon) {
-    return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@'
-      },
-
-      replace: true,
-      templateUrl: 'cr-model-ref.html',
-
-      controller: function($scope) {
-
-        var refId = crCommon.getRefId();
-        var self = this;
-        var modelCtrl;
-
-        // events
-        
-        $scope.$on('submit', function(e, ctrl) {
-          e.stopPropagation();
-
-          $scope.subModel = ctrl.getModel();
-          $scope.subFile = ctrl.getFile();
-          $scope.closeModal();
-
-          modelCtrl = ctrl;
+          var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
+                             { mode: 'minimal'});
           
-          // notify parent model
-          $scope.$emit('ref', refId, self);
-        });
+          var link = $compile(tmpl);
+          var content = link(scope);
 
-        $scope.$on('cancel', function(e) {
-          e.stopPropagation();
-          console.log('on cancel');
-        });
-
-        // controller methods
-
-        this.save = function() {
-          return modelCtrl.save();
-        };
-        
-        this.getId = function() {
-          return $scope.model.id;
-        };
-
-        this.setId = function(id) {
-          $scope.model.id = id;
-          modelCtrl.setId(id);
-        };
-
-        this.setParentId = function(id) {
-          modelCtrl.setParentId(id);
-        };
-
-        this.setModel = function(model) {
-          modelCtrl.setModel(model);
-        };
-        
-        this.getModel = function() {
-          return modelCtrl.getModel();
-        };
-      },
-
-      
-      link: function(scope, elem, attrs) {
-
-        scope.modalId = 'model-ref-modal';
-        scope.closeModal = function() {
-          elem.find('.modal').modal('hide');
+          elem.html(content);
         };
         
         crCommon.watchUntil(
-          scope,
-          function condition(scope) { return scope.model && scope.schema; },
-          function then(scope) {
-            if (scope.schema.view.preview) {
-              var tmpl = '<div ' + scope.schema.view.preview + ' model="subModel" file="subFile"/>';
-              var e = $compile(tmpl)(scope);
-              elem.find('.indent').append(e);
-            }
-          }
+          scope, function(scope) { return scope.model && scope.schema; }, init
         );
       }
     };
@@ -1424,8 +1716,6 @@
         
         var mode = tAttrs.mode || 'default';
         var template = $templateCache.get(templates[mode]);
-        // TODO: use replaceWith instead of append, as soon as angular supports it
-        // tElem.replaceWith(template);
         tElem.append(template);
 
         // Linking function
@@ -1443,32 +1733,34 @@
             }
           });
 
+          
+          var init = function(scope) {
+
+            // create templates for properties
+
+            var tmpl = '';
+            angular.forEach(scope.schema.properties, function(subSchema, key) {
+
+              // ignore some keys
+              if (crSchema.isPrivateProperty(key)) return;
+              
+              if (!scope.model.hasOwnProperty(key)) {
+                scope.model[key] = crSchema.createModel(subSchema);
+              }
+
+              scope.numProperties += 1;
+              
+              tmpl += crBuild(subSchema, scope.model[key],
+                              'schema.properties.' + key, 'model.' + key);
+            });
+
+            // compile and link templates
+            var content = $compile(tmpl)(scope);
+            elem.find('.properties').append(content);
+          };
+          
           crCommon.watchUntil(
-            scope,
-            function condition(scope) { return scope.model && scope.schema; },
-            function then(scope) {
-
-              // create templates for properties
-              var tmpl = '';
-              angular.forEach(scope.schema.properties, function(subSchema, key) {
-
-                // ignore some keys
-                if (key === '_id' || key === '_rev' || key === 'type_') return;
-                
-                if (!scope.model.hasOwnProperty(key)) {
-                  scope.model[key] = crSchema.createModel(subSchema);
-                }
-
-                scope.numProperties += 1;
-                
-                tmpl += crBuild(subSchema, scope.model[key],
-                                'schema.properties.' + key, 'model.' + key);
-              });
-
-              // compile and link templates
-              var content = $compile(tmpl)(scope);
-              elem.find('.properties').append(content);
-            }
+            scope, function(scope) { return scope.model && scope.schema; }, init
           );
         };
       }

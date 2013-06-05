@@ -16,9 +16,11 @@ files = [
 
   '../node_modules/chai/chai.js',
 
+  // order matters
+  '../lib/index.js',
   '../lib/templates.js',
-  '../lib/services.js',
-  '../lib/directives.js',
+  '../lib/services/**/*.js',
+  '../lib/directives/**/*.js',
   
   './unit/test.js'
 ];
