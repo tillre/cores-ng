@@ -6,19 +6,11 @@ var url = require('url');
 
 function handlePayload(app, payload, callback) {
 
-  console.log('hhhhhhhhhhhhhhoooooooooooooooooookkkkkkkkkk');
-  console.log('isMultipart', payload.isMultipart);
-  
   if (payload.isMultipart) {
 
     var doc = payload.doc;
-    var file = payload.file;
+    var file = payload.file0;
 
-    doc.hhhhhhhhhhhuuuuu__ = true;
-    
-    console.log('hook doc', doc);
-    console.log('hook file', file);
-    
     // file is a string when testing with fake file data
     if (typeof file === 'string') file = JSON.parse(file);
 
@@ -49,6 +41,5 @@ function handlePayload(app, payload, callback) {
 
 
 module.exports = {
-  create: handlePayload,
   save: handlePayload
 };

@@ -106,10 +106,10 @@ describe('cores', function() {
 
   describe('crResource', function() {
 
-    var res;
+    var articleRes;
     var customId = 'id_' + (new Date().getTime());
     
-    var doc = {
+    var articleDoc = {
       title: 'Hello Article',
       author: { firstname: 'No', lastname: 'Mono' },
       content: 'Bla bla bla'
@@ -117,7 +117,7 @@ describe('cores', function() {
 
     
     it('should create', inject(['crResource'], function(crResource) {
-      res = new crResource('Article', {
+      articleRes = new crResource('Article', {
         path: '/articles',
         schemaPath: '/articles/_schema',
         viewPaths: { titles: '/articles/_views/titles' }
@@ -128,7 +128,7 @@ describe('cores', function() {
 
     
     it('should save without id', inject(true, function(done) {
-      res.save(doc).then(
+      articleRes.save(articleDoc).then(
         function(d) {
           assert(typeof d._id === 'string');
           assert(typeof d._rev === 'string');
@@ -140,9 +140,9 @@ describe('cores', function() {
 
     
     it('should save with id', inject(true, function(done) {
-      var doc2 = JSON.parse(JSON.stringify(doc));
+      var doc2 = JSON.parse(JSON.stringify(articleDoc));
       doc2._id = customId;
-      res.save(doc2).then(
+      articleRes.save(doc2).then(
         function(d) {
           assert(d._id === doc2._id);
           assert(typeof d._rev === 'string');
@@ -154,7 +154,7 @@ describe('cores', function() {
 
 
     it('should load', inject(true, function(done) {
-      res.load(customId).then(
+      articleRes.load(customId).then(
         function(d) {
           assert(d._id === customId);
           done();
@@ -165,7 +165,7 @@ describe('cores', function() {
 
 
     it('should load all', inject(true, function(done) {
-      res.load().then(
+      articleRes.load().then(
         function(res) {
           assert(res.total_rows > 1);
           done();
@@ -176,7 +176,7 @@ describe('cores', function() {
 
 
     it('should load all with params', inject(true, function(done) {
-      res.load({ limit: 1 }).then(
+      articleRes.load({ limit: 1 }).then(
         function(res) {
           assert(res.total_rows > 1);
           assert(res.rows.length === 1);
@@ -188,14 +188,14 @@ describe('cores', function() {
     
     
     it('should load and update', inject(true, function(done) {
-      res.load(customId).then(
+      articleRes.load(customId).then(
         function(d) {
 
           assert(typeof d._id === 'string');
           assert(typeof d._rev === 'string');
           d.title = 'yoyoyo';
 
-          res.save(d).then(
+          articleRes.save(d).then(
             function(d2) {
               assert(d2._id === d._id);
               assert(d2._rev !== d._rev);
@@ -211,7 +211,7 @@ describe('cores', function() {
 
 
     it('should call the view', inject(true, function(done) {
-      res.view('titles').then(
+      articleRes.view('titles').then(
         function(res) {
           assert(res.total_rows > 1);
           done();
@@ -222,7 +222,7 @@ describe('cores', function() {
 
 
     it('should call the view with params', inject(true, function(done) {
-      res.view('titles', { limit: 1 }).then(
+      articleRes.view('titles', { limit: 1 }).then(
         function(res) {
           assert(res.total_rows > 1);
           assert(res.rows.length === 1);
@@ -234,13 +234,13 @@ describe('cores', function() {
 
 
     it('should destroy', inject(true, function(done) {
-      res.load(customId).then(
+      articleRes.load(customId).then(
         function(d) {
-          return res.destroy(d._id, d._rev);
+          return articleRes.destroy(d._id, d._rev);
         }
       ).then(
         function() {
-          return res.load(customId);
+          return articleRes.load(customId);
         }
       ).then(
         function() {
@@ -256,7 +256,7 @@ describe('cores', function() {
     
     describe('multipart', function() {
 
-      var doc = {
+      var imageDoc = {
         _id: 'multipart_' + (new Date().getTime()),
         title: 'Some image',
         file: { name: 'test.jpg', url: '' }
@@ -270,7 +270,7 @@ describe('cores', function() {
 
       
       it('should save multipart data', inject(['crResources'], true, function(crResources, done) {
-        crResources.get('Image').save(doc, file).then(
+        crResources.get('Image').save(imageDoc, file).then(
           function(doc) {
             assert(doc);
             done();
@@ -282,8 +282,7 @@ describe('cores', function() {
       
       it('should update multipart data', inject(['crResources'], true, function(crResources, done) {
         var res = crResources.get('Image');
-
-        res.load(doc._id).then(
+        res.load(imageDoc._id).then(
           function(doc) {
             doc.title = 'Im Multiman';
 
@@ -299,32 +298,122 @@ describe('cores', function() {
         );
       }));
 
-      // ////////////////////////////////////////
-      // TODO !!! multiple files 
-      // ////////////////////////////////////////
-      
-      
-      // it('should save multiple files', inject(['crResources'], true, function(crResources, done) {
-      //   var doc2 = JSON.parse(JSON.stringify(doc));
-      //   doc2._id += 2;
-      //   var files = [file, file];
 
-      //   res.save(doc2, files).then(
-      //     function(res) {
-      //       console.log(res);
-      //     },
-      //     done
-      //   );
-      // }));
+      it('should save multiple files', inject(['crResources'], true, function(crResources, done) {
+        var doc = {
+          file0: '',
+          file1: ''
+        };
+        var files = [file, file];
+
+        crResources.get('Files').save(doc, files).then(
+          function(doc) {
+            assert(doc.file0 === 'foo.jpg');
+            assert(doc.file1 === 'foo.jpg');
+            done();
+          },
+          done
+        );
+      }));
     });
   });
 
 
-  
+  describe('crModelCtrl', function() {
+
+    
+    
+  });
 
 
   describe('directives', function() {
 
+
+    var types = ['Boolean', 'Integer', 'Number', 'String',
+                 'Enum', 'Object', 'Array', 'Anyof'];
+    
+    types.forEach(function(type) {
+
+      it('should create directive ' + type, inject(['$compile', '$rootScope', 'crResources', 'crSchema'], true, function($compile, $rootScope, crResources, crSchema, done) {
+
+        var self = this;
+        var res = crResources.get(type);
+        
+        res.schema().then(
+          // get the schema
+          function(schema) {
+            return crSchema.createModel(schema);
+          }
+        ).then(
+          // save a default model
+          function(model) {
+            return res.save(model);
+          }
+        ).then(
+          // create the directive
+          function(doc) {
+
+            var scope = $rootScope.$new();
+            scope.id = doc._id;
+            scope.type = doc.type_;
+
+            var elem = angular.element('<div cr-model type="type" id="id"/>');
+            $compile(elem)(scope);
+
+            $('body').append(elem);
+            $('body').append($('<hr>'));
+
+            // wait for ready event
+            var offready = scope.$on('ready', function(e) {
+              e.stopPropagation(); 
+              offready();
+              done();
+            });
+          },
+          // function(err) { console.log('ERRROR', type, err); }
+          done
+        );
+        
+      }));
+    });
+
+
+    
+    // var testData = [];
+
+    // before(inject(['$q', 'crResources', 'crSchema'], true, function($q, crResources, crSchema, done) {
+
+    //   // create default models for all types
+
+    //   var resources = crResources.resources();
+    //   var schemas = {};
+    //   var dirRes = ['Boolean', 'Integer', 'Number', 'String',
+    //                 'Enum', 'Object', 'Array', 'Anyof'];
+
+    //   $q.all(dirRes.map(function(key) {
+    //     // get schemas
+    //     return resources[key].schema().then(
+    //       function(schema) { schemas[key] = schema; }
+    //     );
+    //   })).then(
+    //     function() {
+    //       // create a model for each schema
+    //       return $q.all(dirRes.map(function(key) {
+    //         return resources[key].save(crSchema.createModel(schemas[key])).then(
+    //           function(doc) {
+    //             testData.push({ type: key, id: doc._id });
+    //           }
+    //         );
+    //       }));
+    //     }
+    //   ).then(
+    //     function() { done(); },
+    //     done
+    //   );
+    // }));
+    // });
+    
+    
     return;
     
     function buildFromSchema(type, model, callback) {
@@ -432,33 +521,3 @@ describe('cores', function() {
     
   });
 });
-
-
-//     // it('should build image form', function(done) {
-//     //   cores.getResource('Image').schema().then(
-//     //     function(schema) {
-//     //       buildFromSchema(schema, function(scope, elem) {
-//     //         console.log(elem[0]);
-//     //         done();
-//     //       });
-//     //     },
-//     //     done
-//     //   );
-//     //   // buildFromSchema(
-//     //   //   { properties: {
-//     //   //     file: {
-//     //   //       view: 'image',
-//     //   //       properties: {
-//     //   //         name: { type: 'string' },
-//     //   //         url: { type: 'string' }
-//     //   //       }
-//     //   //     }
-//     //   //   }},
-//     //   //   function(scope, elem) {
-//     //   //     console.log(elem[0]);
-//     //   //     done();
-//     //   //   }
-//     //   // );
-//     // });
-
-
