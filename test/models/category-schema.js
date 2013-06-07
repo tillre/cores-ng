@@ -8,4 +8,4 @@ module.exports = js.object({
   foo: js.ref('Foo').custom('view', { type: 'model-select-ref' }),
   bar: js.ref('Foo').custom('view', { type: 'model-create-ref' })
   
-}).required(['title', 'slug']);
+}).required(['title']);

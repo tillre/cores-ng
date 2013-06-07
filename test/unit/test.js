@@ -62,6 +62,30 @@ describe('cores', function() {
   };
 
 
+  describe('crCommon', function() {
+
+    it('should get ids', inject(['crCommon'], function(crCommon) {
+      assert(crCommon.getFileId() !== crCommon.getFileId());
+      assert(crCommon.getRefId() !== crCommon.getRefId());
+      assert(crCommon.getModalId() !== crCommon.getModalId());
+    }));
+
+    it('should watch until condition is met',
+       inject(['$rootScope', 'crCommon'], true, function($rootScope, crCommon, done) {
+
+         var scope = $rootScope.$new();
+         crCommon.watch(scope, function(scope) {
+           return scope.value;
+         }).then(
+           function(scope) { done(); }
+         );
+         scope.value = true;
+       }));
+
+    
+  });
+  
+
   describe('crResources', function() {
 
     it('should init', inject(['crResources'], true, function(crResources, done) {
@@ -107,7 +131,7 @@ describe('cores', function() {
   describe('crResource', function() {
 
     var articleRes;
-    var customId = 'id_' + (new Date().getTime());
+    var articleId = 'resource_' + (new Date().getTime());
     
     var articleDoc = {
       title: 'Hello Article',
@@ -141,7 +165,7 @@ describe('cores', function() {
     
     it('should save with id', inject(true, function(done) {
       var doc2 = JSON.parse(JSON.stringify(articleDoc));
-      doc2._id = customId;
+      doc2._id = articleId;
       articleRes.save(doc2).then(
         function(d) {
           assert(d._id === doc2._id);
@@ -154,9 +178,9 @@ describe('cores', function() {
 
 
     it('should load', inject(true, function(done) {
-      articleRes.load(customId).then(
+      articleRes.load(articleId).then(
         function(d) {
-          assert(d._id === customId);
+          assert(d._id === articleId);
           done();
         },
         done
@@ -188,7 +212,7 @@ describe('cores', function() {
     
     
     it('should load and update', inject(true, function(done) {
-      articleRes.load(customId).then(
+      articleRes.load(articleId).then(
         function(d) {
 
           assert(typeof d._id === 'string');
@@ -234,13 +258,13 @@ describe('cores', function() {
 
 
     it('should destroy', inject(true, function(done) {
-      articleRes.load(customId).then(
+      articleRes.load(articleId).then(
         function(d) {
           return articleRes.destroy(d._id, d._rev);
         }
       ).then(
         function() {
-          return articleRes.load(customId);
+          return articleRes.load(articleId);
         }
       ).then(
         function() {
@@ -321,8 +345,145 @@ describe('cores', function() {
 
   describe('crModelCtrl', function() {
 
+    var catDoc = {
+      _id: 'model_' + (new Date().getTime()),
+      title: 'Hello Model',
+      slug: 'hello'
+    };
+    
+    var createCtrl = function($rootScope, $controller, type, id) {
+
+      var scope = $rootScope.$new();
+      scope.type = type;
+      if (id) scope.id = id;
+
+      return $controller('crModelCtrl', { $scope: scope });
+    };
+
+    before(inject(['crResources'], true, function(crResources, done) {
+      crResources.get('Category').save(catDoc).then(
+        function(doc) { done(); },
+        done
+      );
+    }));
     
     
+    it('should instantiate',
+       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+         var ctrl = createCtrl($rootScope, $controller, 'Category');
+         assert(ctrl);
+
+         $rootScope.$on('model:ready', function() {
+           done();
+         });
+       }));
+
+
+    it('should instantiate with id',
+       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+         var ctrl = createCtrl($rootScope, $controller, 'Category', catDoc._id);
+         assert(ctrl);
+
+         var off = $rootScope.$on('model:ready', function() {
+           off();
+           assert(ctrl.scope().model.title === 'Hello Model');
+           done();
+         });
+       }));
+
+
+    it('should save',
+       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+         var ctrl = createCtrl($rootScope, $controller, 'Category');
+
+         var off = $rootScope.$on('model:ready', function() {
+           off();
+
+           var model = ctrl.scope().model;
+           model.title = 'Hello Mate';
+           model.author = { firstname: 'Hot', lastname: 'Sauce' };
+           model.content = 'Cherrio';
+
+           ctrl.save().then(
+             function() {
+               done();
+             },
+             done
+           );
+         });
+       }));
+
+    it('should update',
+       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+         var ctrl = createCtrl($rootScope, $controller, 'Category', catDoc._id);
+
+         var off = $rootScope.$on('model:ready', function() {
+           off();
+
+           var model = ctrl.scope().model;
+           model.title = 'Hello Update';
+
+           ctrl.save().then(
+             function() {
+               assert(ctrl.scope().model.title === 'Hello Update');
+               done();
+             },
+             done
+           );
+         });
+       }));
+
+    it('should save and update with referenced model',
+       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+         var ctrl1 = createCtrl($rootScope, $controller, 'Category');
+         var ctrl2 = createCtrl($rootScope, $controller, 'Category');
+
+         var rev1, rev2;
+         
+         var count = 2;
+         var off = $rootScope.$on('model:ready', function(e) {
+           e.stopPropagation();
+           if (--count > 0) {
+             return;
+           }
+           off();
+
+           ctrl1.id('model_ref_1_' + new Date().getTime());
+           ctrl2.id('model_ref_2_' + new Date().getTime());
+           ctrl1.scope().model.title = 'Cat1';
+           ctrl2.scope().model.title = 'Cat2';
+
+           ctrl1.onRefSet({ stopPropagation: function() {} }, 'r1', ctrl2);
+
+           ctrl1.save().then(
+             function() {
+               assert(ctrl2.scope().model.parentId_ === ctrl1.id());
+               // update
+               ctrl1.scope().model.title = 'Cat1U';
+               ctrl2.scope().model.title = 'Cat2U';
+               rev1 = ctrl1.scope().model._rev;
+               rev2 = ctrl1.scope().model._rev;
+               return ctrl1.save();
+             }
+           ).then(
+             function() {
+               assert(ctrl1.scope().model._rev !== rev1);
+               assert(ctrl2.scope().model._rev !== rev2);
+               done();
+             },
+             done
+           );
+         });
+       }));
+
+    // //////////////////////////////////////////////////
+    // TODO test model with files
+    // //////////////////////////////////////////////////
   });
 
 
@@ -370,154 +531,9 @@ describe('cores', function() {
               done();
             });
           },
-          // function(err) { console.log('ERRROR', type, err); }
           done
         );
-        
       }));
     });
-
-
-    
-    // var testData = [];
-
-    // before(inject(['$q', 'crResources', 'crSchema'], true, function($q, crResources, crSchema, done) {
-
-    //   // create default models for all types
-
-    //   var resources = crResources.resources();
-    //   var schemas = {};
-    //   var dirRes = ['Boolean', 'Integer', 'Number', 'String',
-    //                 'Enum', 'Object', 'Array', 'Anyof'];
-
-    //   $q.all(dirRes.map(function(key) {
-    //     // get schemas
-    //     return resources[key].schema().then(
-    //       function(schema) { schemas[key] = schema; }
-    //     );
-    //   })).then(
-    //     function() {
-    //       // create a model for each schema
-    //       return $q.all(dirRes.map(function(key) {
-    //         return resources[key].save(crSchema.createModel(schemas[key])).then(
-    //           function(doc) {
-    //             testData.push({ type: key, id: doc._id });
-    //           }
-    //         );
-    //       }));
-    //     }
-    //   ).then(
-    //     function() { done(); },
-    //     done
-    //   );
-    // }));
-    // });
-    
-    
-    return;
-    
-    function buildFromSchema(type, model, callback) {
-
-      if (typeof model === 'function') {
-        callback = model;
-        model = null;
-      }
-      
-      injector.invoke(function($rootScope, $compile, cores) {
-        var scope = $rootScope.$new();
-        if (model) {
-          scope.model = model;
-        }
-        var elem = angular.element('<div cr-model type="' + type + '" model="model"/>');
-        
-        $compile(elem)(scope);
-        scope.$apply();
-
-        $('body').append(elem);
-        $('body').append($('<hr>'));
-
-        var offready = scope.$on('ready', function() {
-          offready();
-          callback(scope, elem);
-        });
-      });
-    }
-
-    
-    it('should build boolean input', function(done) {
-      buildFromSchema('Boolean', function(scope, elem) {
-        assert(elem.find('input[type="checkbox"]').length === 1);
-        done();
-      });
-    });
-
-    
-    it('should build integer input', function(done) {
-      buildFromSchema('Integer', function(scope, elem) {
-        assert(elem.find('input[type="number"]').length === 1);
-        done();
-      });
-    });
-
-    
-    it('should build number input', function(done) {
-      buildFromSchema('Number', function(scope, elem) {
-        assert(elem.find('input[type="number"]').length === 1);
-        done();
-      });
-    });
-
-    
-    it('should build string input', function(done) {
-      buildFromSchema('String', function(scope, elem) {
-        assert(elem.find('input[type="text"]').length === 1);
-        done();
-      });
-    });
-
-    
-    it('should build enum form', function(done) {
-      buildFromSchema('Enum', function(scope, elem) {
-        assert(elem.find('select').length === 1);
-        done();
-      });
-    });
-
-    
-    it('should build object form', function(done) {
-      buildFromSchema(
-        'Object',
-        function(scope, elem) {
-          assert(elem.find('input[type="text"]').length === 1);
-          assert(elem.find('input[type="number"]').length === 1);
-          done();
-        });
-    });
-
-    it('should build array form', function(done) {
-      buildFromSchema(
-        'Array',
-        { foo: [ {bar:'a'}, {bar:'b'}, {bar:'c'} ] },
-
-        function(scope, elem) {
-          assert(elem.find('ul').length === 1);
-          done();
-        }
-      );
-    });
-
-    
-    it('should build anyOf array', function(done) {
-      buildFromSchema(
-        'Anyof',
-        [ { type_: 'one', foo: 'hello' }, { type_: 'two', bar: 42 }],
-
-        function(scope, elem) {
-          assert(elem.find('ul'));
-          done();
-        }
-      );
-    });
-    
   });
 });
