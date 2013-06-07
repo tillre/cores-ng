@@ -81,7 +81,19 @@ describe('cores', function() {
          );
          scope.value = true;
        }));
+  });
 
+
+  describe('crBuild', function() {
+
+    // var types = [
+    //   { schema: { type: 'boolean' }, expect: 'cr-boolean' },
+    //   { schema: { type: 'number' }, expect: 'cr-number' },
+    //   { schema: { type: 'integer' }, expect: 'cr-integer' },
+    //   { schema: { type: 'string' }, expect: 'cr-string' },
+    // ];
+
+    // TODO test it !!!
     
   });
   
@@ -437,6 +449,7 @@ describe('cores', function() {
          });
        }));
 
+    
     it('should save and update with referenced model',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
@@ -447,7 +460,6 @@ describe('cores', function() {
          
          var count = 2;
          var off = $rootScope.$on('model:ready', function(e) {
-           e.stopPropagation();
            if (--count > 0) {
              return;
            }
@@ -481,9 +493,32 @@ describe('cores', function() {
          });
        }));
 
-    // //////////////////////////////////////////////////
-    // TODO test model with files
-    // //////////////////////////////////////////////////
+
+    it('should save with files',
+       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+         var ctrl = createCtrl($rootScope, $controller, 'Image');
+
+         var file = JSON.stringify({
+           name: 'foo.jpg',
+           path: '/upload/foo.jpg',
+           isTest: true
+         });
+
+         var off = $rootScope.$on('model:ready', function(e) {
+           off();
+
+           ctrl.onFileSet({ stopPropagation: function() {} }, 'f1', file);
+
+           ctrl.save().then(
+             function() {
+               assert(ctrl.scope().model.file.url === JSON.parse(file).path);
+               done();
+             },
+             done
+           );
+         });
+       }));
   });
 
 
