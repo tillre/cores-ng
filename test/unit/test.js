@@ -86,15 +86,26 @@ describe('cores', function() {
 
   describe('crBuild', function() {
 
-    // var types = [
-    //   { schema: { type: 'boolean' }, expect: 'cr-boolean' },
-    //   { schema: { type: 'number' }, expect: 'cr-number' },
-    //   { schema: { type: 'integer' }, expect: 'cr-integer' },
-    //   { schema: { type: 'string' }, expect: 'cr-string' },
-    // ];
+    var types = [
+      { schema: { type: 'boolean' }, attr: 'cr-boolean' },
+      { schema: { type: 'number' }, attr: 'cr-number' },
+      { schema: { type: 'integer' }, attr: 'cr-integer' },
+      { schema: { type: 'string' }, attr: 'cr-string' },
+      { schema: { 'enum': [1, 2] }, attr: 'cr-enum' },
+      { schema: { $ref: 'Foo' }, attr: 'cr-model-create-ref' },
+      { schema: { type: 'object' }, attr: 'cr-object' },
+      { schema: { type: 'array' }, attr: 'cr-array' },
+      { schema: { type: 'array', items: { anyOf: [] } }, attr: 'cr-anyof-array' }
+    ];
 
-    // TODO test it !!!
-    
+    types.forEach(function(data) {
+
+      it('should build element ' + data.attr, inject(['crBuild'], function(crBuild) {
+        var tmpl = crBuild(data.schema);
+        var elem = $(tmpl);
+        assert(typeof elem.attr(data.attr) !== 'undefined');
+      }));
+    });
   });
   
 
