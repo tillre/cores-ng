@@ -84,6 +84,89 @@ describe('cores', function() {
   });
 
 
+  describe('crSchema', function() {
+
+    var types = [
+      { name: 'boolean',
+        schema: { type: 'boolean' },
+        value: true },
+      { name: 'boolean default',
+        schema: { type: 'boolean', default: false },
+        value: false },
+      { name: 'number',
+        schema: { type: 'number' },
+        value: 0 },
+      { name: 'number default',
+        schema: { type: 'number', default: 1.1 },
+        value: 1.1 },
+      { name: 'integer',
+        schema: { type: 'integer' },
+        value: 0 },
+      { name: 'string',
+        schema: { type: 'string' },
+        value: '' },
+      { name: 'string default',
+        schema: { type: 'string', default: 'hello' },
+        value: 'hello' },
+      { name: 'enum',
+        schema: { 'enum': [1, 2] },
+        value: 1 },
+      { name: 'enum default',
+        schema: { 'enum': [1, 2], default: 2 },
+        value: 2 },
+      { name: 'ref',
+        schema: { $ref: 'Foo' },
+        value: {} },
+      { name: 'ref default',
+        schema: { $ref: 'Foo', default: { id: 'bar'} },
+        value: { id: 'bar' } },
+      { name: 'object',
+        schema: { type: 'object' },
+        value: {} },
+      { name: 'object default',
+        schema: { type: 'object', default: { foo: 'bar' } },
+        value: { foo: 'bar'} },
+      { name: 'object properties',
+        schema: { type: 'object', properties: { foo: { type: 'string' } } },
+        value: { foo: '' } },
+      { name: 'array',
+        schema: { type: 'array' },
+        value: [] },
+      { name: 'array default',
+        schema: { type: 'array', default: [1, 2], value: [1, 2] },
+        value: [1, 2] },
+      { name: 'anyof',
+        schema: { type: 'array', items: { anyOf: [] } },
+        value: [] }
+    ];
+
+    types.forEach(function(type) {
+
+      it('should create value', inject(['crSchema'], function(crSchema) {
+        assert(JSON.stringify(crSchema.createValue(type.schema)) === JSON.stringify(type.value));
+      }));
+    });
+
+    it('should recoginze private property on schemas', inject(['crSchema'], function(crSchema) {
+      assert(crSchema.isPrivateProperty('_id'));
+      assert(crSchema.isPrivateProperty('_rev'));
+      assert(crSchema.isPrivateProperty('type_'));
+      assert(crSchema.isPrivateProperty('parentId_'));
+      assert(crSchema.isPrivateProperty('foo') === false);
+    }));
+
+    it('should recognize array schema', inject(['crSchema'], function(crSchema) {
+      assert(crSchema.isArraySchema({ type: 'array' }));
+      assert(crSchema.isArraySchema({ items: { type: 'string' } }));
+    }));
+
+    it('should recognize object schema', inject(['crSchema'], function(crSchema) {
+      assert(crSchema.isObjectSchema({ type: 'object' }));
+      assert(crSchema.isObjectSchema({ properties: { foo: { type: 'number' } } }));
+    }));
+  });
+  
+
   describe('crBuild', function() {
 
     var types = [
@@ -549,7 +632,7 @@ describe('cores', function() {
         res.schema().then(
           // get the schema
           function(schema) {
-            return crSchema.createModel(schema);
+            return crSchema.createValue(schema);
           }
         ).then(
           // save a default model
