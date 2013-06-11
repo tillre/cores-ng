@@ -620,21 +620,106 @@ describe('cores', function() {
 
   describe('directives', function() {
 
+    var tests = [
 
-    var types = ['Boolean', 'Integer', 'Number', 'String',
-                 'Enum', 'Object', 'Array', 'Anyof'];
+      // Standard
+      
+      {
+        type: 'Boolean',
+        validate: function(schema, elem, done) {
+          assert(elem.find('input[type="checkbox"]').length);
+          done();
+        }
+      },
+      {
+        type: 'Integer',
+        validate: function(schema, elem, done) {
+          assert(elem.find('input[type="number"]').length);
+          done();
+        }
+      },
+      {
+        type: 'Number',
+        validate: function(schema, elem, done) {
+          assert(elem.find('input[type="number"]').length);
+          done();
+        }
+      },
+      {
+        type: 'String',
+        validate: function(schema, elem, done) {
+          assert(schema, elem.find('input[type="text"]').length);
+          done();
+        }
+      },      {
+        type: 'Enum',
+        validate: function(schema, elem, done) {
+          assert(elem.find('select').length);
+          done();
+        }
+      },      {
+        type: 'Object',
+        validate: function(schema, elem, done) {
+          assert(elem.find('.properties').find('input').length ===
+                 Object.keys(schema.properties.foo.properties).length);
+          done();
+        }
+      },      {
+        type: 'Array',
+        validate: function(schema, elem, done) {
+          assert(elem.find('ul').length);
+          done();
+        }
+      },      {
+        type: 'Anyof',
+        validate: function(schema, elem, done) {
+          assert(elem.find('ul').length);
+          done();
+        }
+      },
+
+      // Custom
+
+      {
+        type: 'Image',
+        validate: function(schema, elem, done) {
+          assert(elem.find('input[type="file"]').length);
+          done();
+        }
+      },
+      {
+        type: 'Text',
+        validate: function(schema, elem, done) {
+          assert(elem.find('textarea').length);
+          done();
+        }
+      },
+
+      // Complex
+
+      {
+        type: 'Complex',
+        validate: function(schema, elem, done) {
+          // assert(elem.find('textarea').length);
+          done();
+        }
+      }
+    ];
     
-    types.forEach(function(type) {
 
-      it('should create directive ' + type, inject(['$compile', '$rootScope', 'crResources', 'crSchema'], true, function($compile, $rootScope, crResources, crSchema, done) {
+    tests.forEach(function(test) {
+
+      it('should create directive ' + test.type, inject(['$compile', '$rootScope', 'crResources', 'crSchema'], true, function($compile, $rootScope, crResources, crSchema, done) {
 
         var self = this;
-        var res = crResources.get(type);
+        var res = crResources.get(test.type);
+        var schema;
         
         res.schema().then(
           // get the schema
-          function(schema) {
-            return crSchema.createValue(schema);
+          function(s) {
+            schema = s;
+            return crSchema.createValue(s);
           }
         ).then(
           // save a default model
@@ -659,7 +744,8 @@ describe('cores', function() {
             var offready = scope.$on('ready', function(e) {
               e.stopPropagation(); 
               offready();
-              done();
+
+              test.validate(schema, elem, done);
             });
           },
           done

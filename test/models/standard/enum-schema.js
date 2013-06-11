@@ -1,5 +1,5 @@
 module.exports = {
   properties: {
-    foo: { 'enum': ['a', 'b', 'c'] }
+    foo: { 'enum': [1, 2, 3] }
   }
 };
