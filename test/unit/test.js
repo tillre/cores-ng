@@ -559,8 +559,8 @@ describe('cores', function() {
            }
            off();
 
-           ctrl1.id('model_ref_1_' + new Date().getTime() + Math.floor(Math.random() * 999));
-           ctrl2.id('model_ref_2_' + new Date().getTime() + Math.floor(Math.random() * 999));
+           ctrl1.id('model_ref_1_' + new Date().getTime());
+           ctrl2.id('model_ref_2_' + new Date().getTime());
 
            ctrl1.scope().model.title = 'Cat1';
            ctrl2.scope().model.title = 'Cat2';

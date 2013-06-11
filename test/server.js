@@ -98,6 +98,7 @@ module.exports = function(db, callback) {
 
     server.start();
     console.log('started server on port:', port);
+    // console.log('routing:\n', server.routingTable());
     callback(server);
   });
 
