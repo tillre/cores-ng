@@ -21,10 +21,6 @@
                   'cores.services',
                   'cores.templates']);
 
-  angular.module('cores').factory('crInit', function(crResource) {
-    // return the index loading promise
-    return crResource.index();
-  });
 })();
 (function() {
 
@@ -286,27 +282,6 @@
 
 
   //
-  // build the html element for the type
-  //
-  
-  function buildElement(type, schemaPath, modelPath, name, options) {
-    var e = '<div' +
-          ' cr-' + type +
-          ' schema="' + schemaPath + '"' +
-          ' model="' + modelPath + '"' +
-          ' name="' + name + '"';
-
-    angular.forEach(options, function(value, key) {
-      e += ' ' + key + '="' + value + '"';
-    });
-    
-    e += '/>';
-
-    return e;
-  }
-  
-
-  //
   // Create a template for a schema with optional view configuration
   // 
   
@@ -326,14 +301,16 @@
     }
 
     // handle extended types
-    
-    if (schema.enum) {
+
+    if (schema.hasOwnProperty('enum')) {
       viewType = 'enum';
     }
-    else if (schema.$ref) {
+    else if (schema.hasOwnProperty('$ref')) {
       viewType = 'model-create-ref';
     }
-    else if (viewType === 'array' && schema.items.anyOf) {
+    else if (viewType === 'array' &&
+             schema.hasOwnProperty('items') &&
+             schema.items.anyOf) {
       viewType = 'anyof-array';
     }
     
@@ -359,6 +336,27 @@
     }
 
     return buildElement(viewType, schemaPath, modelPath, viewName, options);
+  }
+
+  
+  //
+  // build the html element for the type
+  //
+  
+  function buildElement(type, schemaPath, modelPath, name, options) {
+    var e = '<div' +
+          ' cr-' + type +
+          ' schema="' + schemaPath + '"' +
+          ' model="' + modelPath + '"' +
+          ' name="' + name + '"';
+
+    angular.forEach(options, function(value, key) {
+      e += ' ' + key + '="' + value + '"';
+    });
+    
+    e += '/>';
+
+    return e;
   }
 
   
@@ -399,18 +397,6 @@
     return function() { return 'modal-' + ++id; };
   })(0);
 
-  
-  // watch the scope for changes until condition() returns true and call then()
-
-  function watchUntil(scope, condition, then) {
-    var unwatch = scope.$watch(function(scope) {
-      if (condition(scope)) {
-        unwatch();
-        then(scope);
-      }
-    });
-  }
-
 
   function StandardCtrl($scope) {
     var unwatch = $scope.$watch('model', function stdWatch() {
@@ -418,15 +404,29 @@
       $scope.$emit('ready');
     });
   }
+
+
   
   
-  module.service('crCommon', function() {
+  module.service('crCommon', function($q) {
+
+    function watchUntil(scope, condition) {
+      var def = $q.defer();
+      var off = scope.$watch(function(scope) {
+        if (condition(scope)) {
+          off();
+          def.resolve(scope);
+        }
+      });
+      return def.promise;
+    }
+
     return {
       getFileId: getFileId,
       getRefId: getRefId,
       getModalId: getModalId,
 
-      watchUntil: watchUntil,
+      watch: watchUntil,
       
       StandardCtrl: StandardCtrl
     };
@@ -437,37 +437,37 @@
 
   var module = angular.module('cores.services');
 
+  //
+  // Create an error object from a response
+  //
+
+  function makeError(response) {
+
+    var msg = response.msg || '';
+    if (!msg && response.data) {
+      msg = response.data.message || response.data.error;
+    }
+
+    var err = new Error(msg);
+    err.code = response.code || response.status;
+
+    if (response.config) {
+      err.config = response.config;
+    }
+
+    if (response.data && response.data.errors) {
+      err.errors = response.data.errors;
+    }
+
+    return err;
+  };
+
+
+  //
+  // crResource
+  //
   
-  module.service('crResource', function($http, $q, $rootScope) {
-
-    //
-    // Create an error object from a response
-    //
-
-    function makeError(response) {
-
-      var msg = response.msg || '';
-      if (!msg && response.data) {
-        msg = response.data.message || response.data.error;
-      }
-      
-      var err = new Error(msg);
-      err.code = response.code || response.status;
-
-      if (response.config) {
-        err.config = response.config;
-      }
-
-      if (response.errors) {
-        err.errors = response.errors;
-      }
-      return err;
-    };
-
-    
-    //
-    // Resource class
-    //
+  module.factory('crResource', function($http, $q, $rootScope) {
 
     var Resource = function(type, config, options) {
 
@@ -495,13 +495,10 @@
     
     Resource.prototype.schema = function() {
 
-      var def = $q.defer();
-
-      $http.get(this.host + this.schemaPath).then(
-        function(res) { def.resolve(res.data); },
-        function(res) { def.reject(makeError(res)); }
+      return $http.get(this.host + this.schemaPath).then(
+        function(res) { return res.data; },
+        function(res) { throw makeError(res); }
       );
-      return def.promise;
     };
 
     
@@ -523,13 +520,11 @@
         }
       }
       var config = { params: params || {} };
-      var def = $q.defer();
 
-      $http.get(path, config).then(
-        function(res) { def.resolve(res.data); },
-        function(res) { def.reject(makeError(res)); }
+      return $http.get(path, config).then(
+        function(res) { return res.data; },
+        function(res) { throw makeError(res); }
       );
-      return def.promise;
     };
 
     
@@ -537,24 +532,32 @@
     // Save/update a resource on the server
     //
     
-    Resource.prototype.save = function(doc, file) {
+    Resource.prototype.save = function(doc, files) {
 
-      // var def = $q.defer();
-
+      if (files && !angular.isArray(files)) {
+        files = [files];
+      }
+      var isMultipart = false;
+      
       // create multipart formdata when saving files
 
-      if (file) {
-        console.log('creating multipart data');
+      if (files && files.length) {
         var fd = new FormData();
         fd.append('type_', this.type);
         fd.append('doc', JSON.stringify(doc));
-        fd.append('file', file);
+        // fd.append('file', file);
+
+        files.forEach(function(file, i) {
+          fd.append('file' + i, file);
+        });
+        fd.append('numFiles', files.length);
 
         // when updating, add the id and rev
         if (doc._id)  fd.append('_id', doc._id);
         if (doc._rev) fd.append('_rev', doc._ref);
 
         doc = fd;
+        isMultipart = true;
       }
 
       var req  = {
@@ -563,104 +566,68 @@
         data: doc
       };
 
-      if (doc._id) {
+
+      if (doc._id && doc._rev) {
+        // update
+        req.method = 'PUT';
+        req.url += '/' + doc._id + '/' + doc._rev;
+      }
+      else if (doc._id) {
+        // new with id
         req.method = 'PUT';
         req.url += '/' + doc._id;
       }
-      if (doc._rev) {
-        req.url += '/' + doc._rev;
+
+      if (isMultipart) {
+        return this._sendMultipart(req);
       }
-      if (file) {
-        req.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+      else {
+        return $http(req).then(
+          function(res) { return res.data; },
+          function(res) { throw makeError(res); }
+        );
       }
-
-      return $http(req).then(
-        function(res) { return res.data; },
-        function(res) { return makeError(res); }
-      );
-      
-      // if (doc._id && doc._rev) {
-      //   // update
-      //   console.log('save update', doc._id, doc._rev);
-      //   $http.put(this.host + this.path + '/' + doc._id + '/' + doc._rev, doc).then(
-      //     function(res) { def.resolve(res.data); },
-      //     function(res) { def.reject(makeError(res)); }
-      //   );
-      // }
-      // else if (doc._id) {
-      //   // save with id
-      //   console.log('save new', doc._id);
-      //   $http.put(this.host + this.path + '/' + doc._id, doc).then(
-      //     function(res) { def.resolve(res.data); },
-      //     function(res) { def.reject(makeError(res)); }
-      //   );
-      // }
-      // else {
-      //   // post without id
-      //   console.log('save new');
-      //   $http.post(this.host + this.path, doc).then(
-      //     function(res) { def.resolve(res.data); },
-      //     function(res) { def.reject(makeError(res.data)); }
-      //   );
-      // }
-      // if (doc._id && doc._rev) {
-
-      //   // update
-        
-      //   $http.put(this.host + this.path + '/' + doc._id + '/' + doc._rev, doc).then(
-      //     function(res) { def.resolve(res.data); },
-      //     function(res) { def.reject(makeError(res)); }
-      //   );
-      // }
-      // else {
-
-      //   // create
-
-      //   if (doc instanceof FormData) {
-
-      //     // send multipart with a xhr for now, $http seems to have problems with it
-      //     var xhr = new XMLHttpRequest();
-
-      //     xhr.addEventListener('load', function() {
-
-      //       var data = typeof xhr.response === 'string' ? JSON.parse(xhr.response) : xhr.response;
-
-      //       if (xhr.status === 200) {
-      //         def.resolve(data);
-      //       }
-      //       else {
-      //         def.reject(makeError(data));
-      //       }
-      //       // call apply, because we are outside the angular life-cycle
-      //       $rootScope.$apply();
-      //     });
-
-      //     xhr.open('POST', this.host + this.path);
-      //     xhr.send(doc);
-      //   }
-      //   else {
-      //     $http.post(this.host + this.path, doc).then(
-      //       function(res) { def.resolve(res.data); },
-      //       function(res) { def.reject(makeError(res.data)); }
-      //     );
-      //   }
-      // }
-      return def.promise;
     };
 
 
+    Resource.prototype._sendMultipart = function(req) {
+
+      var def = $q.defer();
+      
+      // send multipart with a xhr for now, $http seems to have problems with it
+      var xhr = new XMLHttpRequest();
+
+      xhr.addEventListener('load', function() {
+
+        var data = typeof xhr.response === 'string' ? JSON.parse(xhr.response) : xhr.response;
+
+        if (xhr.status === 200) {
+          def.resolve(data);
+        }
+        else {
+          def.reject(makeError(data));
+        }
+        // call apply, because we are outside the angular life-cycle
+        $rootScope.$apply();
+      });
+
+      xhr.open(req.method, req.url);
+      xhr.send(req.data);
+
+      return def.promise;
+    };
+
+    
     //
     // Delete a resource on the server
     //
     
     Resource.prototype.destroy = function(doc) {
 
-      var def = $q.defer();
-      $http.delete(this.host + this.path + '/' + doc._id + '/' + doc._rev).then(
-        function(res) { def.resolve(); },
-        function(res) { def.reject(makeError(res)); }
+      return $http.delete(this.host + this.path + '/' + doc._id + '/' + doc._rev).then(
+        function(res) {},
+        function(res) { throw makeError(res); }
       );
-      return def.promise;
     };
 
 
@@ -680,170 +647,81 @@
         params: params || {}
       };
 
-      var def = $q.defer();
-      $http.get(path, config).then(
-        function(res) { def.resolve(res.data); },
-        function(res) { def.reject(makeError(res)); }
+      return $http.get(path, config).then(
+        function(res) { return res.data; },
+        function(res) { throw makeError(res); }
       );
-      return def.promise;
     };
 
-    
-    //
-    // internal module state
-    //
+    return Resource;
+  });
 
-    var internal = {
-      resources: {},
-      host: ''
+
+  //
+  // crResource
+  //
+  
+  module.service('crResources', function($http, $q, $rootScope, crResource) {
+
+
+    var Resources = function() {
+
+      this._resources = {};
+      this._host = '';
     };
 
-    
-    //
-    // loads model config(urls) and create resources from it
-    //
 
-    function loadIndex(host) {
+    Resources.prototype.init = function(host) {
 
-      internal.host = host || '';
-      
-      var def = $q.defer();
+      this._host = host || '';
+      var self = this;
 
-      $http.get(internal.host + '/_index').then(
+      return $http.get(this._host + '/_index').then(
 
         function(res) {
           angular.forEach(res.data, function(value, key) {
-            internal.resources[key] = new Resource(key, value, { host: internal.host });
+            self._resources[key] = new crResource(key, value, { host: self._host });
           });
-          def.resolve();
+          return self._resources;
         },
-        
         function(res) {
-          def.reject(makeError(res));
+          return $q.reject(makeError(res));
         }
       );
-      return def.promise;
-    }
+    };
 
 
-    //
-    // get a new uuid for a resource
-    //
-    
-    function getUUIds(count) {
+    Resources.prototype.getIds = function(count) {
 
       count = count || 1;
-      var def = $q.defer();
 
-      $http.get(internal.host + '/_uuids?count=' + count).then(
-
+      return $http.get(this._host + '/_uuids?count=' + count).then(
         function(res) {
-          def.resolve(res.data.uuids);
+          return res.data.uuids;
         },
         function(res) {
-          def.reject(makeError(res));
+          throw makeError(res);
         }
       );
-      return def.promise;
-    }
+    };
 
 
-    //
-    // get a Resource object
-    //
-    
-    function getResource(type) {
+    Resources.prototype.resources = function() {
+      return this._resources;
+    };
 
-      var r = internal.resources[type];
+
+    Resources.prototype.get = function(type) {
+
+      var r = this._resources[type];
       if (!r) {
         throw new Error('Resource with type not found: ' + type);
       }
       return r;
-    }
-
-
-    //
-    // save a model including its referenced models
-    //
-
-    function saveWithRefs(modelCtrl, refCtrls) {
-
-      refCtrls = refCtrls || [];
-      var newCtrls = [];
-      var ids;
-
-      // collect controllers of new models
-      
-      if (!modelCtrl.getId())
-        newCtrls.push(modelCtrl);
-
-      refCtrls.forEach(function(ctrl) {
-        if (!ctrl.getId())
-          newCtrls.push(ctrl);
-      });
-
-      // call save on all models and return an array of the promises
-
-      var saveAll = function() {
-
-        // TODO: check if model has not changed and must not be saved
-
-        return refCtrls.concat([modelCtrl]).map(function(ctrl) {
-          return ctrl.save().then(
-            function(doc) {
-              ctrl.setModel(doc);
-            }
-          );
-        });
-      };
-      
-      if (newCtrls.length === 0) {
-
-        // no new models, just save all
-
-        return $q.all.apply($q, saveAll());
-      }
-      else {
-
-        // get ids for new models
-
-        return getUUIds(newCtrls.length).then(
-
-          function(res) {
-
-            // assign ids to models
-
-            newCtrls.forEach(function(ctrl) {
-              ctrl.setId(res.uuids.pop());
-            });
-
-            // assign parent ids to submodels
-
-            // var parentId = newCtrls[0].getId();
-            var parentId = modelCtrl.getId();
-            refCtrls.forEach(function(ctrl) {
-              ctrl.setParentId(parentId);
-            });
-
-            // save models
-            
-            return $q.all.apply($q, saveAll());
-          }
-        );
-      }
-    }
-    
-
-    //
-    // public
-    //
-
-    return {
-      index: loadIndex,
-      get: getResource,
-      save: saveWithRefs,
-      getIds: getUUIds
     };
+
+    
+    return new Resources();
   });
 
 })();
@@ -862,16 +740,18 @@
 
 
   function isPrivateProperty(key) {
-    return key === '_id' || key === '_rev' || key === 'type_' || key === 'parent_';
+    return key === '_id' || key === '_rev' || key === 'type_' || key === 'parentId_';
   }
+
   
   //
   // create a object with default values from schema
   //
   
-  function createModel(schema, typeName) {
+  function createValue(schema, typeName) {
 
     var hasDefaultValue = schema.hasOwnProperty('default');
+    var type = schema.type;
     
     if (schema.enum) {
       return hasDefaultValue ? schema.default : schema.enum[0];
@@ -880,14 +760,14 @@
       return hasDefaultValue ? schema.default : {};
     }
     // infer object and array
-    if (!schema.type) {
-      if (schema.properties) schema.type = 'object';
-      if (schema.items) schema.type = 'array';
+    if (!type) {
+      if (schema.properties) type = 'object';
+      if (schema.items) type = 'array';
     }
     
-    if (!schema.type) throw new Error('Cannot create default value for schema without type');
+    if (!type) throw new Error('Cannot create default value for schema without type');
 
-    switch(schema.type) {
+    switch(type) {
     case 'boolean': return hasDefaultValue ? schema.default : true;
     case 'integer': return hasDefaultValue ? schema.default : 0;
     case 'number': return hasDefaultValue ? schema.default : 0;
@@ -898,15 +778,15 @@
       var obj = {};
       angular.forEach(schema.properties, function(propSchema, name) {
         // ignore some vals
-        if (name === '_id' || name === '_rev' || name === 'type_') return;
-        obj[name] = createModel(propSchema);
+        if (isPrivateProperty(name)) return;
+        obj[name] = createValue(propSchema);
       });
       if (typeName) {
         obj.type_ = typeName;
       }
       return obj;
     case 'array': return hasDefaultValue ? schema.default : [];
-    default: throw new Error('Cannot create default value for unknown type: ' + schema.type);
+    default: throw new Error('Cannot create default value for unknown type: ' + type);
     }
   }
 
@@ -917,7 +797,7 @@
   module.service('crSchema', function() {
 
     return {
-      createModel: createModel,
+      createValue: createValue,
       
       isObjectSchema: isObjectSchema,
       isArraySchema: isArraySchema,
@@ -951,8 +831,7 @@
   function ArrayCtrl($scope, crSchema) {
 
     $scope.addItem = function(schema) {
-      console.log('scope', $scope);
-      var obj = crSchema.createModel(schema, schema.name);
+      var obj = crSchema.createValue(schema, schema.name);
       $scope.model.push(obj);
     };
 
@@ -972,6 +851,23 @@
       if (index >= $scope.model.length) return;
       $scope.model.splice(index + 1, 0, $scope.model.splice(index, 1)[0]);
     };
+
+    // wait for ready event of items on initialization
+
+    var numItems = $scope.model.length;
+
+    if (numItems === 0) {
+      $scope.$emit('ready');
+    }
+    else {
+      var off = $scope.$on('ready', function(e) {
+        e.stopPropagation();
+        if (--numItems === 0) {
+          off();
+          $scope.$emit('ready');
+        }
+      });
+    }
   }
 
 
@@ -1044,7 +940,6 @@
       controller: ArrayItemCtrl,
       
       link: function(scope, elem, attrs, anyof) {
-
         // get the schema from the anyof-array
         scope.schema = anyof.getSchema(scope.model.type_);
         scope.array = anyof;
@@ -1083,7 +978,6 @@
         if (!crSchema.isObjectSchema(scope.schema.items)) {
           throw new Error('Array items schema is not of type object: ' + JSON.stringify(scope.schema.items));
         }
-        scope.$emit('ready');
       }
     };
   });
@@ -1107,10 +1001,7 @@
       controller: AnyofArrayCtrl,
 
       link: function(scope, elem, attrs) {
-
         elem.find('.dropdown-toggle').dropdown();
-
-        scope.$emit('ready');
       }
     };
   });
@@ -1205,7 +1096,7 @@
   var module = angular.module('cores.directives');
   
   
-  module.directive('crModelList', function(crCommon, crResource, crSchema) {
+  module.directive('crModelList', function(crCommon, crResources, crSchema) {
     return {
       scope: {
         type: '='
@@ -1216,34 +1107,33 @@
 
       link: function(scope, elem, attrs) {
 
-        var init = function(scope) {
+        crCommon.watch(scope, function(scope) {
+          return !!scope.type;
+        }).then(
+          function(scope) {
+            crResources.get(scope.type).view('all', { limit: 10 }).then(
+              function success(result) {
 
-          crResource.get(scope.type).view('all', { limit: 10 }).then(
-            function success(result) {
+                if(result.total_rows === 0) return;
 
-              if(result.total_rows === 0) return;
+                var firstVal = result.rows[0].value;
 
-              var firstVal = result.rows[0].value;
-
-              // headers array with property names
-              
-              scope.headers = Object.keys(firstVal).filter(function(key) {
-                return !crSchema.isPrivateProperty(key);
-              });
-
-              // rows array with property values for each row
-              
-              scope.rows = result.rows.map(function(row) {
-                return scope.headers.map(function(key) {
-                  return { id: row.id, value: row.value[key] };
+                // headers array with property names
+                
+                scope.headers = Object.keys(firstVal).filter(function(key) {
+                  return !crSchema.isPrivateProperty(key);
                 });
-              });
-            }
-          );
-        };
 
-        crCommon.watchUntil(
-          scope, function(scope) { return !!scope.type; }, init
+                // rows array with property values for each row
+                
+                scope.rows = result.rows.map(function(row) {
+                  return scope.headers.map(function(key) {
+                    return { id: row.id, value: row.value[key] };
+                  });
+                });
+              }
+            );
+          }
         );
 
         scope.select = function(id) {
@@ -1259,7 +1149,7 @@
   var module = angular.module('cores.directives');
   
   
-  module.directive('crModelSelectRef', function(crCommon, crResource) {
+  module.directive('crModelSelectRef', function(crCommon, crResources) {
     return {
       scope: {
         model: '=',
@@ -1283,33 +1173,33 @@
 
         var modelsByName = {};
 
-        var init = function(scope) {
+        crCommon.watch(scope, function(scope) {
+          return scope.model && scope.schema;
+        }).then(
+          function(scope) {
 
-          // property name to display in selectbox
-          var property = attrs.property || 'title';
+            // property name to display in selectbox
+            var property = attrs.property || 'title';
 
-          crResource.get(scope.schema.$ref).view('all').then(
-            function success(models) {
+            crResources.get(scope.schema.$ref).view('all').then(
+              function success(models) {
 
-              models.rows.forEach(function(row) {
+                models.rows.forEach(function(row) {
 
-                var name = row.value[property];
-                modelsByName[name] = row.value;
-                
-                scope.items.push(name);
+                  var name = row.value[property];
+                  modelsByName[name] = row.value;
+                  
+                  scope.items.push(name);
 
-                // set selected
-                if (scope.model.id && scope.model.id === row.id) {
-                  scope.selectedItem = name;
-                }
-              });
-            }
-          );
-        }
-        
-        crCommon.watchUntil(
-          scope, function(scope) { return scope.model && scope.schema; }, init
-        );
+                  // set selected
+                  if (scope.model.id && scope.model.id === row.id) {
+                    scope.selectedItem = name;
+                  }
+                });
+              }
+            );
+          }
+        );        
 
         scope.$watch('selectedItem', function(newValue, oldValue) {
           if (newValue) {
@@ -1374,11 +1264,11 @@
         scope.closeModal = function() {
           elem.find('.modal').modal('hide');
         };
-        
-        crCommon.watchUntil(
-          scope,
-          function condition(scope) { return scope.model && scope.schema; },
-          function then(scope) {
+
+        crCommon.watch(scope, function(scope) {
+          return scope.model && scope.schema;
+        }).then(
+          function(scope) {
             if (scope.schema.view.preview) {
               var tmpl = '<div ' + scope.schema.view.preview + ' model="subModel" files="subFiles"/>';
               var e = $compile(tmpl)(scope);
@@ -1396,7 +1286,7 @@
   var module = angular.module('cores.directives');
 
   
-  module.controller('crModelCtrl', function($scope, $q, crResource, crSchema, crCommon) {
+  module.controller('crModelCtrl', function($scope, $q, crResources, crSchema, crCommon) {
 
     var ModelCtrl = function() {
 
@@ -1405,31 +1295,36 @@
       this._refs = {};
       this._files = {};
 
-      crCommon.watchUntil(
-        $scope,
-        function(scope) { return !!scope.type; },
-        function(scope) { self._init(); }
+      this._init().then(
+        function() {
+          $scope.$emit('model:ready');
+        }
       );
     };
     
 
     ModelCtrl.prototype._init = function() {
 
-      this._resource = crResource.get($scope.type);
-
-      // add/update/remove files from the model
-      $scope.$on('file:set', angular.bind(this, this.onFileSet));
-      $scope.$on('file:remove', angular.bind(this, this.onFileRemove));
-
-      // add/update/remove submodels
-      $scope.$on('ref:set', angular.bind(this, this.onRefSet));
-      $scope.$on('ref:remove', angular.bind(this, this.onRefRemove));
-
-      this._initScopeFunctions();
+      var self = this;
       
-      this.load().then(
-        function() { console.log('model load success'); },
-        function() { console.log('model load error'); }
+      return crCommon.watch($scope, function(scope) {
+        return !!scope.type;
+      }).then(
+        function(scope) {
+          self._resource = crResources.get(scope.type);
+
+          // add/update/remove files from the model
+          $scope.$on('file:set', angular.bind(self, self.onFileSet));
+          $scope.$on('file:remove', angular.bind(self, self.onFileRemove));
+
+          // add/update/remove submodels
+          $scope.$on('ref:set', angular.bind(self, self.onRefSet));
+          $scope.$on('ref:remove', angular.bind(self, self.onRefRemove));
+
+          self._initScopeFunctions();
+
+          return self.load();
+        }
       );
     };
 
@@ -1463,7 +1358,6 @@
     
     ModelCtrl.prototype.onFileSet = function(e, id, file) {
       e.stopPropagation();
-      console.log('set file', id, file);
       this._files[id] = file;
     };
 
@@ -1541,14 +1435,12 @@
       var id = $scope.id;
 
       return this._resource.schema().then(function(schema) {
-        console.log('id', id);
         if (!id) {
           $scope.schema = schema;
-          $scope.model = crSchema.createModel(schema);
+          $scope.model = crSchema.createValue(schema);
         }
         else {
           return self._resource.load(id).then(function(doc) {
-            console.log('loaded doc', doc);
             $scope.schema = schema;
             $scope.model = doc;
           });
@@ -1563,7 +1455,6 @@
       
       var self = this;
       var refModels = Object.keys(this._refs).map(function(k) { return self._refs[k]; });
-      console.log('refs: ', refModels);
 
       // collect all new models that need an id
       
@@ -1584,16 +1475,11 @@
 
         // get and set ids for new models and then save them
 
-        return crResource.getIds(newModels.length).then(
+        return crResources.getIds(newModels.length).then(
           function(ids) {
 
             newModels.forEach(function(model) {
-              console.log('setting model id');
               model.id(ids.pop());
-            });
-
-            refModels.forEach(function(model) {
-              model.parentId(self.id());
             });
 
             return self._saveAll(refModels);
@@ -1605,20 +1491,27 @@
 
     ModelCtrl.prototype._saveAll = function(refModels) {
 
-      // collect save promises for $q.all and return that promise
-
       var self = this;
       
+      // collect files
+
+      var files = Object.keys(this._files).map(function(k) { return self._files[k]; });
+      
+      // collect save promises for $q.all and return that promise
+
       var promises = refModels.map(function(model) {
+        // set the parent id on child models
+        model.parentId(self.id());
         return model.save();
       });
-      
-      promises.push(this._resource.save($scope.model).then(function(doc) {
+
+      promises.push(this._resource.save($scope.model, files).then(function(doc) {
         $scope.model = doc;
       }));
 
-      return $q.all.apply($q, promises);
+      return $q.all(promises);
     };
+
 
     return new ModelCtrl();
   });
@@ -1670,23 +1563,23 @@
 
       link: function(scope, elem, attrs) {
 
-        var init = function(scope) {
-          if (!crSchema.isObjectSchema(scope.schema) &&
-              !crSchema.isArraySchema(scope.schema)) {
-            throw new Error('Top level schema has to be a object or array');
+        crCommon.watch(scope, function(scope) {
+          return scope.model && scope.schema;
+        }).then(
+          function(scope) {
+            if (!crSchema.isObjectSchema(scope.schema) &&
+                !crSchema.isArraySchema(scope.schema)) {
+              throw new Error('Top level schema has to be a object or array');
+            }
+
+            var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
+                               { mode: 'minimal'});
+            
+            var link = $compile(tmpl);
+            var content = link(scope);
+
+            elem.html(content);
           }
-
-          var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
-                             { mode: 'minimal'});
-          
-          var link = $compile(tmpl);
-          var content = link(scope);
-
-          elem.html(content);
-        };
-        
-        crCommon.watchUntil(
-          scope, function(scope) { return scope.model && scope.schema; }, init
         );
       }
     };
@@ -1722,46 +1615,45 @@
         
         return function(scope, elem, attrs) {
 
-          scope.numProperties = 0;
+          var numProperties = 0;
 
           // listen for childs ready event and ready up when all fired
           var offready = scope.$on('ready', function(e) {
             e.stopPropagation();
-            if (--scope.numProperties === 0) {
+            if (--numProperties === 0) {
               offready();
               scope.$emit('ready');
             }
           });
 
-          
-          var init = function(scope) {
+          crCommon.watch(scope, function(scope) {
+            return scope.model && scope.schema;
+          }).then(
+            function(scope) {
 
-            // create templates for properties
+              // create templates for properties
 
-            var tmpl = '';
-            angular.forEach(scope.schema.properties, function(subSchema, key) {
+              var tmpl = '';
+              angular.forEach(scope.schema.properties, function(subSchema, key) {
 
-              // ignore some keys
-              if (crSchema.isPrivateProperty(key)) return;
-              
-              if (!scope.model.hasOwnProperty(key)) {
-                scope.model[key] = crSchema.createModel(subSchema);
-              }
+                // ignore some keys
+                if (crSchema.isPrivateProperty(key)) return;
+                
+                if (!scope.model.hasOwnProperty(key)) {
+                  scope.model[key] = crSchema.createValue(subSchema);
+                }
 
-              scope.numProperties += 1;
-              
-              tmpl += crBuild(subSchema, scope.model[key],
-                              'schema.properties.' + key, 'model.' + key);
-            });
+                numProperties += 1;
+                
+                tmpl += crBuild(subSchema, scope.model[key],
+                                'schema.properties.' + key, 'model.' + key);
+              });
 
-            // compile and link templates
-            var content = $compile(tmpl)(scope);
-            elem.find('.properties').append(content);
-          };
-          
-          crCommon.watchUntil(
-            scope, function(scope) { return scope.model && scope.schema; }, init
-          );
+              // compile and link templates
+              var content = $compile(tmpl)(scope);
+              elem.find('.properties').append(content);
+            }
+          );          
         };
       }
     };
@@ -1843,7 +1735,7 @@
   //
   // enum
   //
-  
+
   module.directive('crEnum', function(crCommon) {
     return {
       scope: {
@@ -1853,7 +1745,31 @@
       },
       replace: true,
       templateUrl: 'cr-enum.html',
+
       controller: crCommon.StandardCtrl
+
+      // link: function(scope, elem, attrs) {
+
+      //   crCommon.watch(scope, function(scope) { return !!scope.schema; }).then(
+      //     function(scope) {
+
+      //       var numItems = scope.enum.length;
+
+      //       if (numItems === 0) {
+      //         scope.$emit('ready');
+      //         return;
+      //       }
+
+      //       var off = scope.$on('ready', function(e) {
+      //         e.stopPropagation();
+      //         if (--numItems === 0) {
+      //           off();
+      //           scope.$emit('ready');
+      //         }
+      //       });
+      //     }
+      //   );
+      // }
     };
   });
   
