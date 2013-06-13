@@ -698,7 +698,7 @@ describe('cores', function() {
       // Complex
 
       {
-        type: 'Complex',
+        type: 'Article',
         validate: function(schema, elem, done) {
           // assert(elem.find('textarea').length);
           done();
@@ -741,10 +741,11 @@ describe('cores', function() {
             $('body').append($('<hr>'));
 
             // wait for ready event
-            var offready = scope.$on('ready', function(e) {
+            var isReady = false;
+            var off = scope.$on('ready', function(e) {
               e.stopPropagation(); 
-              offready();
-
+              assert(!isReady);
+              isReady = true;
               test.validate(schema, elem, done);
             });
           },

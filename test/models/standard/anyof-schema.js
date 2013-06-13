@@ -4,8 +4,8 @@ module.exports = {
       type: 'array',
       items: {
         anyOf: [
-          { properties: { bar: { type: 'number' } } },
-          { properties: { baz: { type: 'boolean'} } }
+          { name: 'bar', properties: { bar: { type: 'number' } } },
+          { name: 'baz', properties: { baz: { type: 'boolean'} } }
         ]
       }
     }

@@ -3,9 +3,8 @@ var fs = require('fs');
 var async = require('async');
 
 var hapi = require('hapi');
-
 var cores = require('cores');
-var coresApi = require('cores-hapi');
+
 
 var port = 3333;
 
@@ -74,14 +73,13 @@ function setupServer(db, callback) {
     console.log('loading models');
     
     cores.load('./test/models', { app: app, recursive: true }, function(err, resources) {
-      if (err) {
-        callback(err);
-        return;
-      }
+      if (err) return callback(err);
 
       console.log('creating api');
-      coresApi(cores, resources, server);
-      callback(null, resources, server);
+      server.pack.require('cores-hapi', { cores: cores, resources: resources }, function(err) {
+        if (err) return callback(err);
+        callback(null, resources, server);
+      });
     });
   });
 }
@@ -98,7 +96,6 @@ module.exports = function(db, callback) {
 
     server.start();
     console.log('started server on port:', port);
-    // console.log('routing:\n', server.routingTable());
     callback(server);
   });
 
