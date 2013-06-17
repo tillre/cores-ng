@@ -236,29 +236,37 @@ describe('cores', function() {
 
   describe('crResource', function() {
 
-    var articleRes;
-    var articleId = 'resource_' + (new Date().getTime());
-    
-    var articleDoc = {
-      title: 'Hello Article',
-      author: { firstname: 'No', lastname: 'Mono' },
-      content: 'Bla bla bla'
-    };
+    var fooRes;
+    var fooId = 'foo_' + (new Date().getTime());
 
+    var fooDoc = {
+      bar: 'Hello Foo'
+    };
     
     it('should create', inject(['crResource'], function(crResource) {
-      articleRes = new crResource('Article', {
-        path: '/articles',
-        schemaPath: '/articles/_schema',
-        viewPaths: { titles: '/articles/_views/titles' }
+      fooRes = new crResource('Foo', {
+        path: '/foos',
+        schemaPath: '/foos/_schema',
+        viewPaths: { bars: '/foos/_views/bars' }
       }, {
         host: host
       });
     }));
 
+
+    it('should get the schema', inject(true, function(done) {
+      fooRes.schema().then(
+        function(s) {
+          assert(s);
+          done();
+        },
+        done
+      );
+    }));
+    
     
     it('should save without id', inject(true, function(done) {
-      articleRes.save(articleDoc).then(
+      fooRes.save(fooDoc).then(
         function(d) {
           assert(typeof d._id === 'string');
           assert(typeof d._rev === 'string');
@@ -270,9 +278,9 @@ describe('cores', function() {
 
     
     it('should save with id', inject(true, function(done) {
-      var doc2 = JSON.parse(JSON.stringify(articleDoc));
-      doc2._id = articleId;
-      articleRes.save(doc2).then(
+      var doc2 = JSON.parse(JSON.stringify(fooDoc));
+      doc2._id = fooId;
+      fooRes.save(doc2).then(
         function(d) {
           assert(d._id === doc2._id);
           assert(typeof d._rev === 'string');
@@ -284,9 +292,9 @@ describe('cores', function() {
 
 
     it('should load', inject(true, function(done) {
-      articleRes.load(articleId).then(
+      fooRes.load(fooId).then(
         function(d) {
-          assert(d._id === articleId);
+          assert(d._id === fooId);
           done();
         },
         done
@@ -295,7 +303,7 @@ describe('cores', function() {
 
 
     it('should load all', inject(true, function(done) {
-      articleRes.load().then(
+      fooRes.load().then(
         function(res) {
           assert(res.total_rows > 1);
           done();
@@ -306,7 +314,7 @@ describe('cores', function() {
 
 
     it('should load all with params', inject(true, function(done) {
-      articleRes.load({ limit: 1 }).then(
+      fooRes.load({ limit: 1 }).then(
         function(res) {
           assert(res.total_rows > 1);
           assert(res.rows.length === 1);
@@ -318,18 +326,18 @@ describe('cores', function() {
     
     
     it('should load and update', inject(true, function(done) {
-      articleRes.load(articleId).then(
+      fooRes.load(fooId).then(
         function(d) {
 
           assert(typeof d._id === 'string');
           assert(typeof d._rev === 'string');
-          d.title = 'yoyoyo';
+          d.bar = 'yoyoyo';
 
-          articleRes.save(d).then(
+          fooRes.save(d).then(
             function(d2) {
               assert(d2._id === d._id);
               assert(d2._rev !== d._rev);
-              assert(d2.title === d.title);
+              assert(d2.bar === d.bar);
               done();
             },
             done
@@ -341,7 +349,7 @@ describe('cores', function() {
 
 
     it('should call the view', inject(true, function(done) {
-      articleRes.view('titles').then(
+      fooRes.view('bars').then(
         function(res) {
           assert(res.total_rows > 1);
           done();
@@ -352,7 +360,7 @@ describe('cores', function() {
 
 
     it('should call the view with params', inject(true, function(done) {
-      articleRes.view('titles', { limit: 1 }).then(
+      fooRes.view('bars', { limit: 1 }).then(
         function(res) {
           assert(res.total_rows > 1);
           assert(res.rows.length === 1);
@@ -364,13 +372,13 @@ describe('cores', function() {
 
 
     it('should destroy', inject(true, function(done) {
-      articleRes.load(articleId).then(
+      fooRes.load(fooId).then(
         function(d) {
-          return articleRes.destroy(d._id, d._rev);
+          return fooRes.destroy(d._id, d._rev);
         }
       ).then(
         function() {
-          return articleRes.load(articleId);
+          return fooRes.load(fooId);
         }
       ).then(
         function() {
@@ -451,10 +459,9 @@ describe('cores', function() {
 
   describe('crModelCtrl', function() {
 
-    var catDoc = {
+    var fooDoc = {
       _id: 'model_' + (new Date().getTime()),
-      title: 'Hello Model',
-      slug: 'hello'
+      bar: 'Hello Model'
     };
     
     var createCtrl = function($rootScope, $controller, type, id) {
@@ -467,7 +474,7 @@ describe('cores', function() {
     };
 
     before(inject(['crResources'], true, function(crResources, done) {
-      crResources.get('Category').save(catDoc).then(
+      crResources.get('Foo').save(fooDoc).then(
         function(doc) { done(); },
         done
       );
@@ -477,7 +484,7 @@ describe('cores', function() {
     it('should instantiate',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Category');
+         var ctrl = createCtrl($rootScope, $controller, 'Foo');
          assert(ctrl);
 
          $rootScope.$on('model:ready', function() {
@@ -489,12 +496,12 @@ describe('cores', function() {
     it('should instantiate with id',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Category', catDoc._id);
+         var ctrl = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
          assert(ctrl);
 
          var off = $rootScope.$on('model:ready', function() {
            off();
-           assert(ctrl.scope().model.title === 'Hello Model');
+           assert(ctrl.scope().model.bar === 'Hello Model');
            done();
          });
        }));
@@ -503,15 +510,13 @@ describe('cores', function() {
     it('should save',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Category');
+         var ctrl = createCtrl($rootScope, $controller, 'Foo');
 
          var off = $rootScope.$on('model:ready', function() {
            off();
 
            var model = ctrl.scope().model;
-           model.title = 'Hello Mate';
-           model.author = { firstname: 'Hot', lastname: 'Sauce' };
-           model.content = 'Cherrio';
+           model.bar = 'Hello Mate';
 
            ctrl.save().then(
              function() {
@@ -525,17 +530,17 @@ describe('cores', function() {
     it('should update',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Category', catDoc._id);
+         var ctrl = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
 
          var off = $rootScope.$on('model:ready', function() {
            off();
 
            var model = ctrl.scope().model;
-           model.title = 'Hello Update';
+           model.bar = 'Hello Update';
 
            ctrl.save().then(
              function() {
-               assert(ctrl.scope().model.title === 'Hello Update');
+               assert(ctrl.scope().model.bar === 'Hello Update');
                done();
              },
              done
@@ -547,8 +552,8 @@ describe('cores', function() {
     it('should save and update with referenced model',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl1 = createCtrl($rootScope, $controller, 'Category');
-         var ctrl2 = createCtrl($rootScope, $controller, 'Category');
+         var ctrl1 = createCtrl($rootScope, $controller, 'Foo');
+         var ctrl2 = createCtrl($rootScope, $controller, 'Foo');
 
          var rev1, rev2;
          
@@ -562,8 +567,8 @@ describe('cores', function() {
            ctrl1.id('model_ref_1_' + new Date().getTime());
            ctrl2.id('model_ref_2_' + new Date().getTime());
 
-           ctrl1.scope().model.title = 'Cat1';
-           ctrl2.scope().model.title = 'Cat2';
+           ctrl1.scope().model.bar = 'Foo1';
+           ctrl2.scope().model.bar = 'Foo2';
 
            ctrl1.onRefSet({ stopPropagation: function() {} }, 'r1', ctrl2);
 
@@ -571,8 +576,8 @@ describe('cores', function() {
              function() {
                assert(ctrl2.scope().model.parentId_ === ctrl1.id());
                // update
-               ctrl1.scope().model.title = 'Cat1U';
-               ctrl2.scope().model.title = 'Cat2U';
+               ctrl1.scope().model.bar = 'Foo1U';
+               ctrl2.scope().model.bar = 'Foo2U';
                rev1 = ctrl1.scope().model._rev;
                rev2 = ctrl2.scope().model._rev;
 
@@ -694,16 +699,23 @@ describe('cores', function() {
           done();
         }
       },
-
-      // Complex
-
       {
-        type: 'Article',
+        type: 'Password',
         validate: function(schema, elem, done) {
-          // assert(elem.find('textarea').length);
+          assert(elem.find('input[type="password"]').length === 2);
           done();
         }
       }
+      
+      // Complex
+
+      // {
+      //   type: 'Complex',
+      //   validate: function(schema, elem, done) {
+      //     // TODO
+      //     done();
+      //   }
+      // }
     ];
     
 

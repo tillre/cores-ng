@@ -171,6 +171,17 @@
       '<div><label>{{name}}:</label><textarea ng-model="model"/></div>'
     );
     
+    // password
+    
+    $templateCache.put(
+      'cr-password.html',
+      '<div>' +
+        '<label>{{name}}:</label>' +
+        '<input type="password" ng-model="pass1"/>' +
+        '<input type="password" ng-model="pass2"/>' +
+      '</div>'
+    );
+    
     // model-create-ref
     
     $templateCache.put(
@@ -1659,6 +1670,35 @@
     };
   });
 
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+  module.directive('crPassword', function() {
+    return {
+      scope: {
+        model: '=',
+        name: '@'
+      },
+      replace: true,
+      templateUrl: 'cr-password.html',
+
+      link: function(scope, elem, attr) {
+        scope.pass1 = '';
+        scope.pass2 = '';
+
+        scope.watch(function(scope) {
+          if (scope.pass1 || scope.pass2) {
+            if (scope.pass1 === scope.pass2) {
+              scope.model = scope.pass1;
+            }
+          }
+        });
+      }
+    };
+  });
+  
 })();
 (function() {
 

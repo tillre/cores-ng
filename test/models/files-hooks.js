@@ -1,5 +1,5 @@
 
-var handlePayload = function(app, payload, callback) {
+var handlePayload = function(payload, callback) {
 
   var doc = payload.doc;
   var numFiles = parseInt(payload.numFiles, 10);
@@ -12,5 +12,6 @@ var handlePayload = function(app, payload, callback) {
 };
 
 module.exports = {
-  save: handlePayload
+  create: handlePayload,
+  update: handlePayload
 };

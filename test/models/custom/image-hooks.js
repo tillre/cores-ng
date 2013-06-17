@@ -4,8 +4,10 @@ var path = require('path');
 var url = require('url');
 
 
-function handlePayload(app, payload, callback) {
+function handlePayload(payload, callback) {
 
+  var self = this;
+  
   if (payload.isMultipart) {
 
     var doc = payload.doc;
@@ -14,7 +16,7 @@ function handlePayload(app, payload, callback) {
     // file is a string when testing with fake file data
     if (typeof file === 'string') file = JSON.parse(file);
 
-    var targetFile = path.join(app.upload.dir, file.name);
+    var targetFile = path.join(self.app.upload.dir, file.name);
 
     if (file.isTest) {
       // when testing no real file is send
@@ -29,7 +31,7 @@ function handlePayload(app, payload, callback) {
           return callback(err);
         }
         
-        doc.file.url = url.resolve(app.upload.url, file.name);
+        doc.file.url = url.resolve(self.app.upload.url, file.name);
         callback(null, doc);
       });
     }
@@ -41,5 +43,6 @@ function handlePayload(app, payload, callback) {
 
 
 module.exports = {
-  save: handlePayload
+  create: handlePayload,
+  update: handlePayload
 };
