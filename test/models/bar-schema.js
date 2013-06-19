@@ -3,9 +3,9 @@ var j = require('jski');
 module.exports = j.object({
 
   boolean: j.boolean(),
-  number: j.number(),
-  integer: j.integer(),
-  string: j.string(),
+  number: j.number().minimum(-1.5).maximum(1.5),
+  integer: j.integer().minimum(0).maximum(10).multipleOf(2),
+  string: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
 
   'enum': j.enum(1, 2, 3),
 
