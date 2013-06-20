@@ -40,25 +40,34 @@
       '</span>'
     );
 
-    // integer
-
-    $templateCache.put(
-      'cr-integer.html',
-      '<span><label>{{name}}:</label><input type="number" ng-model="model"/></span>'
-    );
-
-    // number
+    // number/integer
 
     $templateCache.put(
       'cr-number.html',
-      '<span><label>{{name}}:</label><input type="number" ng-model="model"/></span>'
+      '<span class="control-group" ng-class="{ error: hasErrors() }">' +
+        '<div class="controls">' +
+          '<label>{{name}}:</label><input type="number" ng-model="model"/>' +
+          '<p ng-show="hasError(\'integer\')" class="help-inline">Value is not an integer</p>' +
+          '<p ng-show="hasError(\'multipleOf\')" class="help-inline">Value is not a multiple of</p>' +
+          '<p ng-show="hasError(\'minimum\')" class="help-inline">Value is less than minimum</p>' +
+          '<p ng-show="hasError(\'maximum\')" class="help-inline">Value is greater than maximum</p>' +
+        '</div>' +
+      '</span>'
     );
 
     // string
 
     $templateCache.put(
       'cr-string.html',
-      '<span><label>{{name}}:</label><input class="input-xlarge" type="text" ng-model="model"/></span>'
+      '<span class="control-group" ng-class="{ error: hasErrors() }">' +
+        '<div class="controls">' +
+          '<label>{{name}}:</label><input class="input-xlarge" type="text" ng-model="model"/>' +
+          '<p ng-show="hasError(\'maxLength\')" class="help-inline">Value is too long</p>' +
+          '<p ng-show="hasError(\'minLength\')" class="help-inline">Value is too short</p>' +
+          '<p ng-show="hasError(\'pattern\')" class="help-inline">Value does not match the pattern</p>' +
+          '<p ng-show="hasError(\'format\')" class="help-inline">Value does not match the format</p>' +
+        '</div>' +
+      '</span>'
     );
 
     // enum
@@ -116,7 +125,7 @@
 
           '<ul class="unstyled">' +
             '<li ng-repeat="model in model">' +
-              '<div cr-array-item schema="schema.items" model="model"></div>' +
+              '<div cr-array-item schema="schema.items" model="model" path="{{path}}[{{$index}}]"></div>' +
             '</li>' +
           '</ul>' +
         '</div>' +
@@ -142,7 +151,7 @@
           '</div>' +
 
           '<ul class="unstyled">' + 
-            '<li ng-repeat="model in model"><div cr-anyof-item model="model"></div></li>' +
+            '<li ng-repeat="model in model"><div cr-anyof-item model="model" path="{{path}}[{{$index}}]"></div></li>' +
           '</ul>' +
         '</div>' +
       '</div>'
@@ -175,10 +184,11 @@
     
     $templateCache.put(
       'cr-password.html',
-      '<div>' +
-        '<label>{{name}}:</label>' +
-        '<input type="password" ng-model="pass1"/>' +
+      '<div class="control-group" ng-class="{error: hasError}">' +
+        '<label class="control-label">{{name}}:</label>' +
+        '<input type="password" ng-model="pass1" style="margin-right: 4px"/>' +
         '<input type="password" ng-model="pass2"/>' +
+        '<p ng-show="hasError" class="help-inline">{{ error }}</p>' +
       '</div>'
     );
     
@@ -210,11 +220,11 @@
     $templateCache.put(
       'cr-model.html',
       '<div>' +
-        '<div cr-model-form schema="schema" model="model"></div>' +
-        '<div class="form-actions">' +
-          '<button ng-click="save()" class="btn btn-primary">Save</button>' +
-          '<button ng-click="cancel()" class="btn">Cancel</button>' +
-          '<button ng-click="destroy()" class="btn btn-danger pull-right">Delete</button>' +
+        '<div cr-model-form schema="schema" ng-model="model" valid="valid"></div>' +
+        '<div ng-show="!valid" class="alert alert-error">The form has errors</div>' +
+        '<div class="form-actions btn-toolbar">' +
+          '<button ng-click="save()" ng-class="{ disabled: !valid }" class="btn btn-primary">Save</button>' +
+          '<button ng-click="destroy()" ng-show="!isNew()" class="btn btn-danger pull-right">Delete</button>' +
         '</div>' +
         '<pre>{{ model | json }}</pre>' +
       '</div>'
@@ -231,10 +241,10 @@
             '<h3>{{type}}</h3>' +
           '</div>' +
           '<div class="modal-body">' +
-            '<div cr-model-form schema="schema" model="model"></div>' +
+            '<div cr-model-form schema="schema" ng-model="model" valid="valid"></div>' +
             '<pre>{{ model | json }}</pre>' +
           '</div>' +
-          '<div class="modal-footer">' +
+          '<div class="modal-footer btn-toolbar">' +
             '<button ng-click="submit()" class="btn btn-primary pull-left">Submit</button>' +
             '<button ng-click="cancel()" class="btn pull-right" data-dismiss="modal">Cancel</button>' +
         '</div>' +
@@ -246,7 +256,7 @@
     
     $templateCache.put(
       'cr-model-form.html',
-      '<form></form>'
+      '<form name="modelForm"><h3>Valid: {{modelForm.$valid}}</h3></form>'
     );
 
     // model list
@@ -296,7 +306,7 @@
   // Create a template for a schema with optional view configuration
   // 
   
-  function buildTemplate(schema, model, schemaPath, modelPath, options) {
+  function buildTemplate(schema, model, schemaPath, modelPath, absPath, options) {
 
     var viewType = schema.type;
     var viewName = getModelName(schema, modelPath);
@@ -324,6 +334,13 @@
              schema.items.anyOf) {
       viewType = 'anyof-array';
     }
+
+    // use number directive for integers
+
+    if (viewType === 'integer') {
+      viewType = 'number';
+      options.isInteger = true;
+    }
     
     if (schema.hasOwnProperty('view')) {
 
@@ -346,7 +363,7 @@
       else throw new Error('View has to be of type object or string');
     }
 
-    return buildElement(viewType, schemaPath, modelPath, viewName, options);
+    return buildElement(viewType, schemaPath, modelPath, viewName, absPath, options);
   }
 
   
@@ -354,11 +371,12 @@
   // build the html element for the type
   //
   
-  function buildElement(type, schemaPath, modelPath, name, options) {
+  function buildElement(type, schemaPath, modelPath, name, absPath, options) {
     var e = '<div' +
           ' cr-' + type +
           ' schema="' + schemaPath + '"' +
-          ' model="' + modelPath + '"' +
+          ' ng-model="' + modelPath + '"' +
+          ' path="' + absPath + '"' +
           ' name="' + name + '"';
 
     angular.forEach(options, function(value, key) {
@@ -373,13 +391,14 @@
   
   module.factory('crBuild', function() {
 
-    return function(schema, model, schemaPath, modelPath, options) {
+    return function(schema, model, schemaPath, modelPath, absPath, options) {
 
       schemaPath = schemaPath || 'schema';
       modelPath = modelPath || 'model';
+      absPath = absPath || '';
       options = options || {};
       
-      return buildTemplate(schema, model, schemaPath, modelPath, options);
+      return buildTemplate(schema, model, schemaPath, modelPath, absPath, options);
     };
   });
 
@@ -635,6 +654,9 @@
     
     Resource.prototype.destroy = function(doc) {
 
+      if (!doc._id || !doc._rev) {
+        throw new Error('Cannot delete doc without id or rev');
+      }
       return $http.delete(this.host + this.path + '/' + doc._id + '/' + doc._rev).then(
         function(res) {},
         function(res) { throw makeError(res); }
@@ -887,6 +909,10 @@
     // Inherit from ArrayCtrl, keep in mind to pass all deps
     ArrayCtrl.apply(this, arguments);
 
+    angular.forEach($scope.schema.items.anyOf, function(anySchema, i) {
+      if (!anySchema.name) throw new Error('AnyOf schema has to have a name');
+    });
+    
     this.getSchema = function(type) {
       var schema;
       angular.forEach($scope.schema.items.anyOf, function(anySchema) {
@@ -910,7 +936,7 @@
       scope: {
         model: '=',
         schema: '=',
-        $index: '='
+        path: '@'
       },
 
       replace: true,
@@ -922,7 +948,7 @@
 
         scope.array = array;
         
-        var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
+        var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model', scope.path,
                            { mode: 'minimal' });
 
         var link = $compile(tmpl);
@@ -942,7 +968,8 @@
       require: '^crAnyofArray',
       scope: {
         model: '=',
-        name: '@'
+        name: '@',
+        path: '@'
       },
 
       replace: true,
@@ -955,7 +982,7 @@
         scope.schema = anyof.getSchema(scope.model.type_);
         scope.array = anyof;
         
-        var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
+        var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model', scope.path,
                            { 'mode': 'minimal' });
         var link = $compile(tmpl);
         var e = link(scope);
@@ -971,10 +998,12 @@
   
   module.directive('crArray', function(crSchema) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
+        model: '=ngModel',
         schema: '=',
-        name: '@'
+        name: '@',
+        path: '@'
       },
 
       replace: true,
@@ -1000,10 +1029,12 @@
   
   module.directive('crAnyofArray', function($compile) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
+        model: '=ngModel',
         schema: '=',
-        name: '@'
+        name: '@',
+        path: '@'
       },
 
       replace: true,
@@ -1025,8 +1056,9 @@
 
   module.directive('crImage', function($compile, crCommon) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
+        model: '=ngModel',
         schema: '=',
         name: '@'
       },
@@ -1301,8 +1333,6 @@
 
     var ModelCtrl = function() {
 
-      var self = this;
-      
       this._refs = {};
       this._files = {};
 
@@ -1357,8 +1387,12 @@
       };
 
       $scope.destroy = function() {
-        throw new Error('not implemented');
-        self.destroy();
+        self._destroy();
+      };
+
+      $scope.isNew = function() {
+        if (!$scope.model) return true;
+        return !$scope.model._rev;
       };
     };
 
@@ -1462,6 +1496,8 @@
 
     ModelCtrl.prototype.save = function() {
 
+      if (!$scope.valid) return;
+      
       // trigger saving on this and all referenced models
       
       var self = this;
@@ -1524,6 +1560,15 @@
     };
 
 
+    ModelCtrl.prototype._destroy = function() {
+      return this._resource.destroy($scope.model).then(
+        function() {
+          $scope.model = crSchema.createValue($scope.schema);
+        }
+      );
+    };
+    
+
     return new ModelCtrl();
   });
 
@@ -1564,9 +1609,11 @@
   
   module.directive('crModelForm', function($compile, crBuild, crSchema, crCommon) {
     return {
+      require: 'ngModel',
       scope: {
+        model: '=ngModel',
         schema: '=',
-        model: '='
+        valid: '='
       },
 
       replace: true,
@@ -1574,22 +1621,26 @@
 
       link: function(scope, elem, attrs) {
 
+        scope.$watch('modelForm.$valid', function(newValue, oldValue, scope) {
+          scope.valid = newValue;
+        });
+        
         crCommon.watch(scope, function(scope) {
           return scope.model && scope.schema;
         }).then(
           function(scope) {
-            if (!crSchema.isObjectSchema(scope.schema) &&
-                !crSchema.isArraySchema(scope.schema)) {
-              throw new Error('Top level schema has to be a object or array');
+            if (!crSchema.isObjectSchema(scope.schema)) {
+              throw new Error('Top level schema has to be an object');
             }
 
-            var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
+            var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model', '',
                                { mode: 'minimal'});
             
             var link = $compile(tmpl);
             var content = link(scope);
 
-            elem.html(content);
+            // elem.html(content);
+            elem.append(content);
           }
         );
       }
@@ -1604,10 +1655,12 @@
   
   module.directive('crObject', function($compile, $templateCache, crSchema, crBuild, crCommon) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
+        model: '=ngModel',
         schema: '=',
         name: '@',
+        path: '@',
         template: '@'
       },
 
@@ -1655,9 +1708,10 @@
                 }
 
                 numProperties += 1;
-                
+
                 tmpl += crBuild(subSchema, scope.model[key],
-                                'schema.properties.' + key, 'model.' + key);
+                                'schema.properties.' + key, 'model.' + key,
+                                (scope.path ? scope.path + '.' : '') + key);
               });
 
               // compile and link templates
@@ -1677,25 +1731,47 @@
 
   module.directive('crPassword', function(crCommon) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
-        name: '@'
+        model: '=ngModel',
+        name: '@',
+        path: '@'
       },
       replace: true,
       templateUrl: 'cr-password.html',
 
       controller: crCommon.StandardCtrl,
       
-      link: function(scope, elem, attr) {
+      link: function(scope, elem, attr, ctrl) {
         scope.pass1 = '';
         scope.pass2 = '';
 
-        scope.$watch(function(scope) {
-          if (scope.pass1 || scope.pass2) {
-            if (scope.pass1 === scope.pass2) {
-              scope.model = scope.pass1;
+        scope.hasError = false;
+        scope.error = '';
+        
+        // only set model when passwords are equal and not empty
+
+        var compareValue = function(v1, v2) {
+          if (v1 === v2) {
+            if (v1 !== '') {
+              scope.model = v1;
             }
+            scope.hasError = false;
+            ctrl.$setValidity('me', true);
           }
+          else {
+            scope.error = 'Passwords do not match';
+            scope.hasError = true;
+            ctrl.$setValidity('me', false);
+            console.log('model valid', scope.$valid);
+          }
+        };
+        
+        scope.$watch('pass1', function(newValue) {
+          compareValue(newValue, scope.pass2);
+        });
+        scope.$watch('pass2', function(newValue) {
+          compareValue(newValue, scope.pass1);
         });
       }
     };
@@ -1704,6 +1780,55 @@
 })();
 (function() {
 
+
+  function manageConstraints(scope, ctrl, schema) {
+    
+    var constraints = [];
+
+    var setError = function(error) {
+      ctrl.$setValidity(error, true);
+    };
+
+    var clearError = function(error) {
+      ctrl.$setValidity(error, false);
+    };
+    
+    scope.hasErrors = function() {
+      return Object.keys(ctrl.$error).some(function(key) {
+        return ctrl.$error[key];
+      });
+    };
+
+    scope.hasError = function(name) {
+      return ctrl.$error[name];
+    };
+
+    var addConstraint = function(name, condition, noSchemaConstraint) {
+      if (!noSchemaConstraint &&
+          !schema.hasOwnProperty(name)) return;
+      
+      constraints.push(function(value) {
+        if (!condition(value)) {
+          clearError(name);
+        }
+        else {
+          setError(name);
+        }
+      });
+    };
+        
+    scope.$watch('model', function(newValue, oldValue, scope) {
+      constraints.forEach(function(c) {
+        c(newValue);
+      });
+    });
+
+    return addConstraint;
+  }
+
+  
+
+  
   var module = angular.module('cores.directives');
   
   //
@@ -1712,9 +1837,11 @@
   
   module.directive('crBoolean', function(crCommon) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
-        name: '@'
+        model: '=ngModel',
+        name: '@',
+        path: '@'
       },
       replace: true,
       templateUrl: 'cr-boolean.html',
@@ -1722,37 +1849,50 @@
     };
   });
 
-
-  //
-  // integer
-  //
   
-  module.directive('crInteger', function(crCommon) {
-    return {
-      scope: {
-        model: '=',
-        name: '@'
-      },
-      replace: true,
-      templateUrl: 'cr-integer.html',
-      controller: crCommon.StandardCtrl
-    };
-  });
-
-
   //
   // number
   //
   
   module.directive('crNumber', function(crCommon) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
-        name: '@'
+        model: '=ngModel',
+        schema: '=',
+        name: '@',
+        path: '@',
+        isInteger: '@'
       },
       replace: true,
       templateUrl: 'cr-number.html',
-      controller: crCommon.StandardCtrl
+      controller: crCommon.StandardCtrl,
+
+      link: function(scope, elem, attrs, ctrl) {
+
+        var addConstraint = manageConstraints(scope, ctrl, scope.schema);
+
+        if (elem.attr('isInteger') === 'true') {
+          addConstraint('integer', function(value) {
+            return Math.floor(value) === value;
+          }, true);
+        }
+        else {
+          elem.find('input[type="number"]').attr('step', 'any');
+        }
+        
+        addConstraint('multipleOf', function(value) {
+          return (value % scope.schema.multipleOf) === 0;
+        });
+
+        addConstraint('minimum', function(value) {
+          return value >= scope.schema.minimum;
+        });
+
+        addConstraint('maximum', function(value) {
+          return value <= scope.schema.maximum;
+        });
+      }
     };
   });
 
@@ -1763,13 +1903,37 @@
   
   module.directive('crString', function(crCommon) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
+        model: '=ngModel',
+        schema: '=',
         name: '@'
       },
       replace: true,
       templateUrl: 'cr-string.html',
-      controller: crCommon.StandardCtrl
+      controller: crCommon.StandardCtrl,
+
+      link: function(scope, elem, attrs, ctrl) {
+
+        var addConstraint = manageConstraints(scope, ctrl, scope.schema);
+
+        addConstraint('maxLength', function(value) {
+          return value.length <= scope.schema.maxLength;
+        });
+
+        addConstraint('minLength', function(value) {
+          return value.length >= scope.schema.minLength;
+        });
+
+        addConstraint('pattern', function(value) {
+          return new RegExp(scope.schema.pattern).test(value);
+        });
+
+        addConstraint('format', function(value) {
+          throw new Error('not implemented');
+          return false;
+        });
+      }
     };
   });
 
@@ -1780,8 +1944,9 @@
 
   module.directive('crEnum', function(crCommon) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
+        model: '=ngModel',
         schema: '=',
         name: '@'
       },
@@ -1789,29 +1954,6 @@
       templateUrl: 'cr-enum.html',
 
       controller: crCommon.StandardCtrl
-
-      // link: function(scope, elem, attrs) {
-
-      //   crCommon.watch(scope, function(scope) { return !!scope.schema; }).then(
-      //     function(scope) {
-
-      //       var numItems = scope.enum.length;
-
-      //       if (numItems === 0) {
-      //         scope.$emit('ready');
-      //         return;
-      //       }
-
-      //       var off = scope.$on('ready', function(e) {
-      //         e.stopPropagation();
-      //         if (--numItems === 0) {
-      //           off();
-      //           scope.$emit('ready');
-      //         }
-      //       });
-      //     }
-      //   );
-      // }
     };
   });
   
@@ -1823,8 +1965,9 @@
   
   module.directive('crText', function(crCommon) {
     return {
+      require: 'ngModel',
       scope: {
-        model: '=',
+        model: '=ngModel',
         name: '@'
       },
       replace: true,
