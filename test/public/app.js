@@ -21,40 +21,6 @@
         console.log('cores initialized');
       });
     })
-
-    // .controller('TestCtrl', function($rootScope) {
-
-    //   $rootScope.model = {
-    //     foo: 'Hello',
-    //     bar: 'Guden'
-    //   };
-    //   $rootScope.schema = {
-    //     properties: {
-    //       foo: { type: 'string' },
-    //       bar: { type: 'string' }
-    //     }
-    //   };
-    // })
-
-    // .directive('crTest', function() {
-    //   return {
-    //     require: 'ngModel',
-    //     scope: {
-    //       schema: '=',
-    //       model: '=ngModel'
-    //     },
-    //     link: function(scope, elem, attrs, ctrl) {
-    //       console.log('link ctrl', ctrl);
-
-    //       scope.$watch('model', function(newValue) {
-    //         console.log('model changed', newValue);
-    //       });
-    //       scope.$watch('schema', function(newValue) {
-    //         console.log('schema changed', newValue);
-    //       });
-    //     }
-    //   };
-    // })
   
     .controller('BarCtrl', function($scope, $routeParams, $location) {
       $scope.type = 'Bar';
