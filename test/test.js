@@ -172,7 +172,7 @@ describe('cores', function() {
     var types = [
       { schema: { type: 'boolean' }, attr: 'cr-boolean' },
       { schema: { type: 'number' }, attr: 'cr-number' },
-      { schema: { type: 'integer' }, attr: 'cr-integer' },
+      { schema: { type: 'integer' }, attr: 'cr-number' },
       { schema: { type: 'string' }, attr: 'cr-string' },
       { schema: { 'enum': [1, 2] }, attr: 'cr-enum' },
       { schema: { $ref: 'Foo' }, attr: 'cr-model-create-ref' },
@@ -468,6 +468,8 @@ describe('cores', function() {
 
       var scope = $rootScope.$new();
       scope.type = type;
+      // set valid manually
+      scope.valid = true;
       if (id) scope.id = id;
 
       return $controller('crModelCtrl', { $scope: scope });
