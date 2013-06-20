@@ -1748,22 +1748,29 @@
 
         scope.hasError = false;
         scope.error = '';
+
+        var oldPass = null;
         
         // only set model when passwords are equal and not empty
 
         var compareValue = function(v1, v2) {
           if (v1 === v2) {
             if (v1 !== '') {
+              // set new password
+              oldPass = scope.model;
               scope.model = v1;
             }
+            else if (oldPass !== null) {
+              // reset original password
+              scope.model = oldPass;
+            }
             scope.hasError = false;
-            ctrl.$setValidity('me', true);
+            ctrl.$setValidity('match', true);
           }
           else {
             scope.error = 'Passwords do not match';
             scope.hasError = true;
-            ctrl.$setValidity('me', false);
-            console.log('model valid', scope.$valid);
+            ctrl.$setValidity('match', false);
           }
         };
         
