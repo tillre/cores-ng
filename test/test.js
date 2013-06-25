@@ -423,7 +423,6 @@ describe('cores', function() {
         res.load(imageDoc._id).then(
           function(doc) {
             doc.title = 'Im Multiman';
-
             res.save(doc, file).then(
               function(doc) {
                 assert(doc);
@@ -600,8 +599,8 @@ describe('cores', function() {
     it('should save with files',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Image');
-
+         var ctrl = createCtrl($rootScope, $controller, 'Files');
+         
          var file = JSON.stringify({
            name: 'foo.jpg',
            path: '/upload/foo.jpg',
@@ -612,10 +611,12 @@ describe('cores', function() {
            off();
 
            ctrl.onFileSet({ stopPropagation: function() {} }, 'f1', file);
+           ctrl.onFileSet({ stopPropagation: function() {} }, 'f2', file);
 
            ctrl.save().then(
              function() {
-               assert(ctrl.scope().model.file.url === JSON.parse(file).path);
+               assert(ctrl.scope().model.file0 === 'foo.jpg');
+               assert(ctrl.scope().model.file1 === 'foo.jpg');
                done();
              },
              done

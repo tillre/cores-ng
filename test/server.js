@@ -26,15 +26,26 @@ function setupServer(db, callback) {
   });
 
 
-  // logging
+  // Logging
   
+  // server.on('request', function(req) {
+  //   console.log('-- request', req.method, req.path, req.params);
+  // });
+  // server.on('response', function(res) {
+  //   console.log('-- response', res.code);
+  // });
+  // server.on('tail', function(event) {
+  //   console.log('-- tail');
+  // });
   server.on('internalError', function(req, error) {
     console.log('-- internalError', error);
   });
-  server.on('error', function(err) {
-    console.log(err);
-  });
 
+  // listen on pack events to get plugin log events as well
+
+  server.pack.events.on('log', function(e) {
+    console.log('-- log', e.tags, e.data);
+  });
   
   // serve index.html
   
@@ -75,8 +86,12 @@ function setupServer(db, callback) {
     cores.load('./test/models', { app: app, recursive: true }, function(err, resources) {
       if (err) return callback(err);
 
-      console.log('creating api');
-      server.pack.require('cores-hapi', { cores: cores, resources: resources }, function(err) {
+      var options = {
+        cores: cores,
+        resources: resources,
+        handlers: __dirname + '/models'
+      };
+      server.pack.require('cores-hapi', options, function(err) {
         if (err) return callback(err);
         callback(null, resources, server);
       });

@@ -20,8 +20,8 @@
     "karma-mocha": "0.0.1",
     "chai": "~1.6.0",
     "grunt-contrib-concat": "~0.3.0",
-    "cores-hapi": "0.1.1",
-    "cores": "0.1.1",
+    "cores-hapi": "~0.2.3",
+    "cores": "~0.2.2",
     "jski": "~0.2.0"
   }
 }
