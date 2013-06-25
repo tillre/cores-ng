@@ -584,7 +584,7 @@
 
         // when updating, add the id and rev
         if (doc._id)  fd.append('_id', doc._id);
-        if (doc._rev) fd.append('_rev', doc._ref);
+        if (doc._rev) fd.append('_rev', doc._rev);
 
         doc = fd;
         isMultipart = true;
@@ -635,6 +635,7 @@
           def.resolve(data);
         }
         else {
+          console.log(data);
           def.reject(makeError(data));
         }
         // call apply, because we are outside the angular life-cycle
