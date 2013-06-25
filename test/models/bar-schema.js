@@ -9,6 +9,8 @@ module.exports = j.object({
 
   'enum': j.enum(1, 2, 3),
 
+  ref: j.ref('Foo'),
+
   array: j.array(j.object({
     foo: j.boolean()
   })),
