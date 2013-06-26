@@ -16,17 +16,21 @@
       $routeProvider.otherwise({ redirectTo: '/' });
     })
 
+  
     .controller('AppCtrl', function($scope, crResources) {
+
       crResources.init().then(function() {
         console.log('cores initialized');
       });
     })
+
   
     .controller('BarCtrl', function($scope, $routeParams, $location) {
+
       $scope.type = 'Bar';
-      $scope.id = $routeParams.id;
-      
-      $scope.$on('model:select', function(e, id) {
+      $scope.modelId = $routeParams.id;
+
+      $scope.$on('list:select', function(e, id) {
         e.stopPropagation();
         $location.path('/bars/' + id);
       });
