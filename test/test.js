@@ -151,7 +151,6 @@ describe('cores', function() {
       assert(crSchema.isPrivateProperty('_id'));
       assert(crSchema.isPrivateProperty('_rev'));
       assert(crSchema.isPrivateProperty('type_'));
-      assert(crSchema.isPrivateProperty('parentId_'));
       assert(crSchema.isPrivateProperty('foo') === false);
     }));
 
@@ -175,7 +174,7 @@ describe('cores', function() {
       { schema: { type: 'integer' }, attr: 'cr-number' },
       { schema: { type: 'string' }, attr: 'cr-string' },
       { schema: { 'enum': [1, 2] }, attr: 'cr-enum' },
-      { schema: { $ref: 'Foo' }, attr: 'cr-model-create-ref' },
+      { schema: { $ref: 'Foo' }, attr: 'cr-model-ref' },
       { schema: { type: 'object' }, attr: 'cr-object' },
       { schema: { type: 'array' }, attr: 'cr-array' },
       { schema: { type: 'array', items: { anyOf: [] } }, attr: 'cr-anyof-array' }
@@ -467,11 +466,10 @@ describe('cores', function() {
 
       var scope = $rootScope.$new();
       scope.type = type;
-      // set valid manually
-      scope.valid = true;
-      if (id) scope.id = id;
+      scope.data = { valid: true };
+      if (id) scope.modelId = id;
 
-      return $controller('crModelCtrl', { $scope: scope });
+      return { controller: $controller('crModelCtrl', { $scope: scope }), scope: scope };
     };
 
     before(inject(['crResources'], true, function(crResources, done) {
@@ -485,7 +483,7 @@ describe('cores', function() {
     it('should instantiate',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Foo');
+         var ctrl = createCtrl($rootScope, $controller, 'Foo').controller;
          assert(ctrl);
 
          $rootScope.$on('model:ready', function() {
@@ -497,12 +495,12 @@ describe('cores', function() {
     it('should instantiate with id',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
-         assert(ctrl);
+         var c = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
+         assert(c.controller);
 
          var off = $rootScope.$on('model:ready', function() {
            off();
-           assert(ctrl.scope().model.bar === 'Hello Model');
+           assert(c.scope.model.bar === 'Hello Model');
            done();
          });
        }));
@@ -511,87 +509,38 @@ describe('cores', function() {
     it('should save',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Foo');
+         var c = createCtrl($rootScope, $controller, 'Foo');
 
          var off = $rootScope.$on('model:ready', function() {
            off();
 
-           var model = ctrl.scope().model;
+           var model = c.scope.model;
            model.bar = 'Hello Mate';
 
-           ctrl.save().then(
-             function() {
-               done();
-             },
-             done
-           );
+           c.scope.$on('model:saved', function() {
+             assert(c.scope.model._rev);
+             done();
+           });
+           c.scope.save();
          });
        }));
 
     it('should update',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
+         var c = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
 
          var off = $rootScope.$on('model:ready', function() {
            off();
 
-           var model = ctrl.scope().model;
+           var model = c.scope.model;
            model.bar = 'Hello Update';
 
-           ctrl.save().then(
-             function() {
-               assert(ctrl.scope().model.bar === 'Hello Update');
-               done();
-             },
-             done
-           );
-         });
-       }));
-
-    
-    it('should save and update with referenced model',
-       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
-
-         var ctrl1 = createCtrl($rootScope, $controller, 'Foo');
-         var ctrl2 = createCtrl($rootScope, $controller, 'Foo');
-
-         var rev1, rev2;
-         
-         var count = 2;
-         var off = $rootScope.$on('model:ready', function(e) {
-           if (--count > 0) {
-             return;
-           }
-           off();
-
-           ctrl1.id('model_ref_1_' + new Date().getTime());
-           ctrl2.id('model_ref_2_' + new Date().getTime());
-
-           ctrl1.scope().model.bar = 'Foo1';
-           ctrl2.scope().model.bar = 'Foo2';
-
-           ctrl1.onRefSet({ stopPropagation: function() {} }, 'r1', ctrl2);
-
-           ctrl1.save().then(
-             function() {
-               assert(ctrl2.scope().model.parentId_ === ctrl1.id());
-               // update
-               ctrl1.scope().model.bar = 'Foo1U';
-               ctrl2.scope().model.bar = 'Foo2U';
-               rev1 = ctrl1.scope().model._rev;
-               rev2 = ctrl2.scope().model._rev;
-
-               return ctrl1.save();
-             }
-           ).then(
-             function() {
-               assert(ctrl1.scope().model._rev !== rev1);
-               assert(ctrl2.scope().model._rev !== rev2);
-               done();
-             },
-             done
-           );
+           c.scope.$on('model:saved', function() {
+             assert(c.scope.model.bar === 'Hello Update');
+             done();
+           });
+           c.scope.save();
          });
        }));
 
@@ -599,7 +548,7 @@ describe('cores', function() {
     it('should save with files',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
-         var ctrl = createCtrl($rootScope, $controller, 'Files');
+         var c = createCtrl($rootScope, $controller, 'Files');
          
          var file = JSON.stringify({
            name: 'foo.jpg',
@@ -610,18 +559,32 @@ describe('cores', function() {
          var off = $rootScope.$on('model:ready', function(e) {
            off();
 
-           ctrl.onFileSet({ stopPropagation: function() {} }, 'f1', file);
-           ctrl.onFileSet({ stopPropagation: function() {} }, 'f2', file);
+           c.scope.$emit('file:set', 'f1', file);
+           c.scope.$emit('file:set', 'f2', file);
 
-           ctrl.save().then(
-             function() {
-               assert(ctrl.scope().model.file0 === 'foo.jpg');
-               assert(ctrl.scope().model.file1 === 'foo.jpg');
-               done();
-             },
-             done
-           );
+           c.scope.$on('model:saved', function() {
+             assert(c.scope.model.file0 === 'foo.jpg');
+             assert(c.scope.model.file1 === 'foo.jpg');
+             done();
+           });
+           c.scope.save();
          });
+       }));
+
+    it('should destroy',
+       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+         var c = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
+         assert(c.controller);
+
+         var off = $rootScope.$on('model:ready', function() {
+           off();
+
+           c.scope.$on('model:destroyed', function() {
+             done();
+           });
+           c.scope.destroy();
+         });
+         
        }));
   });
 
@@ -733,23 +696,26 @@ describe('cores', function() {
         res.schema().then(
           // get the schema
           function(s) {
+          console.log('schema');
             schema = s;
             return crSchema.createValue(s);
           }
         ).then(
           // save a default model
           function(model) {
+          console.log('save');
             return res.save(model);
           }
         ).then(
           // create the directive
           function(doc) {
+          console.log('create');
 
             var scope = $rootScope.$new();
-            scope.id = doc._id;
+            scope.modelId = doc._id;
             scope.type = doc.type_;
 
-            var elem = angular.element('<div cr-model type="type" id="id"/>');
+            var elem = angular.element('<div cr-model type="type" modelId="modelId"/>');
             $compile(elem)(scope);
 
             $('body').append(elem);
@@ -761,6 +727,7 @@ describe('cores', function() {
               e.stopPropagation(); 
               assert(!isReady);
               isReady = true;
+              console.log('ready2');
               test.validate(schema, elem, done);
             });
           },

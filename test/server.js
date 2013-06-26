@@ -31,9 +31,9 @@ function setupServer(db, callback) {
   // server.on('request', function(req) {
   //   console.log('-- request', req.method, req.path, req.params);
   // });
-  server.on('response', function(res) {
-    console.log('-- response', res);
-  });
+  // server.on('response', function(res) {
+  //   console.log('-- response', res);
+  // });
   // server.on('tail', function(event) {
   //   console.log('-- tail');
   // });
