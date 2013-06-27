@@ -66,7 +66,6 @@ describe('cores', function() {
 
     it('should get ids', inject(['crCommon'], function(crCommon) {
       assert(crCommon.getFileId() !== crCommon.getFileId());
-      assert(crCommon.getRefId() !== crCommon.getRefId());
       assert(crCommon.getModalId() !== crCommon.getModalId());
     }));
 
@@ -77,7 +76,7 @@ describe('cores', function() {
          crCommon.watch(scope, function(scope) {
            return scope.value;
          }).then(
-           function(scope) { done(); }
+           function() { done(); }
          );
          scope.value = true;
        }));
@@ -174,7 +173,7 @@ describe('cores', function() {
       { schema: { type: 'integer' }, attr: 'cr-number' },
       { schema: { type: 'string' }, attr: 'cr-string' },
       { schema: { 'enum': [1, 2] }, attr: 'cr-enum' },
-      { schema: { $ref: 'Foo' }, attr: 'cr-model-ref' },
+      { schema: { $ref: 'Foo' }, attr: 'cr-ref' },
       { schema: { type: 'object' }, attr: 'cr-object' },
       { schema: { type: 'array' }, attr: 'cr-array' },
       { schema: { type: 'array', items: { anyOf: [] } }, attr: 'cr-anyof-array' }
@@ -694,28 +693,25 @@ describe('cores', function() {
         var schema;
         
         res.schema().then(
-          // get the schema
           function(s) {
-          console.log('schema');
+            // get the schema
             schema = s;
             return crSchema.createValue(s);
           }
         ).then(
-          // save a default model
           function(model) {
-          console.log('save');
+            // save a default model
             return res.save(model);
           }
         ).then(
-          // create the directive
           function(doc) {
-          console.log('create');
-
+            // create the directive
             var scope = $rootScope.$new();
             scope.modelId = doc._id;
             scope.type = doc.type_;
-
-            var elem = angular.element('<div cr-model type="type" modelId="modelId"/>');
+            scope.data = { state: 'editing' };
+            
+            var elem = angular.element('<div cr-model type="type" model-id="modelId"/>');
             $compile(elem)(scope);
 
             $('body').append(elem);
@@ -724,10 +720,10 @@ describe('cores', function() {
             // wait for ready event
             var isReady = false;
             var off = scope.$on('ready', function(e) {
+              
               e.stopPropagation(); 
               assert(!isReady);
               isReady = true;
-              console.log('ready2');
               test.validate(schema, elem, done);
             });
           },
