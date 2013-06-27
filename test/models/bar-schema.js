@@ -20,6 +20,11 @@ module.exports = j.object({
     j.object({ bar: j.string() }).custom('name', 'bar')
   )),
   
+  anyofRefs: j.array(j.anyOf(
+    j.object({ foo: j.ref('Foo').custom('preview', 'bar') }).custom('name', 'foo1'),
+    j.object({ bar: j.ref('Foo').custom('preview', 'bar') }).custom('name', 'foo2')
+  )),
+  
   object: j.object({
     foo: j.number(),
     bar: j.string()
