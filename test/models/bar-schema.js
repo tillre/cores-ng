@@ -15,6 +15,8 @@ module.exports = j.object({
     foo: j.boolean()
   })),
 
+  // arrayRefs: j.array(j.ref('Foo').custom('preview', 'bar')),
+  
   anyof: j.array(j.anyOf(
     j.object({ foo: j.number() }).custom('name', 'foo'),
     j.object({ bar: j.string() }).custom('name', 'bar')
