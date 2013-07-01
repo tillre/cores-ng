@@ -1,0 +1,12 @@
+<table class="table"> 
+  <thead> 
+    <tr> 
+      <th ng-repeat="header in headers">{{header}}</th> 
+    </tr> 
+  </thead> 
+  <tbody> 
+    <tr ng-repeat="row in rows"> 
+      <td ng-click="select(item.id)" ng-repeat="item in row">{{item.value}}</td> 
+    </tr> 
+  </tbody> 
+</table>

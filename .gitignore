@@ -15,3 +15,4 @@ npm-debug.log
 node_modules
 components
 upload
+templates/templates.js

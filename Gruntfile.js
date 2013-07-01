@@ -14,10 +14,22 @@ module.exports = function(grunt) {
       }
     },
 
+    ngtemplates: {
+      cores: {
+        src: 'templates/*.html',
+        dest: 'templates/templates.js',
+        options: {
+          base: 'templates',
+          prepend: 'cr-',
+          module: 'cores.templates'
+        }
+      }
+    },
+    
     concat: {
-      dist: {
+      cores: {
         // order matters!
-        src: ['lib/index.js', 'lib/templates.js', 'lib/services/*.js', 'lib/directives/*.js'],
+        src: ['lib/index.js', 'templates/templates.js', 'lib/services/*.js', 'lib/directives/*.js'],
         dest: 'cores.js'
       }
     }
@@ -25,15 +37,17 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-angular-templates');
 
   //
-  // main tasks
+  // multi tasks
   //
+  
+  grunt.registerTask('default', ['ngtemplates', 'concat']);
   
   grunt.registerTask('server', ['db:create', 'server:run', 'db:destroy']);
   grunt.registerTask('test', ['db:create', 'server:test', 'karma', 'db:destroy']);
 
-  
   //
   // server tasks
   //

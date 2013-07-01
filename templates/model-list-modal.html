@@ -1,0 +1,12 @@
+<div id="{{modalId}}" class="modal hide fade" tabindex="-1" role="dialog"> 
+  <div class="modal-header"> 
+    <button class="close" data-dismiss="modal">x</button> 
+    <h3>{{type}}</h3> 
+  </div> 
+  <div class="modal-body"> 
+    <div cr-model-list type="{{type}}"></div> 
+  </div> 
+  <div class="modal-footer btn-toolbar"> 
+    <button ng-click="cancel" class="btn pull-right" data-dismiss="modal">Cancel</button> 
+  </div> 
+</div>

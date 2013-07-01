@@ -516,11 +516,11 @@ describe('cores', function() {
            var model = c.scope.model;
            model.bar = 'Hello Mate';
 
-           c.scope.$on('model:saved', function() {
+           c.scope.save().then(function() {
+             console.log(c.scope.model._rev);
              assert(c.scope.model._rev);
              done();
-           });
-           c.scope.save();
+           }, done);
          });
        }));
 
@@ -646,31 +646,31 @@ describe('cores', function() {
           assert(elem.find('ul').length);
           done();
         }
-      },
+      }
 
       // Custom
 
-      {
-        type: 'Image',
-        validate: function(schema, elem, done) {
-          assert(elem.find('input[type="file"]').length);
-          done();
-        }
-      },
-      {
-        type: 'Text',
-        validate: function(schema, elem, done) {
-          assert(elem.find('textarea').length);
-          done();
-        }
-      },
-      {
-        type: 'Password',
-        validate: function(schema, elem, done) {
-          assert(elem.find('input[type="password"]').length === 2);
-          done();
-        }
-      }
+      // {
+      //   type: 'Image',
+      //   validate: function(schema, elem, done) {
+      //     assert(elem.find('input[type="file"]').length);
+      //     done();
+      //   }
+      // },
+      // {
+      //   type: 'Text',
+      //   validate: function(schema, elem, done) {
+      //     assert(elem.find('textarea').length);
+      //     done();
+      //   }
+      // },
+      // {
+      //   type: 'Password',
+      //   validate: function(schema, elem, done) {
+      //     assert(elem.find('input[type="password"]').length === 2);
+      //     done();
+      //   }
+      // }
       
       // Complex
 
@@ -694,25 +694,28 @@ describe('cores', function() {
         
         res.schema().then(
           function(s) {
+            console.log('get schema');
             // get the schema
             schema = s;
             return crSchema.createValue(s);
           }
         ).then(
           function(model) {
+            console.log('save model');
             // save a default model
             return res.save(model);
           }
         ).then(
           function(doc) {
+            console.log('create directive');
             // create the directive
             var scope = $rootScope.$new();
             scope.modelId = doc._id;
             scope.type = doc.type_;
-            scope.data = { state: 'editing' };
-            
-            var elem = angular.element('<div cr-model type="type" model-id="modelId"/>');
-            $compile(elem)(scope);
+
+            var cscope = scope.$new();
+            var elem = angular.element('<div cr-model type="{{type}}" model-id="modelId"/>');
+            $compile(elem)(cscope);
 
             $('body').append(elem);
             $('body').append($('<hr>'));
@@ -720,7 +723,7 @@ describe('cores', function() {
             // wait for ready event
             var isReady = false;
             var off = scope.$on('ready', function(e) {
-              
+
               e.stopPropagation(); 
               assert(!isReady);
               isReady = true;

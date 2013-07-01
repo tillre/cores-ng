@@ -20,7 +20,7 @@ files = [
 
   // order matters
   '../lib/index.js',
-  '../lib/templates.js',
+  '../templates/templates.js',
   '../lib/services/**/*.js',
   '../lib/directives/**/*.js',
 
