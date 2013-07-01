@@ -429,7 +429,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.services');
   
-  module.factory('crConstraints', function() {
+  module.factory('crValidation', function() {
 
     return function(scope, schema) {
 
@@ -492,7 +492,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       
       return {
-        add: addConstraint,
+        addConstraint: addConstraint,
         setError: setError,
         removeError: removeError
       };
@@ -1612,7 +1612,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.directives');
 
-  module.directive('crPassword', function(crCommon, crConstraints) {
+  module.directive('crPassword', function(crCommon, crValidation) {
     return {
       scope: {
         model: '=',
@@ -1627,13 +1627,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       
       link: function(scope, elem, attr) {
 
-        var constraints = crConstraints(scope, scope.schema);
+        var validation = crValidation(scope, scope.schema);
 
-        constraints.add('maxLength', function(value) {
+        validation.add('maxLength', function(value) {
           return value.length <= scope.schema.maxLength;
         });
 
-        constraints.add('minLength', function(value) {
+        validation.add('minLength', function(value) {
           return value.length >= scope.schema.minLength;
         });
         
@@ -1650,11 +1650,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             else {
               scope.model = oldPass;
             }
-            constraints.removeError('match');
+            validation.removeError('match');
           }
           else {
             scope.model = oldPass;
-            constraints.setError('match');
+            validation.setError('match');
           }
         };
         
@@ -1696,7 +1696,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   // number
   //
   
-  module.directive('crNumber', function(crCommon, crConstraints) {
+  module.directive('crNumber', function(crCommon, crValidation) {
     return {
       scope: {
         model: '=',
@@ -1712,10 +1712,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        var constraints = crConstraints(scope, scope.schema);        
+        var validation = crValidation(scope, scope.schema);        
 
         if (elem.attr('isInteger') === 'true') {
-          constraints.add('integer', function(value) {
+          val.addConstraint('integer', function(value) {
             return Math.floor(value) === value;
           }, true);
         }
@@ -1723,15 +1723,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           elem.find('input[type="number"]').attr('step', 'any');
         }
         
-        constraints.add('multipleOf', function(value) {
+        validation.addConstraint('multipleOf', function(value) {
           return (value % scope.schema.multipleOf) === 0;
         });
 
-        constraints.add('minimum', function(value) {
+        validation.addConstraint('minimum', function(value) {
           return value >= scope.schema.minimum;
         });
 
-        constraints.add('maximum', function(value) {
+        validation.addConstraint('maximum', function(value) {
           return value <= scope.schema.maximum;
         });
       }
@@ -1743,7 +1743,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   // string
   //
   
-  module.directive('crString', function(crCommon, crConstraints) {
+  module.directive('crString', function(crCommon, crValidation) {
     return {
       scope: {
         model: '=',
@@ -1757,21 +1757,21 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        var constraints = crConstraints(scope, scope.schema);
+        var validation = crValidation(scope, scope.schema);
 
-        constraints.add('maxLength', function(value) {
+        validation.addConstraint('maxLength', function(value) {
           return value.length <= scope.schema.maxLength;
         });
 
-        constraints.add('minLength', function(value) {
+        validation.addConstraint('minLength', function(value) {
           return value.length >= scope.schema.minLength;
         });
 
-        constraints.add('pattern', function(value) {
+        validation.addConstraint('pattern', function(value) {
           return new RegExp(scope.schema.pattern).test(value);
         });
 
-        constraints.add('format', function(value) {
+        validation.addConstraint('format', function(value) {
           throw new Error('not implemented');
           return false;
         });
