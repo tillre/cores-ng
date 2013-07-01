@@ -192,11 +192,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   $templateCache.put("cr-password.html",
     "<div class=\"control-group\" ng-class=\"{ error: hasErrors() }\"> \n" +
     "  <label class=\"control-label\">{{name}}:</label> \n" +
+    "\n" +
     "  <input type=\"password\" ng-model=\"pass1\" style=\"margin-right: 4px\"/> \n" +
     "  <input type=\"password\" ng-model=\"pass2\"/> \n" +
-    "  <!-- <p ng-show=\"hasError\" class=\"help-inline\">{{ error }}</p>  -->\n" +
+    "\n" +
     "  <span ng-switch on=\"getFirstError()\"> \n" +
     "    <p ng-switch-when=\"match\" class=\"help-inline\">Passwords do not match</p> \n" +
+    "    <p ng-switch-when=\"maxLength\" class=\"help-inline\">Value is longer than {{schema.maxLength}}</p> \n" +
+    "    <p ng-switch-when=\"minLength\" class=\"help-inline\">Value is shorter than {{schema.minLength}}</p> \n" +
     "  </span>  \n" +
     "</div>\n"
   );
@@ -453,15 +456,29 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         return '';
       };
 
-      
+
       scope.$watch('model', function(newValue, oldValue, scope) {
         constraints.forEach(function(c) {
           c(newValue);
         });
       });
 
+
+      var setError = function(name) {
+        errors[name] = true;
+        scope.$emit('error:set', scope.path + ':' + name);
+      };
+
       
-      return function constraint(name, condition, isCustomConstraint) {
+      var removeError = function(name) {
+        if (errors.hasOwnProperty(name)) {
+          delete errors[name];
+          scope.$emit('error:remove', scope.path + ':' + name);
+        }
+      };
+
+      
+      var addConstraint = function(name, condition, isCustomConstraint) {
 
         // only check constraints that are defined in the schema
         if (!isCustomConstraint &&
@@ -469,18 +486,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         
         constraints.push(function(value) {
 
-          if (condition(value)) {
-            if (errors.hasOwnProperty(name)) {
-              scope.$emit('error:remove', scope.path + ':' + name);
-              delete errors[name];
-            }
-          }
-          else {
-            scope.$emit('error:set', scope.path + ':' + name);
-            errors[name] = true;
-          }
+          condition(value) ? removeError(name) : setError(name);
         });
       }
+
+      
+      return {
+        add: addConstraint,
+        setError: setError,
+        removeError: removeError
+      };
     }
   });
 })();
@@ -1601,6 +1616,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     return {
       scope: {
         model: '=',
+        schema: '=',
         name: '@',
         path: '@'
       },
@@ -1610,54 +1626,45 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       controller: crCommon.StandardCtrl,
       
       link: function(scope, elem, attr) {
+
+        var constraints = crConstraints(scope, scope.schema);
+
+        constraints.add('maxLength', function(value) {
+          return value.length <= scope.schema.maxLength;
+        });
+
+        constraints.add('minLength', function(value) {
+          return value.length >= scope.schema.minLength;
+        });
         
         scope.pass1 = '';
         scope.pass2 = '';
-
-        // scope.hasError = false;
-        // scope.error = '';
-
-        // var oldPass = null;
-
-        var constraint = crConstraints(scope);
-
-        constraint('match', function() {
-          return scope.pass1 === scope.pass2;
-        }, true);
+        var oldPass = scope.model;
         
-        // addConstraint('match', function() {
-        //   return scope.pass1 === scope.pass2;
-        // });
+        var compareValue = function(v1, v2) {
+          // only set model when passwords are equal and not empty
+          if (v1 === v2) {
+            if (v1 !== '') {
+              scope.model = v1;
+            }
+            else {
+              scope.model = oldPass;
+            }
+            constraints.removeError('match');
+          }
+          else {
+            scope.model = oldPass;
+            constraints.setError('match');
+          }
+        };
         
-        // only set model when passwords are equal and not empty
+        scope.$watch('pass1', function(newValue) {
+          compareValue(newValue, scope.pass2);
+        });
 
-        // var compareValue = function(v1, v2) {
-        //   if (v1 === v2) {
-        //     if (v1 !== '') {
-        //       // set new password
-        //       oldPass = scope.model;
-        //       scope.model = v1;
-        //     }
-        //     else if (oldPass !== null) {
-        //       // reset original password
-        //       scope.model = oldPass;
-        //     }
-        //     scope.hasError = false;
-        //     scope.$emit('form:error', scope.path + ':password', true)
-        //   }
-        //   else {
-        //     scope.error = 'Passwords do not match';
-        //     scope.hasError = true;
-        //     scope.$emit('form:error', scope.path + ':password', false)
-        //   }
-        // };
-        
-        // scope.$watch('pass1', function(newValue) {
-        //   compareValue(newValue, scope.pass2);
-        // });
-        // scope.$watch('pass2', function(newValue) {
-        //   compareValue(newValue, scope.pass1);
-        // });
+        scope.$watch('pass2', function(newValue) {
+          compareValue(newValue, scope.pass1);
+        });
       }
     };
   });
@@ -1705,10 +1712,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        var constraint = crConstraints(scope, scope.schema);        
+        var constraints = crConstraints(scope, scope.schema);        
 
         if (elem.attr('isInteger') === 'true') {
-          constraint('integer', function(value) {
+          constraints.add('integer', function(value) {
             return Math.floor(value) === value;
           }, true);
         }
@@ -1716,15 +1723,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           elem.find('input[type="number"]').attr('step', 'any');
         }
         
-        constraint('multipleOf', function(value) {
+        constraints.add('multipleOf', function(value) {
           return (value % scope.schema.multipleOf) === 0;
         });
 
-        constraint('minimum', function(value) {
+        constraints.add('minimum', function(value) {
           return value >= scope.schema.minimum;
         });
 
-        constraint('maximum', function(value) {
+        constraints.add('maximum', function(value) {
           return value <= scope.schema.maximum;
         });
       }
@@ -1750,21 +1757,21 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        var constraint = crConstraints(scope, scope.schema);
+        var constraints = crConstraints(scope, scope.schema);
 
-        constraint('maxLength', function(value) {
+        constraints.add('maxLength', function(value) {
           return value.length <= scope.schema.maxLength;
         });
 
-        constraint('minLength', function(value) {
+        constraints.add('minLength', function(value) {
           return value.length >= scope.schema.minLength;
         });
 
-        constraint('pattern', function(value) {
+        constraints.add('pattern', function(value) {
           return new RegExp(scope.schema.pattern).test(value);
         });
 
-        constraint('format', function(value) {
+        constraints.add('format', function(value) {
           throw new Error('not implemented');
           return false;
         });

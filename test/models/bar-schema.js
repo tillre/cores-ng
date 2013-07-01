@@ -33,5 +33,5 @@ module.exports = j.object({
   }),
 
   text: j.string().custom('view', 'text'),
-  password: j.string().custom('view', 'password')
+  password: j.string().minLength(8).custom('view', 'password')
 });
