@@ -1,9 +1,13 @@
 <div> 
   <label><strong>{{name}}:</strong></label> 
 
-  <div class="indent"> 
+  <div class="indent control-group" ng-class="{ error: hasErrors() }"> 
     <div cr-ref-preview type="{{schema.$ref}}" options="{{schema.preview}}"></div> 
 
+    <span ng-switch on="getFirstError()"> 
+      <p ng-switch-when="required" class="help-block">Required</p>    
+    </span>
+    
     <div class="btn-group"> 
       <button ng-click="newModel()" class="btn">New</button> 
       <button ng-show="model.id" ng-click="updateModel()" class="btn">Edit</button> 

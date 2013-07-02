@@ -5,7 +5,8 @@ module.exports = j.object({
   boolean: j.boolean(),
   number: j.number().minimum(-1.5).maximum(1.5),
   integer: j.integer().minimum(0).maximum(10).multipleOf(2),
-  string: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
+  string1: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
+  string2: j.string(),
 
   'enum': j.enum(1, 2, 3),
 
@@ -35,4 +36,4 @@ module.exports = j.object({
   text: j.string().custom('view', 'text'),
   password: j.string().minLength(8).custom('view', 'password')
 
-}).required(['number']);
+}).required('string2', 'number', 'ref');
