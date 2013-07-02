@@ -729,20 +729,18 @@ describe('cores', function() {
         
         res.schema().then(
           function(s) {
-            console.log('get schema');
             // get the schema
             schema = s;
             return crSchema.createValue(s);
           }
         ).then(
           function(model) {
-            console.log('save model');
             // save a default model
             return res.save(model);
           }
         ).then(
           function(doc) {
-            console.log('create directive');
+
             // create the directive
             var scope = $rootScope.$new();
             scope.modelId = doc._id;
@@ -755,6 +753,8 @@ describe('cores', function() {
             $('body').append(elem);
             $('body').append($('<hr>'));
 
+            // TODO Problems with ngswitch in model templates, dunno how to fix....
+            
             // wait for ready event
             var isReady = false;
             var off = scope.$on('ready', function(e) {
