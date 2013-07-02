@@ -68,20 +68,55 @@ describe('cores', function() {
       assert(crCommon.getFileId() !== crCommon.getFileId());
       assert(crCommon.getModalId() !== crCommon.getModalId());
     }));
-
-    it('should watch until condition is met',
-       inject(['$rootScope', 'crCommon'], true, function($rootScope, crCommon, done) {
-
-         var scope = $rootScope.$new();
-         crCommon.watch(scope, function(scope) {
-           return scope.value;
-         }).then(
-           function() { done(); }
-         );
-         scope.value = true;
-       }));
   });
 
+
+  describe('crValidation', function() {
+
+    var scope = {
+      $emit: function(event, error) { assert(error === ':foo'); },
+      $watch: function() {}
+    };
+    
+    it('should set error', inject(['crValidation'], function(crValidation) {
+
+      var validation = crValidation(scope);
+      validation.setError('foo');
+
+      assert(scope.hasErrors());
+      assert(scope.hasError('foo'));
+      assert(scope.getFirstError() === 'foo');
+    }));
+
+    it('should remove error', inject(['crValidation'], function(crValidation) {
+
+      var validation = crValidation(scope);
+      validation.setError('foo');
+      validation.removeError('foo');
+
+      assert(!scope.hasErrors());
+      assert(!scope.hasError('foo'));
+      assert(!scope.getFirstError());
+    }));
+
+    it('should add constraint', inject(['$rootScope', 'crValidation'], true, function($rootScope, crValidation, done) {
+
+      var s = $rootScope.$new();
+      s.model = true;
+      s.$on('error:set', function(e, error) {
+        assert(error === ':test');
+        done();
+      });
+
+      var v = crValidation(s);
+      v.addConstraint('test', function(value) {
+        return value;
+      }, true);
+
+      s.model = false;
+    }));
+  });
+  
 
   describe('crSchema', function() {
 
