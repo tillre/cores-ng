@@ -1,6 +1,6 @@
 {
   "name": "cores-ng",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "ignore": [
     "**/.*",
     "lib",
@@ -12,7 +12,10 @@
     "components"
   ],
   "dependencies": {
-    "angular": "git@github.com:PatternConsulting/bower-angular.git#1.1.4",
-    "bootstrap": "~2.3.2"
+    "jquery": "~1.10.1",
+    "angular": "git@github.com:PatternConsulting/bower-angular.git#1.1.5",
+    "bootstrap": "~2.3.2",
+    "bootstrap-datepicker": "~1.1.2",
+    "bootstrap-timepicker": "~0.2.2"
   }
 }

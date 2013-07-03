@@ -8,6 +8,8 @@ module.exports = j.object({
   string1: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
   string2: j.string(),
 
+  date: j.string().custom('view', 'cr-datetime'),
+
   'enum': j.enum(1, 2, 3),
 
   ref: j.ref('Foo').custom('preview', 'bar'),
@@ -33,7 +35,7 @@ module.exports = j.object({
     bar: j.string()
   }),
 
-  text: j.string().custom('view', 'text'),
-  password: j.string().minLength(8).custom('view', 'password')
+  text: j.string().custom('view', 'cr-text'),
+  password: j.string().minLength(8).custom('view', 'cr-password')
 
 }).required('string2', 'number', 'ref');

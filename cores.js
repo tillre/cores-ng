@@ -82,6 +82,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</span>\n"
   );
 
+  $templateCache.put("cr-datetime.html",
+    "<span> \n" +
+    "  <label>{{name}}</label>\n" +
+    "\n" +
+    "  <div class=\"input-append date\" id=\"dp3\" data-date-format=\"dd.mm.yyyy\">\n" +
+    "    <input type=\"text\" class=\"input-small\">\n" +
+    "    <span class=\"add-on\"><i class=\"icon-th\"></i></span>\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <div class=\"input-append bootstrap-timepicker\">\n" +
+    "    <input class=\"time\" type=\"text\" class=\"input-small\">\n" +
+    "    <span class=\"add-on\"><i class=\"icon-time\"></i></span>\n" +
+    "  </div>\n" +
+    "</span>\n" +
+    "\n"
+  );
+
   $templateCache.put("cr-enum.html",
     "<span> \n" +
     "  <label>{{name}}:</label> \n" +
@@ -343,6 +360,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       }
       else throw new Error('View has to be of type object or string');
     }
+    else {
+      // add namespace prefix
+      viewType = 'cr-' + viewType;
+    }
 
     return buildElement(viewType, schemaPath, modelPath, viewName, absPath, options);
   }
@@ -353,8 +374,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   //
   
   function buildElement(type, schemaPath, modelPath, name, absPath, options) {
-    var e = '<div' +
-          ' cr-' + type +
+    var e = '<div ' + type +
           ' schema="' + schemaPath + '"' +
           ' model="' + modelPath + '"' +
           ' path="' + absPath + '"' +
@@ -1078,6 +1098,33 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     };
   });
 
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+  
+  module.directive('crDatetime', function() {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@',
+        path: '@'
+      },
+
+      replace: true,
+      templateUrl: 'cr-datetime.html',
+
+      link: function(scope, elem, attrs) {
+
+        elem.find('.date').datepicker();
+        elem.find('.time').timepicker();
+        
+        scope.$emit('ready');
+      }
+    };
+  });
 })();
 (function() {
 
@@ -1887,6 +1934,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
         scope.$on('preview:update', function(e, id) {
 
+          if (!scope.options || scope.options === '') {
+            scope.options = 'title';
+          }
+          
           e.preventDefault();
           if (id) {
             crResources.get(scope.type).load(id).then(function(doc) {
