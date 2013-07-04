@@ -106,6 +106,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</span>\n"
   );
 
+  $templateCache.put("cr-image.html",
+    "<span>\n" +
+    "  <label>{{name}}</label>\n" +
+    "  <input type=\"file\"/>\n" +
+    "  <img class=\"img-rounded\" height=\"140\">\n" +
+    "</span>\n"
+  );
+
   $templateCache.put("cr-model-form.html",
     "<div> \n" +
     "  <form name=\"modelForm\"></form> \n" +
@@ -1226,29 +1234,29 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   });
 
 
-  module.directive('crImageRefPreview', function() {
-    return {
-      scope: {
-        model: '=',
-        file: '='
-      },
+  // module.directive('crImageRefPreview', function() {
+  //   return {
+  //     scope: {
+  //       model: '=',
+  //       file: '='
+  //     },
 
-      replace: true,
-      templateUrl: 'cr-image-preview.html',
+  //     replace: true,
+  //     templateUrl: 'cr-image-preview.html',
 
-      link: function(scope, elem, attr) {
-        scope.$watch('file', function(file) {
-          if (file) {
-            var fr = new FileReader();
-            fr.onload = function(e) {
-              elem.find('img').attr('src', e.target.result);
-            };
-            fr.readAsDataURL(file);
-          }
-        });
-      }
-    };
-  });
+  //     link: function(scope, elem, attr) {
+  //       scope.$watch('file', function(file) {
+  //         if (file) {
+  //           var fr = new FileReader();
+  //           fr.onload = function(e) {
+  //             elem.find('img').attr('src', e.target.result);
+  //           };
+  //           fr.readAsDataURL(file);
+  //         }
+  //       });
+  //     }
+  //   };
+  // });
 
 })();
 (function() {
