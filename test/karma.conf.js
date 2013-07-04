@@ -10,11 +10,11 @@ files = [
   MOCHA,
   MOCHA_ADAPTER,
   
-  './components/jquery/jquery.js',
-  './components/angular/angular.js',
-  './components/angular/angular-mocks.js',
-  './components/bootstrap/js/bootstrap-dropdown.js',
-  './components/bootstrap/js/bootstrap-modal.js',
+  '../components/jquery/jquery.js',
+  '../components/angular/angular.js',
+  '../components/angular/angular-mocks.js',
+  '../components/bootstrap/js/bootstrap-dropdown.js',
+  '../components/bootstrap/js/bootstrap-modal.js',
   
   '../node_modules/chai/chai.js',
 

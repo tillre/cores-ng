@@ -228,7 +228,7 @@ describe('cores', function() {
   describe('crResources', function() {
 
     it('should init', inject(['crResources'], true, function(crResources, done) {
-      crResources.init(host).then(
+      crResources.init({ host: host }).then(
         function(resources) {
           assert(angular.isObject(resources));
           assert(resources.hasOwnProperty('Boolean'));
@@ -281,9 +281,7 @@ describe('cores', function() {
         path: '/foos',
         schemaPath: '/foos/_schema',
         viewPaths: { bars: '/foos/_views/bars' }
-      }, {
-        host: host
-      });
+      }, host);
     }));
 
 
@@ -441,6 +439,7 @@ describe('cores', function() {
 
       
       it('should save multipart data', inject(['crResources'], true, function(crResources, done) {
+        console.log('image: ', crResources.get('Image'));
         crResources.get('Image').save(imageDoc, file).then(
           function(doc) {
             assert(doc);

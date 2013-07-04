@@ -65,7 +65,7 @@ function setupServer(db, callback) {
 
   // app data
   
-  var app = {
+  var app = server.pack.app = {
     upload: {
       dir: path.join(__dirname, '/public/upload'),
       url: '/test/public/upload/'
@@ -83,7 +83,7 @@ function setupServer(db, callback) {
     // load models and create the api
     console.log('loading models');
     
-    cores.load('./test/models', { app: app, recursive: true }, function(err, resources) {
+    cores.load('./test/models', { recursive: true }, function(err, resources) {
       if (err) return callback(err);
 
       var options = {
