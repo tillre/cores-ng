@@ -439,7 +439,7 @@ describe('cores', function() {
 
       
       it('should save multipart data', inject(['crResources'], true, function(crResources, done) {
-        console.log('image: ', crResources.get('Image'));
+
         crResources.get('Image').save(imageDoc, file).then(
           function(doc) {
             assert(doc);
@@ -551,7 +551,6 @@ describe('cores', function() {
            model.bar = 'Hello Mate';
 
            c.scope.save().then(function() {
-             console.log(c.scope.model._rev);
              assert(c.scope.model._rev);
              done();
            }, done);

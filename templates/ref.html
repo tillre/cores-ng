@@ -10,7 +10,7 @@
     
     <div class="btn-group"> 
       <button ng-click="newModel()" class="btn">New</button> 
-      <button ng-show="model.id" ng-click="updateModel()" class="btn">Edit</button> 
+      <button ng-show="hasModel()" ng-click="updateModel()" class="btn">Edit</button> 
       <button ng-click="selectModel()" class="btn">Select</button> 
     </div> 
   </div> 

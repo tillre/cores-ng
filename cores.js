@@ -250,7 +250,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    \n" +
     "    <div class=\"btn-group\"> \n" +
     "      <button ng-click=\"newModel()\" class=\"btn\">New</button> \n" +
-    "      <button ng-show=\"model.id\" ng-click=\"updateModel()\" class=\"btn\">Edit</button> \n" +
+    "      <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn\">Edit</button> \n" +
     "      <button ng-click=\"selectModel()\" class=\"btn\">Select</button> \n" +
     "    </div> \n" +
     "  </div> \n" +
@@ -475,7 +475,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   
   module.factory('crResource', function($http, $q, $rootScope) {
 
-    var Resource = function(type, config, options) {
+    var Resource = function(type, config, host) {
 
       this.type = type;
       
@@ -486,12 +486,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         config
       );
 
-      // add options to this
-      angular.extend(
-        this,
-        { host: '' },
-        options
-      );
+      if (host) {
+        this.path = host + this.path;
+        this.schemaPath = host + this.schemaPath;
+
+        var self = this;
+        angular.forEach(this.viewPaths, function(path, name) {
+          self.viewPaths[name] = host + path;
+        });
+      }
     };
 
 
@@ -501,7 +504,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     
     Resource.prototype.schema = function() {
 
-      return $http.get(this.host + this.schemaPath).then(
+      return $http.get(this.schemaPath).then(
         function(res) { return res.data; },
         function(res) { throw makeError(res); }
       );
@@ -514,7 +517,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     
     Resource.prototype.load = function(id, params) {
 
-      var path = this.host + this.path;
+      var path = this.path;
 
       if (id) {
         if (typeof id === 'string') {
@@ -567,7 +570,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       }
 
       var req  = {
-        url: this.host + this.path,
+        url: this.path,
         method: 'POST',
         data: doc
       };
@@ -633,7 +636,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       if (!doc._id || !doc._rev) {
         throw new Error('Cannot delete doc without id or rev');
       }
-      return $http.delete(this.host + this.path + '/' + doc._id + '/' + doc._rev).then(
+      return $http.delete(this.path + '/' + doc._id + '/' + doc._rev).then(
         function(res) {},
         function(res) { throw makeError(res); }
       );
@@ -650,7 +653,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       if (!path) {
         throw new Error('No view with name found: ' + name);
       }
-      path = this.host + path;
 
       var config = {
         params: params || {}
@@ -676,20 +678,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     var Resources = function() {
 
       this._resources = {};
-      this._host = '';
+      this._path = '';
     };
 
 
-    Resources.prototype.init = function(host) {
+    Resources.prototype.init = function(options) {
 
-      this._host = host || '';
+      options = options || {};
+      this._host = options.host || '';
+      this._path = this._host + (options.path || '');
+      
       var self = this;
 
-      return $http.get(this._host + '/_index').then(
+      return $http.get(this._path + '/_index').then(
 
         function(res) {
-          angular.forEach(res.data, function(value, key) {
-            self._resources[key] = new crResource(key, value, { host: self._host });
+          angular.forEach(res.data, function(config, key) {
+            self._resources[key] = new crResource(key, config, self._host);
           });
           return self._resources;
         },
@@ -704,7 +709,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       count = count || 1;
 
-      return $http.get(this._host + '/_uuids?count=' + count).then(
+      return $http.get(this._path + '/_uuids?count=' + count).then(
         function(res) {
           return res.data.uuids;
         },
@@ -1916,13 +1921,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
         $scope.$on('model:saved', function(e, model) {
           e.stopPropagation();
-          $scope.model.id = model._id;
+          $scope.model.id_ = model._id;
           $scope.$broadcast('preview:update', model._id);
         });
 
         $scope.$on('list:select', function(e, id) {
           e.stopPropagation();
-          $scope.model.id = id;
+          $scope.model.id_ = id;
           $scope.$broadcast('preview:update', id);
         });
       },
@@ -1939,29 +1944,33 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         };
 
         scope.updateModel = function() {
-          scope.$broadcast('model:showmodal', scope.editModalId, scope.model.id);
+          scope.$broadcast('model:showmodal', scope.editModalId, scope.model.id_);
         };
 
         scope.selectModel = function() {
           scope.$broadcast('list:showmodal', scope.selectModalId, true);
         };
 
+        scope.hasModel = function() {
+          return !!scope.model.id_;
+        };
+
         // validation
 
         var validation = crValidation(scope, {
-          path: scope.path, schema: scope.schema, watch: 'model.id'
+          path: scope.path, schema: scope.schema, watch: 'model.id_'
         });
 
         if (attrs.isRequired === 'true') {
           validation.addConstraint('required', function(value) {
-            return !!scope.model.id;
+            return !!scope.model.id_;
           }, true);
         }
         
         // delay to give the preview time to initialize
         
         $timeout(function() {
-          scope.$broadcast('preview:update', scope.model.id);
+          scope.$broadcast('preview:update', scope.model.id_);
           scope.$emit('ready');
         });
       }
