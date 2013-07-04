@@ -1148,7 +1148,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           date.setMonth(e.date.getMonth());
           date.setDate(e.date.getDate());
 
-          scope.model = date.toUTCString();
+          scope.model = date.toISOString();
+          scope.$apply();
         });
 
         timepicker.on('changeTime.timepicker', function(e) {
@@ -1157,7 +1158,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           date.setHours(e.time.hours);
           date.setMinutes(e.time.minutes);
 
-          scope.model = date.toUTCString();
+          scope.model = date.toISOString();
+          scope.$apply();
         });
         
         scope.$emit('ready');
