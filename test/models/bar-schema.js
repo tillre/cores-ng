@@ -8,6 +8,9 @@ module.exports = j.object({
   string1: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
   string2: j.string(),
 
+  slug: j.string()
+    .custom('view', { type: 'cr-slug', source: ['string1', 'string2'] }),
+  
   date: j.string().custom('view', 'cr-datetime'),
 
   'enum': j.enum(1, 2, 3),
@@ -21,8 +24,18 @@ module.exports = j.object({
   // arrayRefs: j.array(j.ref('Foo').custom('preview', 'bar')),
   
   anyof: j.array(j.anyOf(
-    j.object({ foo: j.number() }).custom('name', 'foo'),
-    j.object({ bar: j.string() }).custom('name', 'bar')
+    j.object({
+      text: j.string(),
+      images: j.array(j.object({ name: j.string() }))
+    }).custom('name', 'textimage'),
+
+    j.object({
+      embed: j.string()
+    }).custom('name', 'video'),
+    
+    j.object({
+      images: j.array(j.object({ name: j.string() }))
+    }).custom('name', 'gallery')
   )),
   
   anyofRefs: j.array(j.anyOf(

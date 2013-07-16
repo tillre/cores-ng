@@ -92,7 +92,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  </div>\n" +
     "\n" +
     "  <div class=\"input-append bootstrap-timepicker\">\n" +
-    "    <input class=\"time\" type=\"text\" class=\"input-small\">\n" +
+    "    <input class=\"time input-small\" type=\"text\" class=\"input-small\">\n" +
     "    <span class=\"add-on\"><i class=\"icon-time\"></i></span>\n" +
     "  </div>\n" +
     "</span>\n" +
@@ -258,6 +258,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div cr-model-modal modal-id=\"{{editModalId}}\" type=\"{{schema.$ref}}\" path=\"{{path}}\"></div> \n" +
     "  <div cr-model-list-modal modal-id=\"{{selectModalId}}\" type=\"{{schema.$ref}}\"></div> \n" +
     "</div>\n"
+  );
+
+  $templateCache.put("cr-slug.html",
+    "<span class=\"control-group\" ng-class=\"{ error: hasErrors() }\"> \n" +
+    "  <div class=\"controls\"> \n" +
+    "    <label>{{name}}:</label>\n" +
+    "    <div class=\"input-append\">\n" +
+    "      <input class=\"input-xlarge\" type=\"text\" ng-model=\"model\"/>\n" +
+    "      <a ng-click=\"generate()\" class=\"btn\">Generate</a>\n" +
+    "    </div>\n" +
+    "    <span ng-switch on=\"getFirstError()\"> \n" +
+    "      <p ng-switch-when=\"maxLength\" class=\"help-inline\">Value is longer than {{schema.maxLength}}</p> \n" +
+    "      <p ng-switch-when=\"minLength\" class=\"help-inline\">Value is shorter than {{schema.minLength}}</p> \n" +
+    "      <p ng-switch-when=\"required\" class=\"help-inline\">Required</p> \n" +
+    "    </span> \n" +
+    "  </div> \n" +
+    "</span>\n"
   );
 
   $templateCache.put("cr-string.html",
@@ -2007,6 +2024,42 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     };
   });
 })();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
+  module.directive('crSlug', function() {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@',
+        path: '@',
+        source: '@'
+      },
+
+      replace: true,
+      templateUrl: 'cr-slug.html',
+
+      link: function(scope, elem, attrs) {
+
+        scope.generate = function() {
+          
+          var sources = scope.source ? scope.source.split(',') : "";
+          var val = '';
+          
+          angular.forEach(sources, function(src) {
+            val += (val !== '' ? '-' : '') + scope.$parent.model[src];
+          });
+          scope.model = val;
+        }
+      }
+    };
+  });
+
+})();
+
 (function() {
 
   var module = angular.module('cores.directives');
