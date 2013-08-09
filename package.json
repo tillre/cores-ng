@@ -15,7 +15,7 @@
     "grunt-karma": "~0.4.3",
     "bower": "~0.8.6",
     "async": "~0.2.8",
-    "hapi": "~1.x.x",
+    "hapi": "~1.8.3",
     "karma": "~0.9.2",
     "karma-mocha": "0.0.1",
     "chai": "~1.6.0",

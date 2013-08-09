@@ -27,7 +27,7 @@ function setupServer(db, callback) {
 
 
   // Logging
-  
+
   // server.on('request', function(req) {
   //   console.log('-- request', req.method, req.path, req.params);
   // });
@@ -46,17 +46,17 @@ function setupServer(db, callback) {
   server.pack.events.on('log', function(e) {
     console.log('-- log', e.tags, e.data);
   });
-  
+
   // serve index.html
-  
+
   server.route({
     path: '/',
     method: 'GET',
     handler: { file: './test/public/index.html' }
   });
-  
+
   // serve files
-  
+
   server.route({
     path: '/{path*}',
     method: 'GET',
@@ -64,7 +64,7 @@ function setupServer(db, callback) {
   });
 
   // app data
-  
+
   var app = server.pack.app = {
     upload: {
       dir: path.join(__dirname, '/public/upload'),
@@ -82,7 +82,7 @@ function setupServer(db, callback) {
 
     // load models and create the api
     console.log('loading models');
-    
+
     cores.load('./test/models', { recursive: true }, function(err, resources) {
       if (err) return callback(err);
 

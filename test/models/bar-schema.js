@@ -9,8 +9,9 @@ module.exports = j.object({
   string2: j.string(),
 
   slug: j.string()
+    .format('slug')
     .custom('view', { type: 'cr-slug', source: ['string1', 'string2'] }),
-  
+
   date: j.string().custom('view', 'cr-datetime'),
 
   'enum': j.enum(1, 2, 3),
@@ -22,7 +23,7 @@ module.exports = j.object({
   })),
 
   // arrayRefs: j.array(j.ref('Foo').custom('preview', 'bar')),
-  
+
   anyof: j.array(j.anyOf(
     j.object({
       text: j.string(),
@@ -32,17 +33,17 @@ module.exports = j.object({
     j.object({
       embed: j.string()
     }).custom('name', 'video'),
-    
+
     j.object({
       images: j.array(j.object({ name: j.string() }))
     }).custom('name', 'gallery')
   )),
-  
+
   anyofRefs: j.array(j.anyOf(
     j.object({ foo: j.ref('Foo').custom('preview', 'bar') }).custom('name', 'foo1'),
     j.object({ bar: j.ref('Foo').custom('preview', 'bar') }).custom('name', 'foo2')
   )),
-  
+
   object: j.object({
     foo: j.number(),
     bar: j.string()
