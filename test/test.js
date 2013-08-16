@@ -15,7 +15,7 @@ describe('cores', function() {
   // (deps, callback)
   // (async, callback(done))
   //
-  
+
   function inject(deps, async, callback) {
 
     if (typeof deps === 'function') {
@@ -29,19 +29,19 @@ describe('cores', function() {
       async = deps;
       deps = [];
     }
-    
+
     if (typeof async === 'function') {
       callback = async;
       async = false;
     }
 
     var run;
-    
+
     deps.unshift('$rootScope');
     injector.invoke(deps.concat(function($rootScope) {
 
       var args = Array.prototype.slice.call(arguments, 1);
-      
+
       if (async) {
         run = function(done) {
           args.push(done);
@@ -55,7 +55,7 @@ describe('cores', function() {
           $rootScope.$apply();
         };
       }
-      
+
     }));
 
     return run;
@@ -77,7 +77,7 @@ describe('cores', function() {
       $emit: function(event, error) { assert(error === ':foo'); },
       $watch: function() {}
     };
-    
+
     it('should set error', inject(['crValidation'], function(crValidation) {
 
       var validation = crValidation(scope);
@@ -116,7 +116,7 @@ describe('cores', function() {
       s.model = false;
     }));
   });
-  
+
 
   describe('crSchema', function() {
 
@@ -198,7 +198,7 @@ describe('cores', function() {
       assert(crSchema.isObjectSchema({ properties: { foo: { type: 'number' } } }));
     }));
   });
-  
+
 
   describe('crBuild', function() {
 
@@ -223,7 +223,7 @@ describe('cores', function() {
       }));
     });
   });
-  
+
 
   describe('crResources', function() {
 
@@ -275,7 +275,7 @@ describe('cores', function() {
     var fooDoc = {
       bar: 'Hello Foo'
     };
-    
+
     it('should create', inject(['crResource'], function(crResource) {
       fooRes = new crResource('Foo', {
         path: '/foos',
@@ -294,8 +294,8 @@ describe('cores', function() {
         done
       );
     }));
-    
-    
+
+
     it('should save without id', inject(true, function(done) {
       fooRes.save(fooDoc).then(
         function(d) {
@@ -307,7 +307,7 @@ describe('cores', function() {
       );
     }));
 
-    
+
     it('should save with id', inject(true, function(done) {
       var doc2 = JSON.parse(JSON.stringify(fooDoc));
       doc2._id = fooId;
@@ -354,8 +354,8 @@ describe('cores', function() {
         done
       );
     }));
-    
-    
+
+
     it('should load and update', inject(true, function(done) {
       fooRes.load(fooId).then(
         function(d) {
@@ -422,7 +422,7 @@ describe('cores', function() {
       );
     }));
 
-    
+
     describe('multipart', function() {
 
       var imageDoc = {
@@ -437,7 +437,7 @@ describe('cores', function() {
         isTest: true
       });
 
-      
+
       it('should save multipart data', inject(['crResources'], true, function(crResources, done) {
 
         crResources.get('Image').save(imageDoc, file).then(
@@ -449,7 +449,7 @@ describe('cores', function() {
         );
       }));
 
-      
+
       it('should update multipart data', inject(['crResources'], true, function(crResources, done) {
         var res = crResources.get('Image');
         res.load(imageDoc._id).then(
@@ -494,7 +494,7 @@ describe('cores', function() {
       _id: 'model_' + (new Date().getTime()),
       bar: 'Hello Model'
     };
-    
+
     var createCtrl = function($rootScope, $controller, type, id) {
 
       var scope = $rootScope.$new();
@@ -511,8 +511,8 @@ describe('cores', function() {
         done
       );
     }));
-    
-    
+
+
     it('should instantiate',
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
@@ -581,7 +581,7 @@ describe('cores', function() {
        inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
 
          var c = createCtrl($rootScope, $controller, 'Files');
-         
+
          var file = JSON.stringify({
            name: 'foo.jpg',
            path: '/upload/foo.jpg',
@@ -616,7 +616,7 @@ describe('cores', function() {
            });
            c.scope.destroy();
          });
-         
+
        }));
   });
 
@@ -626,7 +626,7 @@ describe('cores', function() {
     var tests = [
 
       // Standard
-      
+
       {
         type: 'Boolean',
         validate: function(schema, elem, done) {
@@ -704,7 +704,7 @@ describe('cores', function() {
       //     done();
       //   }
       // }
-      
+
       // Complex
 
       // {
@@ -715,7 +715,7 @@ describe('cores', function() {
       //   }
       // }
     ];
-    
+
 
     tests.forEach(function(test) {
 
@@ -724,7 +724,7 @@ describe('cores', function() {
         var self = this;
         var res = crResources.get(test.type);
         var schema;
-        
+
         res.schema().then(
           function(s) {
             // get the schema
@@ -752,12 +752,12 @@ describe('cores', function() {
             $('body').append($('<hr>'));
 
             // TODO Problems with ngswitch in model templates, dunno how to fix....
-            
+
             // wait for ready event
             var isReady = false;
             var off = scope.$on('ready', function(e) {
 
-              e.stopPropagation(); 
+              e.stopPropagation();
               assert(!isReady);
               isReady = true;
               test.validate(schema, elem, done);
