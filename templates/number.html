@@ -1,15 +1,15 @@
-<span class="control-group" ng-class="{ error: hasErrors() }"> 
-  <div class="controls"> 
+<span class="control-group" ng-class="{ error: hasErrors() }">
+  <div class="controls">
     <label>{{name}}:</label>
-    
-    <input type="number" ng-model="model"/> 
 
-    <span ng-switch on="getFirstError()"> 
-      <p ng-switch-when="integer" class="help-inline">Value is not an integer</p> 
-      <p ng-switch-when="multipleOf" class="help-inline">Value is not a multiple of {{schema.multipleOf}}</p> 
-      <p ng-switch-when="minimum" class="help-inline">Value is less than {{schema.minimum}}</p> 
-      <p ng-switch-when="maximum" class="help-inline">Value is greater than {{schema.maximum}}</p> 
+    <input type="number" ng-model="model"/>
+
+    <span ng-switch on="getFirstError()">
       <p ng-switch-when="required" class="help-inline">Required</p>
-    </span> 
-  </div> 
+      <p ng-switch-when="integer" class="help-inline">Value is not an integer</p>
+      <p ng-switch-when="multipleOf" class="help-inline">Value is not a multiple of {{schema.multipleOf}}</p>
+      <p ng-switch-when="minimum" class="help-inline">Value is less than {{schema.minimum}}</p>
+      <p ng-switch-when="maximum" class="help-inline">Value is greater than {{schema.maximum}}</p>
+    </span>
+  </div>
 </span>

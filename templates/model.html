@@ -1,11 +1,20 @@
-<div> 
-  <div ng-switch on="data.state"> 
-    <div ng-switch-when="loading" class="alert alert-info">Loading...</div> 
-    <div ng-switch-when="saving" class="alert alert-info">Saving...</div> 
-    <div ng-switch-default cr-model-form schema="schema" model="model" valid="data.valid" path="{{path}}"></div> 
-  </div> 
-  <div class="form-actions btn-toolbar"> 
-    <button ng-click="save()" ng-class="{ disabled: !data.valid }" class="btn btn-primary">Save</button> 
-    <button ng-click="destroy()" ng-show="!isNew()" class="btn btn-danger pull-right">Delete</button> 
-  </div> 
+<div>
+  <!-- <div ng-switch on="data.state"> -->
+  <!--   <div ng-switch-when="loading" class="alert alert-info">Loading...</div> -->
+  <!--   <div ng-switch-when="saving" class="alert alert-info">Saving...</div> -->
+  <!--   <div ng-switch-default cr-model-form schema="schema" model="model" valid="data.valid" path="{{path}}"></div> -->
+  <!-- </div> -->
+  <div cr-model-form schema="schema" model="model" valid="data.valid" path="{{path}}"></div>
+  <div ng-switch on="data.state">
+    <div ng-switch-when="loading" class="alert alert-info">Loading...</div>
+    <div ng-switch-when="saving" class="alert alert-info">Saving...</div>
+    <div ng-switch-default class="form-actions btn-toolbar">
+      <button ng-click="save()" ng-class="{ disabled: !data.valid }" class="btn btn-primary">Save</button>
+      <button ng-click="destroy()" ng-show="!isNew()" class="btn btn-danger pull-right">Delete</button>
+    </div>
+  </div>
+  <!-- <div class="form-actions btn-toolbar">  -->
+  <!--   <button ng-click="save()" ng-class="{ disabled: !data.valid }" class="btn btn-primary">Save</button>  -->
+  <!--   <button ng-click="destroy()" ng-show="!isNew()" class="btn btn-danger pull-right">Delete</button>  -->
+  <!-- </div>  -->
 </div>

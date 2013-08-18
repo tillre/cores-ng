@@ -6,11 +6,11 @@
       <a ng-click="generate()" class="btn">Generate</a>
     </div>
     <span ng-switch on="getFirstError()">
+      <p ng-switch-when="required" class="help-inline">Required</p>
       <p ng-switch-when="maxLength" class="help-inline">Value is longer than {{schema.maxLength}}</p>
       <p ng-switch-when="minLength" class="help-inline">Value is shorter than {{schema.minLength}}</p>
       <p ng-switch-when="pattern" class="help-inline">Value does not match the pattern</p>
       <p ng-switch-when="format" class="help-inline">Value is no valid {{schema.format}}</p>
-      <p ng-switch-when="required" class="help-inline">Required</p>
     </span>
   </div>
 </span>
