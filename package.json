@@ -1,6 +1,6 @@
 {
   "name": "cores-ng",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "AngularJS based ui for cores resources",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "grunt-contrib-concat": "~0.3.0",
     "cores-hapi": "~0.2.3",
     "cores": "~0.2.2",
-    "jski": "~0.2.0",
+    "jski": "~0.3.x",
     "grunt-angular-templates": "~0.3.8"
   }
 }
