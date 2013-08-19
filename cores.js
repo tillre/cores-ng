@@ -326,6 +326,264 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 (function() {
 
+  var module = angular.module('cores.controllers');
+
+
+  module.controller('crAnyofArrayCtrl', function($injector, $controller, $scope, crSchema) {
+
+
+    // $injector.invoke(ArrayCtrl, this, { $scope: $scope });
+    // $injector.invoke('crArrayCtrl', this, { $scope: $scope });
+
+    // inherit from ArrayCtrl
+    $controller('crArrayCtrl', { $scope: $scope });
+
+    angular.forEach($scope.schema.items.anyOf, function(anySchema, i) {
+      if (!anySchema.name) throw new Error('AnyOf schema has to have a name');
+    });
+
+    // called by the anyof-item controller
+
+    this.getSchema = function(type) {
+      var schema;
+      angular.forEach($scope.schema.items.anyOf, function(anySchema) {
+        if (anySchema.name === type) {
+          schema = anySchema;
+        }
+      });
+      if (!schema) throw new Error('No schema for type found: ' + type);
+      return schema;
+    };
+  })
+})();
+(function() {
+
+  var module = angular.module('cores.controllers');
+
+
+  module.controller('crArrayCtrl', function($scope, crSchema) {
+
+    $scope.addItem = function(schema) {
+      var obj = crSchema.createValue(schema, schema.name);
+      $scope.model.push(obj);
+    };
+
+    $scope.$on('remove:item', function(e, index) {
+      e.stopPropagation();
+      $scope.model.splice(index, 1);
+    });
+
+    $scope.$on('moveUp:item', function(e, index) {
+      e.stopPropagation();
+      if (index === 0) return;
+      $scope.model.splice(index - 1, 0, $scope.model.splice(index, 1)[0]);
+    });
+
+    $scope.$on('moveDown:item', function(e, index) {
+      e.stopPropagation();
+      if (index >= $scope.model.length) return;
+      $scope.model.splice(index + 1, 0, $scope.model.splice(index, 1)[0]);
+    });
+
+    // wait for ready event of items on initialization
+
+    var numItems = $scope.model.length;
+
+    if (numItems === 0) {
+      $scope.$emit('ready');
+    }
+    else {
+      var off = $scope.$on('ready', function(e) {
+        e.stopPropagation();
+        if (--numItems === 0) {
+          off();
+          $scope.$emit('ready');
+        }
+      });
+    }
+  });
+})();
+(function() {
+
+  var module = angular.module('cores.controllers');
+
+
+  module.controller('crArrayItemCtrl', function($scope) {
+
+    $scope.moveUp = function() {
+      $scope.$emit('moveUp:item', $scope.$parent.$index);
+    };
+
+    $scope.moveDown = function() {
+      $scope.$emit('moveDown:item', $scope.$parent.$index);
+    };
+
+    $scope.remove = function() {
+      $scope.$emit('remove:item', $scope.$parent.$index);
+    };
+  });
+})();
+(function() {
+
+  var module = angular.module('cores.controllers');
+
+
+  module.controller('crModelCtrl', function($scope, $q, crResources, crSchema, crCommon) {
+
+    var STATE_EDITING = 'editing';
+    var STATE_LOADING = 'loading';
+    var STATE_SAVING = 'saving';
+
+    var self = this;
+    var files = {};
+
+    var data = $scope.data = {
+      valid: true,
+      state: STATE_EDITING
+    };
+
+    // add/update/remove files from the model
+
+    $scope.$on('file:set', function(e, id, file) {
+      e.stopPropagation();
+      files[id] = file;
+    });
+
+    $scope.$on('file:remove', function(e, id) {
+      e.stopPropagation();
+      delete files[id];
+    });
+
+    // button methods
+
+    $scope.save = function() {
+      $scope.$emit('model:save');
+      return self.save();
+    };
+
+    $scope.cancel = function() {
+      $scope.$emit('model:cancel');
+    };
+
+    $scope.destroy = function() {
+      $scope.$emit('model:destroy');
+      return self.destroy();
+    };
+
+    $scope.isNew = function() {
+      if (!$scope.model) return true;
+      return !$scope.model._rev;
+    };
+
+    //
+    // methods
+    //
+
+    this.load = function(id) {
+
+      data.state = STATE_LOADING;
+      return this._resource.load(id).then(function(doc) {
+        $scope.model = doc;
+        data.state = STATE_EDITING;
+      });
+    };
+
+
+    this.save = function() {
+
+      var def = $q.defer();
+
+      if (!$scope.data.valid) {
+        def.reject(new Error('Model is not valid'));
+        return def.promise;
+      }
+      data.state = STATE_SAVING;
+
+      var fs = Object.keys(files).map(function(k) { return files[k]; });
+
+      this._resource.save($scope.model, fs).then(function(doc) {
+
+        $scope.model = doc;
+        $scope.modelId = doc._id;
+        data.state = STATE_EDITING;
+        $scope.$emit('model:saved', $scope.model);
+        def.resolve(doc);
+
+      }, function(err) {
+
+        if (err.message === 'Validation failed') {
+          console.log('err', err.errors);
+
+          data.state = STATE_EDITING;
+
+          err.errors.forEach(function(v) {
+            console.log('broadcast', v);
+            $scope.$broadcast('set:customError', v.path, v.code, v.message);
+          });
+        }
+        def.reject(err);
+      });
+
+      return def.promise;
+    };
+
+
+    this.destroy = function() {
+
+      return this._resource.destroy($scope.model).then(
+        function() {
+          $scope.model = crSchema.createValue($scope.schema);
+          $scope.$emit('model:destroyed');
+        }
+      );
+    };
+
+
+    //
+    // init
+    //
+
+    data.state = STATE_LOADING;
+    self._resource = crResources.get($scope.type);
+
+    // load schema
+    self._resource.schema().then(function(schema) {
+
+      // load or create default model
+      $scope.schema = schema;
+      var id = $scope.modelId;
+
+      if (!id) {
+        $scope.model = crSchema.createValue(schema);
+        data.state = STATE_EDITING;
+      }
+      else {
+        return self.load(id);
+      }
+    }).then(function() {
+
+      // watch for modelId changes to load/clear the model
+      $scope.$watch('modelId', function(newId, oldId) {
+
+        if (newId !== oldId) {
+          if (newId) {
+            // load model with new id
+            self.load(newId);
+          }
+          else if (oldId) {
+            // newId was set to null, create default value
+            $scope.model = crSchema.createValue($scope.schema);
+          }
+        }
+      });
+
+      $scope.$emit('model:ready');
+    });
+  });
+
+})();
+(function() {
+
   var module = angular.module('cores.services');
 
   
