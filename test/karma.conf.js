@@ -9,30 +9,31 @@ basePath = '';
 files = [
   MOCHA,
   MOCHA_ADAPTER,
-  
+
   '../components/jquery/jquery.js',
   '../components/angular/angular.js',
   '../components/angular/angular-mocks.js',
   '../components/bootstrap/js/bootstrap-dropdown.js',
   '../components/bootstrap/js/bootstrap-modal.js',
-  
+
   '../node_modules/chai/chai.js',
 
   // order matters
   '../lib/index.js',
   '../templates/templates.js',
   '../lib/services/**/*.js',
+  '../lib/controllers/**/*.js',
   '../lib/directives/**/*.js',
 
   // '../cores.js',
-  
+
   './test.js'
 ];
 
 
 // list of files to exclude
 exclude = [
-  
+
 ];
 
 
@@ -80,5 +81,3 @@ captureTimeout = 60000;
 // Continuous Integration mode
 // if true, it capture browsers, run tests and exit
 singleRun = false;
-
-
