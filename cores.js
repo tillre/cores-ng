@@ -1645,11 +1645,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       link: function(scope, elem, attrs) {
 
         function load() {
-          crResources.get(scope.type).view('all', { limit: 10 }).then(function success(result) {
+          crResources.get(scope.type).view('all', { include_docs: true, limit: 10 }).then(function success(result) {
 
             if(result.total_rows === 0) return;
 
-            var firstVal = result.rows[0].value;
+            var firstVal = result.rows[0].doc;
 
             // headers array with property names
 
@@ -1661,7 +1661,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
             scope.rows = result.rows.map(function(row) {
               return scope.headers.map(function(key) {
-                return { id: row.id, value: row.value[key] };
+                return { id: row.id, value: row.doc[key] };
               });
             });
           });
