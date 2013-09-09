@@ -21,7 +21,7 @@
     "chai": "~1.6.0",
     "grunt-contrib-concat": "~0.3.0",
     "cores-hapi": "~0.2.3",
-    "cores": "~0.2.2",
+    "cores": "~0.2.6",
     "jski": "~0.3.x",
     "grunt-angular-templates": "~0.3.8"
   }
