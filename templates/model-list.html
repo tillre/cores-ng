@@ -1,21 +1,21 @@
 <div>
-  <table class="table">
+  <table class="table table-hover">
     <thead>
       <tr>
         <th ng-repeat="header in headers">{{header}}</th>
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="row in rows">
-        <td ng-click="select(item.id)" ng-repeat="item in row">{{item.value}}</td>
+      <tr ng-repeat="row in rows" style="cursor:pointer;" ng-click="select(row.id)">
+        <td ng-repeat="item in row.items">{{item.value}}</td>
       </tr>
     </tbody>
   </table>
   <div class="pagination">
     <ul>
-      <li class="{{ !isLoading && prevId  ? '' : 'disabled' }}"><a ng-click="prev()">Prev</a></li>
+      <li class="{{ !isLoading && prevId  ? '' : 'disabled' }}"><a href="" ng-click="prev()">Prev</a></li>
       <li class="disabled"><a>{{ pageNo }} &#47 {{ totalPages }}</a></li>
-      <li class="{{ !isLoading && nextId ? '' : 'disabled' }}"><a ng-click="next()">Next</a></li>
+      <li class="{{ !isLoading && nextId ? '' : 'disabled' }}"><a href="" ng-click="next()">Next</a></li>
     </ul>
   </div>
 </div>

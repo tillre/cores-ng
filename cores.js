@@ -143,23 +143,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   $templateCache.put("cr-model-list.html",
     "<div>\n" +
-    "  <table class=\"table\">\n" +
+    "  <table class=\"table table-hover\">\n" +
     "    <thead>\n" +
     "      <tr>\n" +
     "        <th ng-repeat=\"header in headers\">{{header}}</th>\n" +
     "      </tr>\n" +
     "    </thead>\n" +
     "    <tbody>\n" +
-    "      <tr ng-repeat=\"row in rows\">\n" +
-    "        <td ng-click=\"select(item.id)\" ng-repeat=\"item in row\">{{item.value}}</td>\n" +
+    "      <tr ng-repeat=\"row in rows\" style=\"cursor:pointer;\" ng-click=\"select(row.id)\">\n" +
+    "        <td ng-repeat=\"item in row.items\">{{item.value}}</td>\n" +
     "      </tr>\n" +
     "    </tbody>\n" +
     "  </table>\n" +
     "  <div class=\"pagination\">\n" +
     "    <ul>\n" +
-    "      <li class=\"{{ !isLoading && prevId  ? '' : 'disabled' }}\"><a ng-click=\"prev()\">Prev</a></li>\n" +
+    "      <li class=\"{{ !isLoading && prevId  ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"prev()\">Prev</a></li>\n" +
     "      <li class=\"disabled\"><a>{{ pageNo }} &#47 {{ totalPages }}</a></li>\n" +
-    "      <li class=\"{{ !isLoading && nextId ? '' : 'disabled' }}\"><a ng-click=\"next()\">Next</a></li>\n" +
+    "      <li class=\"{{ !isLoading && nextId ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"next()\">Next</a></li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
     "</div>"
@@ -1692,9 +1692,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
             // table rows values according to header
             scope.rows = result.rows.map(function(row) {
-              return scope.headers.map(function(key) {
-                return { id: row.id, value: row.doc[key] };
-              });
+              return {
+                id: row.id,
+                items: scope.headers.map(function(key) {
+                  return { value: row.doc[key] };
+                })
+              };
             });
 
             if (result.rows.length > 0) {
