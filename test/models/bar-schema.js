@@ -49,8 +49,8 @@ module.exports = j.object({
     bar: j.string()
   }),
 
-  text: j.string().custom('view', 'cr-text')
-  // password: j.string().minLength(8).custom('view', 'cr-password')
+  text: j.string().custom('view', 'cr-text'),
+  password: j.string().minLength(8).custom('view', 'cr-password')
 
 }).required('string2', 'number', 'ref', 'slug', 'text');
 // }).required();
