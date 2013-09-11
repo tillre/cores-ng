@@ -29,6 +29,7 @@
 
       $scope.type = 'Bar';
       $scope.modelId = $routeParams.id;
+      $scope.headers = ['slug'];
 
       $scope.$on('list:select', function(e, id) {
         e.stopPropagation();
