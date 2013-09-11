@@ -1636,7 +1636,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   module.directive('crModelList', function(crCommon, crResources, crSchema) {
     return {
       scope: {
-        type: '@'
+        type: '@',
+        headers: '=?'
       },
 
       replace: true,
@@ -1644,10 +1645,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        var headers = [];
-        if (attrs.headers) {
-          headers = attrs.headers.replace(/\s/g, '').split(',');
-        }
+        scope.rows = [];
 
         function load() {
           crResources.get(scope.type).view('all', { include_docs: true, limit: 10 }).then(function success(result) {
@@ -1656,12 +1654,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
             var firstVal = result.rows[0].doc;
 
-            // header array with property names
-            if (headers.length > 0) {
-              scope.headers = headers;
-            }
-            else {
-              // display all fields as defined in the schema
+            if (!scope.headers || scope.headers.length === 0) {
               scope.headers = Object.keys(firstVal).filter(function(key) {
                 return !crSchema.isPrivateProperty(key);
               });
@@ -1676,9 +1669,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           });
         }
 
-        scope.headers = [];
-        scope.rows = [];
-
         scope.select = function(id) {
           scope.$emit('list:select', id);
         };
@@ -1688,7 +1678,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           load();
         });
 
-        load();
+        var unwatch = scope.$watch('type', function() {
+          unwatch();
+          load();
+        });
       }
     };
   });
