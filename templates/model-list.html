@@ -1,12 +1,21 @@
-<table class="table"> 
-  <thead> 
-    <tr> 
-      <th ng-repeat="header in headers">{{header}}</th> 
-    </tr> 
-  </thead> 
-  <tbody> 
-    <tr ng-repeat="row in rows"> 
-      <td ng-click="select(item.id)" ng-repeat="item in row">{{item.value}}</td> 
-    </tr> 
-  </tbody> 
-</table>
+<div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th ng-repeat="header in headers">{{header}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="row in rows">
+        <td ng-click="select(item.id)" ng-repeat="item in row">{{item.value}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="pagination">
+    <ul>
+      <li class="{{ !isLoading && prevId  ? '' : 'disabled' }}"><a ng-click="prev()">Prev</a></li>
+      <li class="disabled"><a>{{ pageNo }} &#47 {{ totalPages }}</a></li>
+      <li class="{{ !isLoading && nextId ? '' : 'disabled' }}"><a ng-click="next()">Next</a></li>
+    </ul>
+  </div>
+</div>
