@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "jquery": "~1.10.1",
-    "angular": "PatternConsulting/bower-angular#v1.2.0rc1",
+    "angular": "PatternConsulting/bower-angular#v1.2.0-rc.2",
     "bootstrap": "~2.3.2",
     "bootstrap-datepicker": "~1.1.2",
     "bootstrap-timepicker": "~0.2.2"
