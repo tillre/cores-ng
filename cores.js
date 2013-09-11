@@ -1644,6 +1644,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
+        var headers = [];
+        if (attrs.headers) {
+          headers = attrs.headers.replace(/\s/g, '').split(',');
+        }
+
         function load() {
           crResources.get(scope.type).view('all', { include_docs: true, limit: 10 }).then(function success(result) {
 
@@ -1651,14 +1656,18 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
             var firstVal = result.rows[0].doc;
 
-            // headers array with property names
-
-            scope.headers = Object.keys(firstVal).filter(function(key) {
-              return !crSchema.isPrivateProperty(key);
-            });
+            // header array with property names
+            if (headers.length > 0) {
+              scope.headers = headers;
+            }
+            else {
+              // display all fields as defined in the schema
+              scope.headers = Object.keys(firstVal).filter(function(key) {
+                return !crSchema.isPrivateProperty(key);
+              });
+            }
 
             // rows array with property values for each row
-
             scope.rows = result.rows.map(function(row) {
               return scope.headers.map(function(key) {
                 return { id: row.id, value: row.doc[key] };
