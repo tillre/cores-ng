@@ -28,17 +28,12 @@ function setupServer(db, callback) {
 
   // Logging
 
-  // server.on('request', function(req) {
-  //   console.log('-- request', req.method, req.path, req.params);
-  // });
-  // server.on('response', function(res) {
-  //   console.log('-- response', res);
-  // });
-  // server.on('tail', function(event) {
-  //   console.log('-- tail');
-  // });
+  server.on('response', function(req) {
+    console.log(req.method, req.path, req.raw.res.statusCode);
+  });
+
   server.on('internalError', function(req, error) {
-    console.log('-- internalError', error);
+    console.log('ERROR', error);
   });
 
   // listen on pack events to get plugin log events as well
@@ -111,7 +106,6 @@ module.exports = function(db, callback) {
 
     server.start();
     console.log('started server on port:', port);
-    callback(server);
+    callback(null, server);
   });
-
 };
