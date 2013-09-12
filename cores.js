@@ -119,10 +119,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-model-form.html",
-    "<div> \n" +
-    "  <form name=\"modelForm\"></form> \n" +
-    "  <div ng-show=\"!valid\" class=\"alert alert-error\">The form has errors</div> \n" +
-    "  <pre>{{ model | json }}</pre> \n" +
+    "<div>\n" +
+    "  <form name=\"modelForm\"></form>\n" +
+    "  <div ng-show=\"!valid\" class=\"alert alert-error\">The form has errors</div>\n" +
+    "  <pre ng-show=\"debug\">{{ model | json }}</pre>\n" +
     "</div>\n"
   );
 
@@ -166,45 +166,38 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-model-modal.html",
-    "<div id=\"{{modalId}}\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\"> \n" +
-    "  <div class=\"modal-header\"> \n" +
-    "    <button class=\"close\" data-dismiss=\"modal\">x</button> \n" +
-    "    <h3>{{type}}</h3> \n" +
-    "  </div> \n" +
-    "  <div class=\"modal-body\" ng-switch on=\"data.state\"> \n" +
-    "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div> \n" +
-    "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div> \n" +
-    "    <div ng-switch-default cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" path=\"{{path}}\"></div> \n" +
-    "  </div> \n" +
-    "  <div class=\"modal-footer\"> \n" +
-    "    <div class=\"btn-toolbar\"> \n" +
-    "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary pull-left\">Save</button> \n" +
-    "      <button ng-click=\"cancel()\" class=\"btn pull-right\" data-dismiss=\"modal\">Cancel</button> \n" +
-    "    </div> \n" +
-    "  </div> \n" +
+    "<div id=\"{{modalId}}\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\">\n" +
+    "  <div class=\"modal-header\">\n" +
+    "    <button class=\"close\" data-dismiss=\"modal\">x</button>\n" +
+    "    <h3>{{type}}</h3>\n" +
+    "  </div>\n" +
+    "  <div class=\"modal-body\" ng-switch on=\"data.state\">\n" +
+    "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
+    "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
+    "    <div ng-switch-default cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\" path=\"{{path}}\"></div>\n" +
+    "  </div>\n" +
+    "  <div class=\"modal-footer\">\n" +
+    "    <div class=\"btn-toolbar\">\n" +
+    "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary pull-left\">Save</button>\n" +
+    "      <button ng-click=\"cancel()\" class=\"btn pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
+    "      <button ng-click=\"toggleDebug()\" class=\"btn\">Debug</button>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-model.html",
     "<div>\n" +
-    "  <!-- <div ng-switch on=\"data.state\"> -->\n" +
-    "  <!--   <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div> -->\n" +
-    "  <!--   <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div> -->\n" +
-    "  <!--   <div ng-switch-default cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" path=\"{{path}}\"></div> -->\n" +
-    "  <!-- </div> -->\n" +
-    "  <div cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" path=\"{{path}}\"></div>\n" +
+    "  <div cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\" path=\"{{path}}\"></div>\n" +
     "  <div ng-switch on=\"data.state\">\n" +
     "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
     "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
     "    <div ng-switch-default class=\"form-actions btn-toolbar\">\n" +
     "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary\">Save</button>\n" +
     "      <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\">Delete</button>\n" +
+    "      <button ng-click=\"toggleDebug()\" class=\"btn\">Debug</button>\n" +
     "    </div>\n" +
     "  </div>\n" +
-    "  <!-- <div class=\"form-actions btn-toolbar\">  -->\n" +
-    "  <!--   <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary\">Save</button>  -->\n" +
-    "  <!--   <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\">Delete</button>  -->\n" +
-    "  <!-- </div>  -->\n" +
     "</div>\n"
   );
 
@@ -448,7 +441,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
     var data = $scope.data = {
       valid: true,
-      state: STATE_EDITING
+      state: STATE_EDITING,
+      debug: false
     };
 
     // add/update/remove files from the model
@@ -477,6 +471,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     $scope.destroy = function() {
       $scope.$emit('model:destroy');
       return self.destroy();
+    };
+
+    $scope.toggleDebug = function() {
+      $scope.data.debug = !$scope.data.debug;
     };
 
     $scope.isNew = function() {
@@ -1592,6 +1590,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         model: '=',
         schema: '=',
         valid: '=',
+        debug: '=',
         path: '@'
       },
 
