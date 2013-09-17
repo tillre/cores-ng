@@ -17,10 +17,9 @@
     "karma": "~0.9.2",
     "karma-mocha": "0.0.1",
     "chai": "~1.6.0",
-    "cores-server": "0.0.3",
+    "cores-server": "0.1.0",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-angular-templates": "~0.3.8",
-    "jski": "~0.3.1",
-    "async": "~0.2.9"
+    "jski": "~0.3.1"
   }
 }
