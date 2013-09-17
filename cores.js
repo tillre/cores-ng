@@ -437,24 +437,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     var STATE_SAVING = 'saving';
 
     var self = this;
-    var files = {};
-
     var data = $scope.data = {
       valid: true,
       state: STATE_EDITING,
-      debug: false
+      debug: false,
+      files: {}
     };
 
     // add/update/remove files from the model
 
     $scope.$on('file:set', function(e, id, file) {
       e.stopPropagation();
-      files[id] = file;
+      data.files[id] = file;
     });
 
     $scope.$on('file:remove', function(e, id) {
       e.stopPropagation();
-      delete files[id];
+      delete data.files[id];
     });
 
     // button methods
@@ -490,7 +489,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       data.state = STATE_LOADING;
       return this._resource.load(id).then(function(doc) {
-        $scope.model = doc;
+        self.setModel(doc);
         data.state = STATE_EDITING;
       });
     };
@@ -506,11 +505,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       }
       data.state = STATE_SAVING;
 
-      var fs = Object.keys(files).map(function(k) { return files[k]; });
+      var fs = Object.keys(data.files).map(function(k) { return data.files[k]; });
 
       this._resource.save($scope.model, fs).then(function(doc) {
 
-        $scope.model = doc;
+        self.setModel(doc);
         $scope.modelId = doc._id;
         data.state = STATE_EDITING;
         $scope.$emit('model:saved', $scope.model);
@@ -519,8 +518,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       }, function(err) {
 
         if (err.message === 'Validation failed') {
-          console.log('err', err.errors);
-
           data.state = STATE_EDITING;
 
           err.errors.forEach(function(v) {
@@ -539,17 +536,24 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       return this._resource.destroy($scope.model).then(
         function() {
-          $scope.model = crSchema.createValue($scope.schema);
+          self.setModel(crSchema.createValue($scope.schema));
           $scope.$emit('model:destroyed');
         }
       );
     };
 
 
+    this.setModel = function(model) {
+
+      // reset files dict when model changes
+      data.files = {};
+      $scope.model = model;
+    };
+
+
     //
     // init
     //
-
     data.state = STATE_LOADING;
     self._resource = crResources.get($scope.type);
 
@@ -561,7 +565,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       var id = $scope.modelId;
 
       if (!id) {
-        $scope.model = crSchema.createValue(schema);
+        self.setModel(crSchema.createValue(schema));
         data.state = STATE_EDITING;
       }
       else {
@@ -579,7 +583,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
           else if (oldId) {
             // newId was set to null, create default value
-            $scope.model = crSchema.createValue($scope.schema);
+            self.setModel(crSchema.createValue($scope.schema));
           }
         }
       });
