@@ -2,31 +2,10 @@ var path = require('path');
 var fs = require('fs');
 var async = require('async');
 
-var hapi = require('hapi');
-var cores = require('cores');
+var coresServer = require('cores-server');
 
 
-var port = 3333;
-
-
-function setupServer(db, callback) {
-
-  cores = cores(db);
-
-  // test server
-
-  var server = new hapi.Server('0.0.0.0', port, {
-    cors: {
-      origin: ['*'],
-      headers: ['X-Requested-With', 'Content-Type']
-    },
-    payload: {
-      maxBytes: 10 * 1024 * 1024 // 10MB
-    }
-  });
-
-
-  // Logging
+function configureServer(server, callback) {
 
   server.on('response', function(req) {
     console.log(req.method, req.path, req.raw.res.statusCode);
@@ -70,42 +49,36 @@ function setupServer(db, callback) {
   // create upload dir
 
   fs.mkdir(app.upload.dir, function(err) {
-    if (err && err.code !== 'EEXIST') {
-      callback(err);
-      return;
-    }
-
-    // load models and create the api
-    console.log('loading models');
-
-    cores.load('./test/models', { recursive: true }, function(err, resources) {
-      if (err) return callback(err);
-
-      var options = {
-        cores: cores,
-        resources: resources,
-        handlers: __dirname + '/models'
-      };
-      server.pack.require('cores-hapi', options, function(err) {
-        if (err) return callback(err);
-        callback(null, resources, server);
-      });
-    });
+    if (err && err.code !== 'EEXIST') return callback(err);
+    server.start(callback);
   });
 }
 
 
-module.exports = function(db, callback) {
+module.exports = function setupServer(callback) {
 
-  setupServer(db, function(err, resources, server) {
+  coresServer({
+    server: {
+      host: '0.0.0.0',
+      port: 3333,
+      options: {
+        cors: {
+          origin: ['*'],
+          headers: ['X-Requested-With', 'Content-Type']
+        },
+        payload: {
+          maxBytes: 10 * 1024 * 1024 // 10MB
+        }
+      }
+    },
+    db: {
+      name: 'test-cores-ng'
+    },
+    resourcesDir: __dirname + '/resources'
 
-    if (err) {
-      callback(err);
-      return;
-    }
-
-    server.start();
-    console.log('started server on port:', port);
-    callback(null, server);
+  }).then(function(server) {
+    configureServer(server, callback);
+  }, function(err) {
+    callback(err);
   });
 };

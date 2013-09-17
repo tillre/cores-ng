@@ -2,7 +2,7 @@ var path = require('path');
 var nano = require('nano')('http://localhost:5984');
 
 
-var dbName = 'test-cores-angular';
+var dbName = 'test-cores-ng';
 
 
 module.exports = function(grunt) {
@@ -43,10 +43,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-angular-templates');
 
-  //
-  // multi tasks
-  //
-
   grunt.registerTask('default', ['ngtemplates', 'concat']);
 
   grunt.registerTask('server', ['db:create', 'server:run', 'db:destroy']);
@@ -58,9 +54,8 @@ module.exports = function(grunt) {
 
   grunt.registerTask('server:run', 'start server', function() {
     var done = this.async();
-    var server = require('./test/server.js');
-    var db = nano.use(dbName);
-    server(db, function(err, server) {
+    var startServer = require('./test/server.js');
+    startServer(function(err) {
       if (err) console.log(err);
     });
     // never call done to run endlessly
@@ -68,9 +63,8 @@ module.exports = function(grunt) {
 
   grunt.registerTask('server:test', 'start test server', function() {
     var done = this.async();
-    var server = require('./test/server.js');
-    var db = nano.use(dbName);
-    server(db, done);
+    var startServer = require('./test/server.js');
+    startServer(done);
   });
 
 
