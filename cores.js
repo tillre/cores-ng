@@ -1502,24 +1502,32 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 (function() {
 
   var module = angular.module('cores.directives');
-  
 
-  module.directive('crImage', function($compile, crCommon) {
+
+  module.directive('crImage', function($compile, crCommon, crValidation) {
     return {
       scope: {
         model: '=',
         schema: '=',
         name: '@'
       },
-      
+
       replace: true,
       templateUrl: 'cr-image.html',
 
 
       link: function(scope, elem, attrs) {
 
+        var validation = crValidation(scope, 'model.name');
+
+        if (attrs.isRequired === 'true') {
+          validation.addConstraint('required', function(value) {
+            return !!scope.model.name && scope.model.name !== '';
+          }, true);
+        }
+
         var fileId = crCommon.getFileId();
-        
+
         var input = elem.find('input[type="file"]');
         var preview = elem.find('img');
 
@@ -1527,7 +1535,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.$watch('model.url', function(url) {
           preview.attr('src', url);
         });
-        
+
         input.on('change', function(e) {
 
           var files = input[0].files;
