@@ -29,7 +29,7 @@
 
       $scope.type = 'Bar';
       $scope.modelId = $routeParams.id;
-      $scope.headers = ['slug'];
+      $scope.headers = ['string1', 'ref.bar'];
       $scope.limit = 3;
 
       $scope.$on('list:select', function(e, id) {

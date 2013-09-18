@@ -2,54 +2,55 @@ var j = require('jski');
 
 module.exports = j.object({
 
-  boolean: j.boolean(),
-  number: j.number().minimum(-1.5).maximum(1.5),
-  integer: j.integer().minimum(0).maximum(10).multipleOf(2),
+  // boolean: j.boolean(),
+  // number: j.number().minimum(-1.5).maximum(1.5),
+  // integer: j.integer().minimum(0).maximum(10).multipleOf(2),
   string1: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
   string2: j.string(),
 
-  slug: j.string()
-    .format('slug')
-    .custom('view', { type: 'cr-slug', source: ['string1', 'string2'] }),
+  // slug: j.string()
+  //   .format('slug')
+  //   .custom('view', { type: 'cr-slug', source: ['string1', 'string2'] }),
 
-  date: j.string().custom('view', 'cr-datetime'),
+  // date: j.string().custom('view', 'cr-datetime'),
 
-  'enum': j.enum(1, 2, 3),
+  // 'enum': j.enum(1, 2, 3),
 
   ref: j.ref('Foo').custom('preview', 'bar'),
 
-  array: j.array(j.object({
-    foo: j.boolean()
-  })),
+//   array: j.array(j.object({
+//     foo: j.boolean()
+//   })),
 
-  // arrayRefs: j.array(j.ref('Foo').custom('preview', 'bar')),
+//   // arrayRefs: j.array(j.ref('Foo').custom('preview', 'bar')),
 
-  anyof: j.array(j.anyOf(
-    j.object({
-      text: j.string(),
-      images: j.array(j.object({ name: j.string() }))
-    }).custom('name', 'textimage'),
+//   anyof: j.array(j.anyOf(
+//     j.object({
+//       text: j.string(),
+//       images: j.array(j.object({ name: j.string() }))
+//     }).custom('name', 'textimage'),
 
-    j.object({
-      embed: j.string()
-    }).custom('name', 'video'),
+//     j.object({
+//       embed: j.string()
+//     }).custom('name', 'video'),
 
-    j.object({
-      images: j.array(j.object({ name: j.string() }))
-    }).custom('name', 'gallery')
-  )),
+//     j.object({
+//       images: j.array(j.object({ name: j.string() }))
+//     }).custom('name', 'gallery')
+//   )),
 
-  anyofRefs: j.array(j.anyOf(
-    j.object({ foo: j.ref('Foo').custom('preview', 'bar') }).custom('name', 'foo1'),
-    j.object({ bar: j.ref('Foo').custom('preview', 'bar') }).custom('name', 'foo2')
-  )),
+//   anyofRefs: j.array(j.anyOf(
+//     j.object({ foo: j.ref('Foo').custom('preview', 'bar') }).custom('name', 'foo1'),
+//     j.object({ bar: j.ref('Foo').custom('preview', 'bar') }).custom('name', 'foo2')
+//   )),
 
-  object: j.object({
-    foo: j.number(),
-    bar: j.string()
-  }),
+//   object: j.object({
+//     foo: j.number(),
+//     bar: j.string()
+//   }),
 
-  text: j.string().custom('view', 'cr-text'),
-  password: j.string().minLength(8).custom('view', 'cr-password')
+//   text: j.string().custom('view', 'cr-text'),
+//   password: j.string().minLength(8).custom('view', 'cr-password')
 
-}).required('string2', 'number', 'ref', 'slug', 'text');
+// }).required('string2', 'number', 'ref', 'slug', 'text');
+});
