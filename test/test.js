@@ -68,6 +68,19 @@ describe('cores', function() {
       assert(crCommon.getFileId() !== crCommon.getFileId());
       assert(crCommon.getModalId() !== crCommon.getModalId());
     }));
+
+    it('should create slug', inject(['crCommon'], function(crCommon) {
+      assert(crCommon.createSlug(' Hällö Würld ') === 'haelloe-wuerld');
+    }));
+
+    it('should capitalize string', inject(['crCommon'], function(crCommon) {
+      assert(crCommon.capitalize('hello') === 'Hello');
+    }));
+
+    it('should get obj value by string path', inject(['crCommon'], function(crCommon) {
+      assert(crCommon.parseObjectPath({ a: { b: 123 }}, 'a.b') === 123);
+      assert(crCommon.parseObjectPath({ a: { b: 123 }}, 'a.b.c.d') === undefined);
+    }));
   });
 
 

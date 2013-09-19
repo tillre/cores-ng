@@ -146,7 +146,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <table class=\"table table-hover\">\n" +
     "    <thead>\n" +
     "      <tr>\n" +
-    "        <th ng-repeat=\"header in headers\">{{header}}</th>\n" +
+    "        <th ng-repeat=\"title in titles\" style=\"text-transform:capitalize;\">{{title}}</th>\n" +
     "      </tr>\n" +
     "    </thead>\n" +
     "    <tbody>\n" +
@@ -761,13 +761,35 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   };
 
 
+  var capitalize = function(str) {
+    if (!str || str.length === 0) {
+      return '';
+    }
+    return str.charAt(0).toUpperCase() + str.substr(1);
+  };
+
+
+  var parseObjectPath = function(obj, path) {
+    var parts = path.split('.');
+    var value = obj[parts[0]];
+    for (var i = 1; i < parts.length; ++i) {
+      if (!value) break;
+      value = value[parts[i]];
+    }
+    return value;
+  };
+
+
   module.service('crCommon', function($q) {
 
     return {
       getFileId: getFileId,
       getModalId: getModalId,
 
-      createSlug: createSlug
+      createSlug: createSlug,
+      capitalize: capitalize,
+
+      parseObjectPath: parseObjectPath
     };
   });
 
@@ -1667,6 +1689,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       link: function(scope, elem, attrs) {
 
         var prevIds = [];
+        var resource;
+        var schema;
 
         scope.isLoading = false;
         scope.prevId = null;
@@ -1683,30 +1707,21 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           var limit = scope.limit || 20;
           var params = {
             include_docs: true,
+            include_refs: true,
             // fetch one more and use the id as the startkey for the next page
             limit: limit + 1,
             startkey: startkey
           };
 
-          crResources.get(scope.type).view('all', params).then(function success(result) {
-
+          resource.view('all', params).then(function success(result) {
             if(result.total_rows === 0) return;
-
-            var firstVal = result.rows[0].doc;
-
-            // table header names
-            if (!scope.headers || scope.headers.length === 0) {
-              scope.headers = Object.keys(firstVal).filter(function(key) {
-                return !crSchema.isPrivateProperty(key);
-              });
-            }
 
             // table rows values according to header
             scope.rows = result.rows.map(function(row) {
               return {
                 id: row.id,
-                items: scope.headers.map(function(key) {
-                  return { value: row.doc[key] };
+                items: scope.headers.map(function(path, i) {
+                  return { value: crCommon.parseObjectPath(row.doc, path) };
                 })
               };
             });
@@ -1719,12 +1734,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
               scope.totalPages = Math.ceil(result.total_rows / limit);
 
               if (result.rows.length > limit) {
-                // there a more pages, remember the last row's id and remove it from the list
+                // there a more pages left, remember the last row's id and remove it from the list
                 scope.nextId = result.rows[limit].id;
                 scope.rows.pop();
               }
             }
-
             scope.isLoading = false;
           });
         }
@@ -1753,7 +1767,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
         var unwatch = scope.$watch('type', function() {
           unwatch();
-          load();
+          resource = crResources.get(scope.type);
+          resource.schema().then(function(s) {
+            schema = s;
+
+            // auto generate headers when not set
+            if (!scope.headers || scope.headers.length === 0) {
+              scope.headers = Object.keys(schema.properties).filter(function(key) {
+                return !crSchema.isPrivateProperty(key);
+              });
+            }
+            // table column titles
+            scope.titles = scope.headers.map(function(header) {
+              return header.split('.')[0];
+            });
+
+            load();
+          });
         });
       }
     };
