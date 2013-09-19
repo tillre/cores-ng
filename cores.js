@@ -198,7 +198,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div ng-switch on=\"data.state\">\n" +
     "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
     "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
-    "    <div ng-switch-default class=\"form-actions btn-toolbar\">\n" +
+    "    <div ng-switch-when=\"editing\" class=\"form-actions btn-toolbar\">\n" +
     "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary\">Save</button>\n" +
     "      <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\">Delete</button>\n" +
     "      <button ng-click=\"toggleDebug()\" class=\"btn\">Debug</button>\n" +
@@ -550,7 +550,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
     this.setModel = function(model) {
-
       // reset files dict when model changes
       data.files = {};
       $scope.model = model;
@@ -1263,7 +1262,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
       var addConstraint = function(name, condition, isCustomConstraint) {
-
         // only check constraints that are defined in the schema
         if (!isCustomConstraint &&
             !scope.schema.hasOwnProperty(name)) return;
@@ -1275,7 +1273,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
       scope.$on('set:customError', function(e, path, code, message) {
-
         if (path === scope.path) {
           setCustomError(code);
           return true;
@@ -1639,6 +1636,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       controller: function($scope) {
 
+        $scope.valid = true;
         $scope.errors = {};
 
         $scope.$on('set:error', function(e, id) {
@@ -1656,20 +1654,30 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem) {
 
-        scope.$watch('model', function() {
+        var childScope;
 
+        scope.$watch('model', function() {
           if (!scope.schema) return;
+          scope.valid = true;
+          scope.errors = {};
 
           if (!crSchema.isObjectSchema(scope.schema)) {
             throw new Error('Top level schema has to be an object');
           }
 
+          // cleanup dom and scope
+          if (childScope) {
+            elem.find('form').empty();
+            childScope.$destroy();
+          }
+          // create markup
           var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
                              scope.path || '', { mode: 'minimal'});
 
+          // compile and link with new scope
+          childScope = scope.$new();
           var link = $compile(tmpl);
-          var content = link(scope);
-
+          var content = link(childScope);
           elem.find('form').html(content);
         });
       }
@@ -1855,7 +1863,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         });
 
         scope.$on('showModal:model', function(e, modalId, modelId) {
-
           if (modalId === scope.modalId) {
             e.preventDefault();
             scope.modelId = modelId;
@@ -2004,9 +2011,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
                             (scope.path ? scope.path : '')  + '/' + key,
                             { 'is-required': isRequired(key) });
           });
-
-          // compile and link templates
-          var content = $compile(tmpl)(scope);
+          // compile and link template
+          var link = $compile(tmpl);
+          var content = link(scope);
           elem.find('.properties').append(content);
         };
       }
