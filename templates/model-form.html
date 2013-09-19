@@ -1,5 +1,11 @@
 <div>
   <form name="modelForm"></form>
   <div ng-show="!valid" class="alert alert-error">The form has errors</div>
-  <pre ng-show="debug">{{ model | json }}</pre>
+  <div ng-show="debug" style="border: 1px solid #ccc; border-radius: 5px; padding: 12px">
+    <h4>Debug</h4>
+    <h5>Model</h5>
+    <pre>{{ model | json }}</pre>
+    <h5>Errors</h5>
+    <ul><li ng-repeat="(name, active) in errors">{{name}}: {{active}}</li></ul>
+  </div>
 </div>

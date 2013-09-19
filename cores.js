@@ -122,7 +122,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div>\n" +
     "  <form name=\"modelForm\"></form>\n" +
     "  <div ng-show=\"!valid\" class=\"alert alert-error\">The form has errors</div>\n" +
-    "  <pre ng-show=\"debug\">{{ model | json }}</pre>\n" +
+    "  <div ng-show=\"debug\" style=\"border: 1px solid #ccc; border-radius: 5px; padding: 12px\">\n" +
+    "    <h4>Debug</h4>\n" +
+    "    <h5>Model</h5>\n" +
+    "    <pre>{{ model | json }}</pre>\n" +
+    "    <h5>Errors</h5>\n" +
+    "    <ul><li ng-repeat=\"(name, active) in errors\">{{name}}: {{active}}</li></ul>\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
