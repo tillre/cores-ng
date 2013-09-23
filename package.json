@@ -1,6 +1,6 @@
 {
   "name": "cores-ng",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "description": "AngularJS based ui for cores resources",
   "main": "index.js",
   "scripts": {

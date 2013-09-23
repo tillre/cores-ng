@@ -202,6 +202,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div ng-switch on=\"data.state\">\n" +
     "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
     "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
+    "    <div ng-switch-when=\"error\" class=\"alert alert-error\"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>\n" +
     "    <div ng-switch-when=\"editing\" class=\"form-actions btn-toolbar\">\n" +
     "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary\">Save</button>\n" +
     "      <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\">Delete</button>\n" +
@@ -500,6 +501,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     var STATE_EDITING = 'editing';
     var STATE_LOADING = 'loading';
     var STATE_SAVING = 'saving';
+    var STATE_ERROR = 'error';
 
     var self = this;
     var data = $scope.data = {
@@ -556,6 +558,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       return this._resource.load(id).then(function(doc) {
         self.setModel(doc);
         data.state = STATE_EDITING;
+
+      }, function(err) {
+        data.state = STATE_ERROR;
+        data.error = err;
       });
     };
 
@@ -789,21 +795,18 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.services');
 
   // Get a new file id
-
   var getFileId = (function(id) {
     return function() { return 'file' + ++id; };
   })(0);
 
 
   // Get a new modal id
-
   var getModalId = (function(id) {
     return function() { return 'modal-' + ++id; };
   })(0);
 
 
   var createSlug = function(str) {
-
     str = str.replace(/^\s+|\s+$/g, ''); // trim
     str = str.toLowerCase();
 
@@ -889,7 +892,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     if (response.data && response.data.errors) {
       err.errors = response.data.errors;
     }
-
     return err;
   };
 
@@ -931,7 +933,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       return $http.get(this.schemaPath).then(
         function(res) { return res.data; },
-        function(res) { throw makeError(res); }
+        function(res) { return $q.reject(makeError(res)); }
       );
     };
 
@@ -957,7 +959,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       return $http.get(path, config).then(
         function(res) { return res.data; },
-        function(res) { throw makeError(res); }
+        function(res) { return $q.reject(makeError(res)); }
       );
     };
 
@@ -1019,7 +1021,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       else {
         return $http(req).then(
           function(res) { return res.data; },
-          function(res) { throw makeError(res); }
+          function(res) { return $q.reject(makeError(res)); }
         );
       }
     };
@@ -1064,7 +1066,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       }
       return $http.delete(this.path + '/' + doc._id + '/' + doc._rev).then(
         function(res) {},
-        function(res) { throw makeError(res); }
+        function(res) { return $q.reject(makeError(res)); }
       );
     };
 
@@ -1086,7 +1088,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       return $http.get(path, config).then(
         function(res) { return res.data; },
-        function(res) { throw makeError(res); }
+        function(res) { return $q.reject(makeError(res)); }
       );
     };
 
@@ -1140,7 +1142,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           return res.data.uuids;
         },
         function(res) {
-          throw makeError(res);
+          return $q.reject(makeError(res));
         }
       );
     };
