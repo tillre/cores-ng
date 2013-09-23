@@ -1,0 +1,14 @@
+<div>
+  <label><strong>{{name}}:</strong></label>
+
+  <div class="indent control-group" ng-class="{ error: hasErrors() }">
+
+    <select ng-model="selectedRow" ng-options="r.name for r in rows">
+      <option value="">-- choose --</option>
+    </select>
+
+    <span ng-switch on="getFirstError()">
+      <p ng-switch-when="required" class="help-block">Required</p>
+    </span>
+  </div>
+</div>

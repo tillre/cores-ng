@@ -31,6 +31,7 @@ module.exports = function(grunt) {
         // order matters!
         src: ['lib/index.js',
               'templates/templates.js',
+              'lib/filters/*.js',
               'lib/controllers/*.js',
               'lib/services/*.js',
               'lib/directives/*.js'],

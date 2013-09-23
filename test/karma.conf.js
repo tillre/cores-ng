@@ -22,6 +22,7 @@ files = [
   '../lib/index.js',
   '../templates/templates.js',
   '../lib/services/**/*.js',
+  '../lib/filters/**/*.js',
   '../lib/controllers/**/*.js',
   '../lib/directives/**/*.js',
 
