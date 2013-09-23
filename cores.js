@@ -1760,6 +1760,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     return {
       scope: {
         type: '@',
+        view: '@',
         limit: '=?',
         headers: '=?'
       },
@@ -1794,7 +1795,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             startkey: startkey
           };
 
-          resource.view('all', params).then(function success(result) {
+          resource.view(scope.view || 'all', params).then(function success(result) {
             if(result.total_rows === 0) return;
 
             // table rows values according to header
