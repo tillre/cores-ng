@@ -7,6 +7,14 @@ module.exports = {
           emit(doc._id, null);
         }
       }
+    },
+
+    onlyASD: {
+      map: function(doc) {
+        if (doc.type_ === 'Bar' && doc.string1 === 'asd') {
+          emit(doc._id, null);
+        }
+      }
     }
   }
 

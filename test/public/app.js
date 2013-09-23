@@ -30,6 +30,11 @@
       $scope.type = 'Bar';
       $scope.modelId = $routeParams.id;
       $scope.headers = ['string1', 'ref.bar'];
+      $scope.viewConfigs = [
+        { title: 'Alt All', name: 'altall' },
+        { title: 'Only asd', name: 'onlyASD' }
+      ];
+      // $scope.view = '';
       $scope.limit = 3;
 
       $scope.$on('list:select', function(e, id) {

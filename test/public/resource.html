@@ -1,5 +1,6 @@
 <h1>{{type}}</h1>
 
-<div cr-model-list type="{{type}}" view="altall" headers="headers" limit="limit"></div>
+<div cr-model-list-filter view-configs="viewConfigs" view="view"></div>
+<div cr-model-list type="{{type}}" view="view" headers="headers" limit="limit"></div>
 <hr>
 <div cr-model type="{{type}}" model-id="modelId"></div>

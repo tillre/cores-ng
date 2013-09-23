@@ -136,6 +136,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
+  $templateCache.put("cr-model-list-filter.html",
+    "<form class=\"form-inline\">\n" +
+    "  <label>Filter:</label>\n" +
+    "  <select ng-model=\"viewConfig\" ng-options=\"v.name for v in viewConfigs\">\n" +
+    "    <option value=\"\">Default</option>\n" +
+    "  </select>\n" +
+    "</div>"
+  );
+
   $templateCache.put("cr-model-list-modal.html",
     "<div id=\"{{modalId}}\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\"> \n" +
     "  <div class=\"modal-header\"> \n" +
@@ -1756,11 +1765,41 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
+  module.directive('crModelListFilter', function() {
+    return {
+      scope: {
+        viewConfigs: '=',
+        view: '='
+      },
+
+      replace: true,
+      templateUrl: 'cr-model-list-filter.html',
+
+      link: function(scope, elem, attrs) {
+
+        var firstSelect = true;
+        var defaultView = '';
+
+        scope.$watch('viewConfig', function(newValue, oldValue) {
+          if (firstSelect && newValue) {
+            // remeber default view value
+            defaultView = scope.view;
+            firstSelect = false;
+          }
+          if (!firstSelect) {
+            scope.view = newValue ? newValue.name : defaultView;
+          }
+        });
+      }
+    };
+  });
+
+
   module.directive('crModelList', function(crCommon, crResources, crSchema) {
     return {
       scope: {
         type: '@',
-        view: '@',
+        view: '=?',
         limit: '=?',
         headers: '=?'
       },
@@ -1770,23 +1809,27 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        var prevIds = [];
         var resource;
         var schema;
 
-        scope.isLoading = false;
-        scope.prevId = null;
-        scope.curId = null;
-        scope.nextId = null;
-        scope.pageNo = 1;
-        scope.totalPages = 1;
-        scope.rows = [];
+        function initScope() {
+          scope.prevIds = [];
+          scope.isLoading = false;
+          scope.prevId = null;
+          scope.curId = null;
+          scope.nextId = null;
+          scope.pageNo = 1;
+          scope.totalPages = 1;
+          scope.rows = [];
+        }
+        initScope();
 
         function load(startkey) {
 
           scope.isLoading = true;
 
           var limit = scope.limit || 20;
+          var view = scope.view || 'all';
           var params = {
             include_docs: true,
             include_refs: true,
@@ -1795,7 +1838,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             startkey: startkey
           };
 
-          resource.view(scope.view || 'all', params).then(function success(result) {
+          resource.view(view, params).then(function success(result) {
             if(result.total_rows === 0) return;
 
             // table rows values according to header
@@ -1811,8 +1854,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             if (result.rows.length > 0) {
               scope.curId = result.rows[0].id;
               scope.nextId = null;
-              scope.prevId = prevIds.length > 0 ? prevIds[prevIds.length - 1] : null;
-              scope.pageNo = prevIds.length + 1;
+              scope.prevId = scope.prevIds.length > 0 ? scope.prevIds[scope.prevIds.length - 1] : null;
+              scope.pageNo = scope.prevIds.length + 1;
               scope.totalPages = Math.ceil(result.total_rows / limit);
 
               if (result.rows.length > limit) {
@@ -1831,14 +1874,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
         scope.next = function() {
           if (scope.nextId) {
-            prevIds.push(scope.curId);
+            scope.prevIds.push(scope.curId);
             load(scope.nextId);
           }
         };
 
         scope.prev = function() {
-          if (prevIds.length > 0) {
-            load(prevIds.pop());
+          if (scope.prevIds.length > 0) {
+            load(scope.prevIds.pop());
           }
         };
 
@@ -1866,6 +1909,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
             load();
           });
+        });
+
+        scope.$watch('view', function(newValue, oldValue) {
+          if (newValue === oldValue) return;
+          if (!resource) return;
+          // reload list on view change
+          load();
         });
       }
     };
