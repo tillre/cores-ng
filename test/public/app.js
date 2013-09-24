@@ -36,7 +36,7 @@
         { title: 'By String1', name: 'by_string', params: { keys: ['foo'] }}
       ];
       // $scope.view = { title: 'All', name: 'all' };
-      $scope.limit = 3;
+      $scope.limit = 2;
 
       $scope.$on('list:select', function(e, id) {
         e.stopPropagation();

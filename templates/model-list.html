@@ -11,11 +11,10 @@
       </tr>
     </tbody>
   </table>
-  <div class="pagination">
+  <div ng-show="rows && rows.length > 0" class="pagination">
     <ul>
-      <li class="{{ !isLoading && prevId  ? '' : 'disabled' }}"><a href="" ng-click="prev()">Prev</a></li>
-      <li class="disabled"><a>{{ pageNo }} &#47 {{ totalPages }}</a></li>
-      <li class="{{ !isLoading && nextId ? '' : 'disabled' }}"><a href="" ng-click="next()">Next</a></li>
+      <li class="{{ !isLoading && prevKeys.length  ? '' : 'disabled' }}"><a href="" ng-click="prev()">Prev</a></li>
+      <li class="{{ !isLoading && nextKey ? '' : 'disabled' }}"><a href="" ng-click="next()">Next</a></li>
     </ul>
   </div>
 </div>

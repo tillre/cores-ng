@@ -174,11 +174,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      </tr>\n" +
     "    </tbody>\n" +
     "  </table>\n" +
-    "  <div class=\"pagination\">\n" +
+    "  <div ng-show=\"rows && rows.length > 0\" class=\"pagination\">\n" +
     "    <ul>\n" +
-    "      <li class=\"{{ !isLoading && prevId  ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"prev()\">Prev</a></li>\n" +
-    "      <li class=\"disabled\"><a>{{ pageNo }} &#47 {{ totalPages }}</a></li>\n" +
-    "      <li class=\"{{ !isLoading && nextId ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"next()\">Next</a></li>\n" +
+    "      <li class=\"{{ !isLoading && prevKeys.length  ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"prev()\">Prev</a></li>\n" +
+    "      <li class=\"{{ !isLoading && nextKey ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"next()\">Next</a></li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
     "</div>"
@@ -1097,13 +1096,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       }
 
       var config = {
-        params: params || {}
+        params: {}
       };
       // stringify non string params as json, to preserve them
       // angularjs http will otherwise do funky stuff with array params
       for (var x in params) {
         if (typeof params[x] !== 'string') {
-          params[x] = JSON.stringify(params[x]);
+          config.params[x] = JSON.stringify(params[x]);
+        }
+        else {
+          config.params[x] = params[x];
         }
       }
       return $http.get(path, config).then(
@@ -1823,13 +1825,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var schema;
 
         function initScope() {
-          scope.prevIds = [];
           scope.isLoading = false;
-          scope.prevId = null;
-          scope.curId = null;
-          scope.nextId = null;
-          scope.pageNo = 1;
-          scope.totalPages = 1;
+          scope.prevKeys = [];
+          scope.curKey = null;
+          scope.nextKey = null;
           scope.rows = [];
         }
         initScope();
@@ -1846,10 +1845,17 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             limit: limit + 1,
             startkey: startkey
           };
+
           var view = 'all';
           if (scope.view) {
             view = scope.view.name;
-            crCommon.merge(params, scope.view.params);
+            for (var x in scope.view.params) {
+              // only overwrite startkey on first load
+              if (x === 'startkey' && params.startkey) {
+                continue;
+              }
+              params[x] = scope.view.params[x];
+            }
           }
 
           resource.view(view, params).then(function success(result) {
@@ -1866,19 +1872,20 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             });
 
             if (result.rows.length > 0) {
-              scope.curId = result.rows[0].id;
-              scope.nextId = null;
-              scope.prevId = scope.prevIds.length > 0 ? scope.prevIds[scope.prevIds.length - 1] : null;
-              scope.pageNo = scope.prevIds.length + 1;
-              scope.totalPages = Math.ceil(result.total_rows / limit);
+              scope.curKey = result.rows[0].key;
+              scope.nextKey = null;
 
               if (result.rows.length > limit) {
-                // there a more pages left, remember the last row's id and remove it from the list
-                scope.nextId = result.rows[limit].id;
+                // there a more pages left, remember the last row's key and do not display it
+                scope.nextKey = result.rows[limit].key;
                 scope.rows.pop();
               }
             }
             scope.isLoading = false;
+
+          }, function(err) {
+            console.log('ERROR', err);
+            throw err;
           });
         }
 
@@ -1887,15 +1894,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         };
 
         scope.next = function() {
-          if (scope.nextId) {
-            scope.prevIds.push(scope.curId);
-            load(scope.nextId);
+          if (scope.nextKey) {
+            scope.prevKeys.push(scope.curKey);
+            load(scope.nextKey);
           }
         };
 
         scope.prev = function() {
-          if (scope.prevIds.length > 0) {
-            load(scope.prevIds.pop());
+          if (scope.prevKeys.length > 0) {
+            load(scope.prevKeys.pop());
           }
         };
 
