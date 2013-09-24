@@ -29,12 +29,13 @@
 
       $scope.type = 'Bar';
       $scope.modelId = $routeParams.id;
-      $scope.headers = ['string1', 'ref.bar'];
-      $scope.viewConfigs = [
+      $scope.headers = ['string1', 'ref/bar'];
+      $scope.views = [
         { title: 'Alt All', name: 'altall' },
-        { title: 'Only asd', name: 'onlyASD' }
+        { title: 'Only asd', name: 'onlyASD' },
+        { title: 'By String1', name: 'by_string', params: { keys: ['foo'] }}
       ];
-      // $scope.view = '';
+      // $scope.view = { title: 'All', name: 'all' };
       $scope.limit = 3;
 
       $scope.$on('list:select', function(e, id) {

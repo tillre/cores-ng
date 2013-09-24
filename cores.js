@@ -139,7 +139,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   $templateCache.put("cr-model-list-filter.html",
     "<form class=\"form-inline\">\n" +
     "  <label>Filter:</label>\n" +
-    "  <select ng-model=\"viewConfig\" ng-options=\"v.name for v in viewConfigs\">\n" +
+    "  <select ng-model=\"selectedView\" ng-options=\"v.title for v in views\">\n" +
     "    <option value=\"\">Default</option>\n" +
     "  </select>\n" +
     "</div>"
@@ -223,14 +223,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   $templateCache.put("cr-multi-select-ref.html",
     "<div>\n" +
-    "  <label><strong>{{name}}:</strong></label>\n" +
+    "  <label>{{name}}:</label>\n" +
     "\n" +
     "  <div class=\"indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "\n" +
-    "    <!-- <select ng-model=\"selectedRow\" ng-options=\"r.name for r in rows\"> -->\n" +
-    "    <!--   <option value=\"\">-- choose --</option> -->\n" +
-    "    <!-- </select> -->\n" +
-    "\n" +
     "    <ul>\n" +
     "      <li ng-repeat=\"row in rows\">\n" +
     "        <label class=\"checkbox\">{{row.name}}\n" +
@@ -322,9 +317,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   $templateCache.put("cr-single-select-ref.html",
     "<div>\n" +
-    "  <label><strong>{{name}}:</strong></label>\n" +
+    "  <label>{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
+    "  <div class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
     "\n" +
     "    <select ng-model=\"selectedRow\" ng-options=\"r.name for r in rows\">\n" +
     "      <option value=\"\">-- choose --</option>\n" +
@@ -862,6 +857,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   };
 
 
+  var merge = function(a, b) {
+    for (var x in b) {
+      a[x] = b[x];
+    }
+    return a;
+  };
+
+
   module.service('crCommon', function($q) {
 
     return {
@@ -871,7 +874,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       createSlug: createSlug,
       capitalize: capitalize,
 
-      jsonPointer: jsonPointer
+      jsonPointer: jsonPointer,
+
+      merge: merge
     };
   });
 
@@ -1094,13 +1099,18 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       var config = {
         params: params || {}
       };
-
+      // stringify non string params as json, to preserve them
+      // angularjs http will otherwise do funky stuff with array params
+      for (var x in params) {
+        if (typeof params[x] !== 'string') {
+          params[x] = JSON.stringify(params[x]);
+        }
+      }
       return $http.get(path, config).then(
         function(res) { return res.data; },
         function(res) { return $q.reject(makeError(res)); }
       );
     };
-
     return Resource;
   });
 
@@ -1768,7 +1778,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   module.directive('crModelListFilter', function() {
     return {
       scope: {
-        viewConfigs: '=',
+        views: '=',
         view: '='
       },
 
@@ -1778,16 +1788,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       link: function(scope, elem, attrs) {
 
         var firstSelect = true;
-        var defaultView = '';
+        var defaultConfig = '';
 
-        scope.$watch('viewConfig', function(newValue, oldValue) {
-          if (firstSelect && newValue) {
-            // remeber default view value
-            defaultView = scope.view;
+        scope.$watch('selectedView', function(newConfig, oldConfig) {
+          if (firstSelect && newConfig) {
+            // remeber default view config
+            defaultConfig = scope.view;
             firstSelect = false;
           }
           if (!firstSelect) {
-            scope.view = newValue ? newValue.name : defaultView;
+            scope.view = newConfig || defaultConfig;
           }
         });
       }
@@ -1829,7 +1839,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           scope.isLoading = true;
 
           var limit = scope.limit || 20;
-          var view = scope.view || 'all';
           var params = {
             include_docs: true,
             include_refs: true,
@@ -1837,6 +1846,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             limit: limit + 1,
             startkey: startkey
           };
+          var view = 'all';
+          if (scope.view) {
+            view = scope.view.name;
+            crCommon.merge(params, scope.view.params);
+          }
 
           resource.view(view, params).then(function success(result) {
             if(result.total_rows === 0) return;

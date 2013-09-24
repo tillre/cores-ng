@@ -1,12 +1,7 @@
 <div>
-  <label><strong>{{name}}:</strong></label>
+  <label>{{name}}:</label>
 
   <div class="indent control-group" ng-class="{ error: hasErrors() }">
-
-    <!-- <select ng-model="selectedRow" ng-options="r.name for r in rows"> -->
-    <!--   <option value="">-- choose --</option> -->
-    <!-- </select> -->
-
     <ul>
       <li ng-repeat="row in rows">
         <label class="checkbox">{{row.name}}

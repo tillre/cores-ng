@@ -15,6 +15,14 @@ module.exports = {
           emit(doc._id, null);
         }
       }
+    },
+
+    by_string: {
+      map: function(doc) {
+        if (doc.type_ === 'Bar') {
+          emit(doc.string1, null);
+        }
+      }
     }
   }
 
