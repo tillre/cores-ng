@@ -1936,6 +1936,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           if (newValue === oldValue) return;
           if (!resource) return;
           // reload list on view change
+          initScope();
           load();
         });
       }
