@@ -2,7 +2,7 @@
   <label>{{name}}:</label>
 
   <div class="indent control-group" ng-class="{ error: hasErrors() }">
-    <ul>
+    <ul class="unstyled">
       <li ng-repeat="row in rows">
         <label class="checkbox">{{row.name}}
           <input type="checkbox" ng-model="row.selected"/>

@@ -8,6 +8,8 @@ module.exports = j.object({
   string1: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
   string2: j.string(),
 
+  richRext: j.string().custom('view', 'cr-rich-text')
+
 //   slug: j.string()
 //     .format('slug')
 //     .custom('view', { type: 'cr-slug', source: ['string1', 'string2'] }),
