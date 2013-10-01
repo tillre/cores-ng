@@ -1,7 +1,7 @@
 <div>
   <label><strong>{{name}}:</strong></label>
 
-  <div class="indent control-group" ng-class="{ error: hasErrors() }">
+  <div class="cr-indent control-group" ng-class="{ error: hasErrors() }">
     <div cr-ref-preview type="{{schema.$ref}}" preview-path="{{previewPath}}"></div>
 
     <span ng-switch on="getFirstError()">

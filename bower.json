@@ -16,6 +16,8 @@
     "angular": "PatternConsulting/bower-angular#v1.2.0-rc.2",
     "bootstrap": "~2.3.2",
     "bootstrap-datepicker": "~1.1.2",
-    "bootstrap-timepicker": "~0.2.2"
+    "bootstrap-timepicker": "~0.2.2",
+    "jquery-autosize": "~1.17.8",
+    "markdown": "~0.5.0"
   }
 }

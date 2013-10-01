@@ -27,24 +27,42 @@ input[type="number"] {
     margin-right: 12px;
 }
 
-.item-controls {
+.cr-item-controls {
     position: absolute;
     top: 0;
     right: 0;
 }
 
-.item-controls .btn-group {
+.cr-item-controls .btn-group {
     margin-right: 8px;
 }
 
-.indent {
+.cr-indent {
     padding-left: 12px;
     margin-bottom: 10px;
     border-left: 1px solid #eee;
 }
 
-.debug, .editable {
+.cr-debug, .cr-editor {
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 12px;
+    overflow: hidden;
+}
+
+.cr-editor-area {
+    display: block;
+    width: 100%;
+
+    box-shadow: none;
+    border-style: none;
+    border-color: Transparent;
+    overflow: auto;
+
+    -moz-box-sizing: border-box;
+         box-sizing: border-box;
+}
+
+.cr-editor-preview {
+    display: none;
 }
