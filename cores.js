@@ -33,30 +33,30 @@
 angular.module("cores.templates").run(["$templateCache", function($templateCache) {
 
   $templateCache.put("cr-anyof-array.html",
-    "<div> \n" +
-    "  <label><strong>{{name}}</strong></label> \n" +
+    "<div>\n" +
+    "  <label><strong>{{name}}</strong></label>\n" +
     "\n" +
-    "  <div class=\"indent\"> \n" +
-    "    <div class=\"btn-group\"> \n" +
-    "      <a class=\"btn dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">Add <span class=\"caret\"/></a> \n" +
-    "      <ul class=\"dropdown-menu\" role=\"menu\"> \n" +
-    "        <li ng-repeat=\"schema in schema.items.anyOf\"> \n" +
-    "          <a ng-click=\"addItem(schema)\">{{schema.name}}</a> \n" +
-    "        </li> \n" +
-    "      </ul> \n" +
-    "    </div> \n" +
+    "  <div class=\"cr-indent\">\n" +
+    "    <div class=\"btn-group\">\n" +
+    "      <a class=\"btn dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">Add <span class=\"caret\"/></a>\n" +
+    "      <ul class=\"dropdown-menu\" role=\"menu\">\n" +
+    "        <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
+    "          <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
+    "        </li>\n" +
+    "      </ul>\n" +
+    "    </div>\n" +
     "\n" +
-    "    <ul class=\"unstyled\">  \n" +
-    "      <li ng-repeat=\"model in model\"><div cr-anyof-item model=\"model\" path=\"{{path}}[ {{$index}} ]\"></div></li> \n" +
-    "    </ul> \n" +
-    "  </div> \n" +
+    "    <ul class=\"unstyled\">\n" +
+    "      <li ng-repeat=\"model in model\"><div cr-anyof-item model=\"model\" path=\"{{path}}[ {{$index}} ]\"></div></li>\n" +
+    "    </ul>\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-array-item.html",
     "<div>\n" +
     "  <hr>\n" +
-    "  <div class=\"item-controls\">\n" +
+    "  <div class=\"cr-item-controls\">\n" +
     "    <div class=\"btn-group\">\n" +
     "      <button class=\"btn btn-small\" ng-click=\"moveUp()\">Up</button>\n" +
     "      <button class=\"btn btn-small\" ng-click=\"moveDown()\">Down</button>\n" +
@@ -70,7 +70,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div>\n" +
     "  <label><strong>{{name}}</strong></label>\n" +
     "\n" +
-    "  <div class=\"indent\">\n" +
+    "  <div class=\"cr-indent\">\n" +
     "    <button class=\"btn\" ng-click=\"addItem(schema.items)\">Add</button>\n" +
     "\n" +
     "    <ul class=\"unstyled\">\n" +
@@ -126,7 +126,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div>\n" +
     "  <form name=\"modelForm\"></form>\n" +
     "  <div ng-show=\"!valid\" class=\"alert alert-error\">The form has errors</div>\n" +
-    "  <div ng-show=\"debug\" style=\"border: 1px solid #ccc; border-radius: 5px; padding: 12px\">\n" +
+    "  <div ng-show=\"debug\" class=\"cr-debug\">\n" +
     "    <h4>Debug</h4>\n" +
     "    <h5>Model</h5>\n" +
     "    <pre>{{ model | json }}</pre>\n" +
@@ -224,8 +224,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div>\n" +
     "  <label>{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "    <ul>\n" +
+    "  <div class=\"cr-indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
+    "    <ul class=\"unstyled\">\n" +
     "      <li ng-repeat=\"row in rows\">\n" +
     "        <label class=\"checkbox\">{{row.name}}\n" +
     "          <input type=\"checkbox\" ng-model=\"row.selected\"/>\n" +
@@ -265,9 +265,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-object.html",
-    "<fieldset> \n" +
-    "  <label><strong>{{name}}:<strong></label> \n" +
-    "  <div class=\"indent properties\"></div> \n" +
+    "<fieldset>\n" +
+    "  <label><strong>{{name}}:<strong></label>\n" +
+    "  <div class=\"cr-indent properties\"></div>\n" +
     "</fieldset>\n"
   );
 
@@ -295,7 +295,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div>\n" +
     "  <label><strong>{{name}}:</strong></label>\n" +
     "\n" +
-    "  <div class=\"indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
+    "  <div class=\"cr-indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
     "    <div cr-ref-preview type=\"{{schema.$ref}}\" preview-path=\"{{previewPath}}\"></div>\n" +
     "\n" +
     "    <span ng-switch on=\"getFirstError()\">\n" +
@@ -312,6 +312,26 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div cr-model-modal modal-id=\"{{editModalId}}\" type=\"{{schema.$ref}}\" path=\"{{path}}\"></div>\n" +
     "  <div cr-model-list-modal modal-id=\"{{selectModalId}}\" type=\"{{schema.$ref}}\"></div>\n" +
     "</div>\n"
+  );
+
+  $templateCache.put("cr-rich-text.html",
+    "<span class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
+    "  <div class=\"controls\">\n" +
+    "    <label>{{name}}:</label>\n" +
+    "\n" +
+    "    <div class=\"cr-editor\">\n" +
+    "      <textarea class=\"cr-editor-area\" ng-model=\"model\" rows=\"1\"></textarea>\n" +
+    "      <div class=\"cr-editor-preview\"></div>\n" +
+    "      <button class=\"btn pull-right\" ng-click=\"togglePreview()\">{{ isPreview ? \"Edit\" : \"Preview\" }}</button>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <span ng-switch on=\"getFirstError()\">\n" +
+    "      <p ng-switch-when=\"required\" class=\"help-inline\">Required</p>\n" +
+    "      <p ng-switch-when=\"maxLength\" class=\"help-inline\">Value is longer than {{schema.maxLength}}</p>\n" +
+    "      <p ng-switch-when=\"minLength\" class=\"help-inline\">Value is shorter than {{schema.minLength}}</p>\n" +
+    "    </span>\n" +
+    "  </div>\n" +
+    "</span>"
   );
 
   $templateCache.put("cr-single-select-ref.html",
@@ -1524,8 +1544,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.directives');
 
-  
-  module.directive('crDatetime', function() {
+
+  module.directive('crDatetime', function(crValidation) {
     return {
       scope: {
         model: '=',
@@ -1539,8 +1559,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
+        var validation = crValidation(scope);
+        if (attrs.isRequired === 'true') {
+          validation.addConstraint('required', function(value) {
+            return !!value && value !== '';
+          }, true);
+        }
+
         var date = new Date();
-        
+
         if (scope.model && scope.model !== '') {
           // get date from model
           date = new Date(scope.model);
@@ -1554,14 +1581,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           todayHighlight: true
         });
         datepicker.datepicker('update', date);
-        
+
         var timepicker = elem.find('.time').timepicker({
           minuteStep: 15,
           defaultTime: date.getHours() + ':' + date.getMinutes(),
           showMeridian: false,
           showSeconds: false
         });
-        
+
         datepicker.on('changeDate', function(e) {
           e.stopPropagation();
 
@@ -1582,7 +1609,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           scope.model = date.toISOString();
           scope.$apply();
         });
-        
+
         scope.$emit('ready');
       }
     };
@@ -2443,6 +2470,69 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       }
     };
   });
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
+  module.directive('crRichText', function(crCommon, crValidation) {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@',
+        path: '@'
+      },
+
+      replace: true,
+      templateUrl: 'cr-rich-text.html',
+
+      link: function(scope, elem, attrs) {
+
+        var validation = crValidation(scope);
+
+        validation.addConstraint('maxLength', function(value) {
+          return value.length <= scope.schema.maxLength;
+        });
+
+        validation.addConstraint('minLength', function(value) {
+          return value.length >= scope.schema.minLength;
+        });
+
+        if (attrs.isRequired === 'true') {
+          validation.addConstraint('required', function(value) {
+            return !!value && value !== '';
+          }, true);
+        }
+
+        var $area = elem.find('.cr-editor-area');
+        var $preview = elem.find('.cr-editor-preview');
+        $area.autosize();
+
+        scope.isPreview = false;
+        scope.togglePreview = function() {
+          scope.isPreview = !scope.isPreview;
+          if (scope.isPreview) {
+            $preview.html(markdown.toHTML($area.val()));
+          }
+          $area.toggle();
+          $preview.toggle();
+        };
+
+        // manually trigger autosize on first model change
+        var unwatch = scope.$watch('model', function(newValue, oldValue) {
+          if (newValue) {
+            unwatch();
+            $area.trigger('autosize.resize');
+          }
+        });
+
+        scope.$emit('ready');
+      }
+    };
+  });
+
 })();
 (function() {
 
