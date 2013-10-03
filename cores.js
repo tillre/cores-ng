@@ -619,6 +619,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             $scope.$broadcast('set:customError', v.path, v.code, v.message);
           });
         }
+        else {
+          data.state = STATE_ERROR;
+          data.error = err;
+        }
         def.reject(err);
       });
 
