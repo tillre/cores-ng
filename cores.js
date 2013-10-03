@@ -1079,7 +1079,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           def.resolve(data);
         }
         else {
-          def.reject(makeError(data));
+          def.reject(makeError({code: xhr.status, data: data}));
         }
         // call apply, because we are outside the angular life-cycle
         $rootScope.$apply();
@@ -1212,6 +1212,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   });
 
 })();
+
 (function() {
 
   var module = angular.module('cores.services');
