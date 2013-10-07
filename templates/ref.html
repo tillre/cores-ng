@@ -2,7 +2,7 @@
   <label><strong>{{name}}:</strong></label>
 
   <div class="cr-indent control-group" ng-class="{ error: hasErrors() }">
-    <div cr-ref-preview type="{{schema.$ref}}" preview-path="{{previewPath}}"></div>
+    <div cr-ref-preview type="{{schema.$ref}}" options="options"></div>
 
     <span ng-switch on="getFirstError()">
       <p ng-switch-when="required" class="help-block">Required</p>
@@ -15,6 +15,11 @@
     </div>
   </div>
 
-  <div cr-model-modal modal-id="{{editModalId}}" type="{{schema.$ref}}" path="{{path}}" defaults="{{defaults}}"></div>
+  <div cr-model-modal
+       modal-id="{{editModalId}}"
+       type="{{schema.$ref}}"
+       path="{{path}}"
+       defaults="options.defaults"></div>
+
   <div cr-model-list-modal modal-id="{{selectModalId}}" type="{{schema.$ref}}"></div>
 </div>
