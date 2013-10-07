@@ -309,7 +309,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    </div>\n" +
     "  </div>\n" +
     "\n" +
-    "  <div cr-model-modal modal-id=\"{{editModalId}}\" type=\"{{schema.$ref}}\" path=\"{{path}}\"></div>\n" +
+    "  <div cr-model-modal modal-id=\"{{editModalId}}\" type=\"{{schema.$ref}}\" path=\"{{path}}\" defaults=\"{{defaults}}\"></div>\n" +
     "  <div cr-model-list-modal modal-id=\"{{selectModalId}}\" type=\"{{schema.$ref}}\"></div>\n" +
     "</div>\n"
   );
@@ -410,7 +410,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
     return function(input, path) {
       if (!input) return null;
-      return crCommon.jsonPointer(input, path);
+      return crCommon.jsonPointerGet(input, path);
     };
   });
 
@@ -634,7 +634,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       return this._resource.destroy($scope.model).then(
         function() {
-          self.setModel(crSchema.createValue($scope.schema));
+          self.setModel();
           $scope.$emit('model:destroyed');
         }
       );
@@ -642,8 +642,20 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
     this.setModel = function(model) {
+      if (!model) {
+        // create default model
+        model = crSchema.createValue($scope.schema);
+        // set custom default values
+        if ($scope.data.defaults) {
+          Object.keys($scope.data.defaults).forEach(function(key) {
+            var value = $scope.data.defaults[key];
+            crCommon.jsonPointerSet(model, key, value);
+          });
+        }
+      }
       // reset files dict when model changes
       data.files = {};
+
       $scope.model = model;
     };
 
@@ -657,12 +669,17 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     // load schema
     self._resource.schema().then(function(schema) {
 
+      // parse some options
+      if ($scope.defaults && typeof $scope.defaults === 'string') {
+        $scope.data.defaults = JSON.parse(unescape($scope.defaults));
+      }
+
       // load or create default model
       $scope.schema = schema;
       var id = $scope.modelId;
 
       if (!id) {
-        self.setModel(crSchema.createValue(schema));
+        self.setModel();
         data.state = STATE_EDITING;
       }
       else {
@@ -680,7 +697,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
           else if (oldId) {
             // newId was set to null, create default value
-            self.setModel(crSchema.createValue($scope.schema));
+            self.setModel();
           }
         }
       });
@@ -694,11 +711,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.services');
 
-  
+
   //
   // get the name from the schema or alternativly from the path
   //
-  
+
   function getModelName(schema, modelPath) {
     // use schema name if it exists
     var name = schema.title || '';
@@ -715,8 +732,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   //
   // Create a template for a schema with optional view configuration
-  // 
-  
+  //
+
   function buildTemplate(schema, model, schemaPath, modelPath, absPath, options) {
 
     var viewType = schema.type;
@@ -752,19 +769,24 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       viewType = 'number';
       options['is-integer'] = true;
     }
-    
+
     if (schema.hasOwnProperty('view')) {
 
       // view can be a string or object with additional options
-      
+
       if (angular.isObject(schema.view)) {
         viewType = schema.view.type || viewType;
         viewName = schema.view.name || viewName;
 
-        // add view properties to options
+        // add view properties as options
+        // will be added as attribute key-value-pairs to the directive element
         angular.forEach(schema.view, function(value, key) {
           if (key !== 'type' && key !== 'name') {
-            options[key] = value;
+            // convert non string values to a json string
+            // escape to not mess up attribute quotes
+            options[key] = typeof value !== 'string'
+              ? escape(JSON.stringify(value))
+              : value;
           }
         });
       }
@@ -781,11 +803,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     return buildElement(viewType, schemaPath, modelPath, viewName, absPath, options);
   }
 
-  
+
   //
   // build the html element for the type
   //
-  
+
   function buildElement(type, schemaPath, modelPath, name, absPath, options) {
     var e = '<div ' + type +
           ' schema="' + schemaPath + '"' +
@@ -796,13 +818,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     angular.forEach(options, function(value, key) {
       e += ' ' + key + '="' + value + '"';
     });
-    
+
     e += '/>';
 
     return e;
   }
 
-  
+
   module.factory('crBuild', function() {
 
     return function(schema, model, schemaPath, modelPath, absPath, options) {
@@ -811,7 +833,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       modelPath = modelPath || 'model';
       absPath = absPath || '';
       options = options || {};
-      
+
       return buildTemplate(schema, model, schemaPath, modelPath, absPath, options);
     };
   });
@@ -863,7 +885,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   };
 
 
-  var jsonPointer = function(obj, path) {
+  var trim = function(str) {
+    return this.replace(/^\s+|\s+$/g, '');
+  };
+
+
+  var jsonPointerGet = function(obj, path) {
     // TODO: array paths
     if (!path) return obj;
     var parts = path.split('/');
@@ -877,6 +904,28 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       value = value[parts[i]];
     }
     return value;
+  };
+
+
+  var jsonPointerSet = function(obj, path, value) {
+    // TODO: array paths
+    var parts = path.split('/');
+    if (parts.length && parts[0] === '') parts.shift();
+    if (parts.length && parts[parts.length - 1] === '') parts.pop();
+    if (parts.length === 0) return;
+
+    var o = obj;
+    var p = parts[0];
+
+    while(true) {
+      parts.shift();
+      if (parts.length === 0) {
+        o[p] = value;
+        return;
+      }
+      o = o[p];
+      p = parts[0];
+    }
   };
 
 
@@ -897,7 +946,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       createSlug: createSlug,
       capitalize: capitalize,
 
-      jsonPointer: jsonPointer,
+      jsonPointerSet: jsonPointerSet,
+      jsonPointerGet: jsonPointerGet,
 
       merge: merge
     };
@@ -1020,7 +1070,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var fd = new FormData();
         fd.append('type_', this.type);
         fd.append('doc', JSON.stringify(doc));
-        // fd.append('file', file);
 
         files.forEach(function(file, i) {
           fd.append('file' + i, file);
@@ -1898,7 +1947,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
               return {
                 id: row.id,
                 items: scope.headers.map(function(path, i) {
-                  return { value: crCommon.jsonPointer(row.doc, path) };
+                  return { value: crCommon.jsonPointerGet(row.doc, path) };
                 })
               };
             });
@@ -2019,7 +2068,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       scope: {
         type: '@',
         path: '@',
-        modalId: '@'
+        modalId: '@',
+        defaults: '@'
       },
 
       replace: true,
@@ -2027,7 +2077,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       controller: 'crModelCtrl',
 
-      link: function(scope, elem) {
+
+      link: function(scope, elem, attrs) {
 
         scope.$on('model:saved', function() {
           // close on save
@@ -2055,13 +2106,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       scope: {
         type: '@',
         path: '@',
-        modelId: '='
+        modelId: '=',
+        options: '@'
       },
 
       replace: true,
       templateUrl: 'cr-model.html',
 
-      controller: 'crModelCtrl'
+      controller: 'crModelCtrl',
+
+      link: function(scope, elem, attrs) {
+        if (attrs.options && typeof attrs.options === 'string') {
+          scope.options = JSON.parse(attrs.options);
+        }
+        else {
+          scope.options = {};
+        }
+      }
     };
   });
 })();
@@ -2302,7 +2363,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             scope.rows = result.rows.map(function(row) {
               var r = {
                 id: row.id,
-                name: crCommon.jsonPointer(row.doc, scope.previewPath)
+                name: crCommon.jsonPointerGet(row.doc, scope.previewPath)
               };
               if (scope.model.id_ && r.id === scope.model.id_) {
                 scope.selectedRow = r;
@@ -2355,7 +2416,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
               var r = {
                 id: row.id,
                 selected: false,
-                name: crCommon.jsonPointer(row.doc, scope.previewPath)
+                name: crCommon.jsonPointerGet(row.doc, scope.previewPath)
               };
               return r;
             });
@@ -2390,7 +2451,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         schema: '=',
         name: '@',
         path: '@',
-        previewPath: '@'
+        previewPath: '@',
+        defaults: '@'
       },
 
       replace: true,
