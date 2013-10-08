@@ -1,4 +1,4 @@
-<span class="control-group" ng-class="{ error: hasErrors() }">
+<div class="control-group" ng-class="{ error: hasErrors() }">
   <div class="controls">
     <label>{{name}}:</label>
 
@@ -6,12 +6,7 @@
       <textarea class="cr-editor-area" ng-model="model" rows="1"></textarea>
       <div class="cr-editor-preview"></div>
       <button class="btn pull-right" ng-click="togglePreview()">{{ isPreview ? "Edit" : "Preview" }}</button>
+      <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
     </div>
-
-    <span ng-switch on="getFirstError()">
-      <p ng-switch-when="required" class="help-inline">Required</p>
-      <p ng-switch-when="maxLength" class="help-inline">Value is longer than {{schema.maxLength}}</p>
-      <p ng-switch-when="minLength" class="help-inline">Value is shorter than {{schema.minLength}}</p>
-    </span>
   </div>
 </span>

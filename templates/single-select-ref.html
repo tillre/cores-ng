@@ -7,8 +7,6 @@
       <option value="">-- choose --</option>
     </select>
 
-    <span ng-switch on="getFirstError()">
-      <p ng-switch-when="required" class="help-block">Required</p>
-    </span>
+    <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
   </div>
 </div>

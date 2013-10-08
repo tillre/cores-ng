@@ -1,18 +1,18 @@
 var j = require('jski');
 
+
 module.exports = j.object({
 
   boolean: j.boolean(),
   number: j.number().minimum(-1.5).maximum(1.5),
   integer: j.integer().minimum(0).maximum(10).multipleOf(2),
-  string1: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
-  string2: j.string(),
+  string: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
 
   markdown: j.string().custom('view', 'cr-markdown'),
 
   slug: j.string()
     .format('slug')
-    .custom('view', { type: 'cr-slug', source: ['string1', 'string2'] }),
+    .custom('view', { type: 'cr-slug', source: ['string'] }),
 
   date: j.string().custom('view', 'cr-datetime'),
 
@@ -68,4 +68,4 @@ module.exports = j.object({
   text: j.string().custom('view', 'cr-text'),
   password: j.string().minLength(8).custom('view', 'cr-password')
 
-}).required('string2', 'number', 'ref', 'slug', 'text', 'singleSelRef', 'multiSelRef');
+}).required('string2', 'number', 'ref', 'enum', 'slug', 'text', 'singleSelRef');

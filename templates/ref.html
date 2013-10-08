@@ -4,9 +4,7 @@
   <div class="cr-indent control-group" ng-class="{ error: hasErrors() }">
     <div cr-ref-preview type="{{schema.$ref}}" options="options"></div>
 
-    <span ng-switch on="getFirstError()">
-      <p ng-switch-when="required" class="help-block">Required</p>
-    </span>
+    <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
 
     <div class="btn-group">
       <button ng-click="newModel()" class="btn">New</button>

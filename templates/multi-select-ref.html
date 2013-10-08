@@ -10,8 +10,6 @@
       </li>
     </ul>
 
-    <span ng-switch on="getFirstError()">
-      <p ng-switch-when="required" class="help-block">Required</p>
-    </span>
+    <p ng-show="hasErrors()" class="help-inline">{{ getFirstError() }}</p>
   </div>
 </div>

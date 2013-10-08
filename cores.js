@@ -123,7 +123,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-markdown.html",
-    "<span class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
+    "<div class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
     "  <div class=\"controls\">\n" +
     "    <label>{{name}}:</label>\n" +
     "\n" +
@@ -131,13 +131,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      <textarea class=\"cr-editor-area\" ng-model=\"model\" rows=\"1\"></textarea>\n" +
     "      <div class=\"cr-editor-preview\"></div>\n" +
     "      <button class=\"btn pull-right\" ng-click=\"togglePreview()\">{{ isPreview ? \"Edit\" : \"Preview\" }}</button>\n" +
+    "      <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "    </div>\n" +
-    "\n" +
-    "    <span ng-switch on=\"getFirstError()\">\n" +
-    "      <p ng-switch-when=\"required\" class=\"help-inline\">Required</p>\n" +
-    "      <p ng-switch-when=\"maxLength\" class=\"help-inline\">Value is longer than {{schema.maxLength}}</p>\n" +
-    "      <p ng-switch-when=\"minLength\" class=\"help-inline\">Value is shorter than {{schema.minLength}}</p>\n" +
-    "    </span>\n" +
     "  </div>\n" +
     "</span>"
   );
@@ -253,9 +248,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      </li>\n" +
     "    </ul>\n" +
     "\n" +
-    "    <span ng-switch on=\"getFirstError()\">\n" +
-    "      <p ng-switch-when=\"required\" class=\"help-block\">Required</p>\n" +
-    "    </span>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</div>\n"
   );
@@ -267,13 +260,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "\n" +
     "    <input type=\"number\" ng-model=\"model\"/>\n" +
     "\n" +
-    "    <span ng-switch on=\"getFirstError()\">\n" +
-    "      <p ng-switch-when=\"required\" class=\"help-inline\">Required</p>\n" +
-    "      <p ng-switch-when=\"integer\" class=\"help-inline\">Value is not an integer</p>\n" +
-    "      <p ng-switch-when=\"multipleOf\" class=\"help-inline\">Value is not a multiple of {{schema.multipleOf}}</p>\n" +
-    "      <p ng-switch-when=\"minimum\" class=\"help-inline\">Value is less than {{schema.minimum}}</p>\n" +
-    "      <p ng-switch-when=\"maximum\" class=\"help-inline\">Value is greater than {{schema.maximum}}</p>\n" +
-    "    </span>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</span>\n"
   );
@@ -298,12 +285,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <input type=\"password\" ng-model=\"pass1\" style=\"margin-right: 4px\"/>\n" +
     "  <input type=\"password\" ng-model=\"pass2\"/>\n" +
     "\n" +
-    "  <span ng-switch on=\"getFirstError()\">\n" +
-    "    <p ng-switch-when=\"required\" class=\"help-inline\">Required</p>\n" +
-    "    <p ng-switch-when=\"match\" class=\"help-inline\">Passwords do not match</p>\n" +
-    "    <p ng-switch-when=\"maxLength\" class=\"help-inline\">Value is longer than {{schema.maxLength}}</p>\n" +
-    "    <p ng-switch-when=\"minLength\" class=\"help-inline\">Value is shorter than {{schema.minLength}}</p>\n" +
-    "  </span>\n" +
+    "  <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
     "</div>\n"
   );
 
@@ -318,9 +300,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div class=\"cr-indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
     "    <div cr-ref-preview type=\"{{schema.$ref}}\" options=\"options\"></div>\n" +
     "\n" +
-    "    <span ng-switch on=\"getFirstError()\">\n" +
-    "      <p ng-switch-when=\"required\" class=\"help-block\">Required</p>\n" +
-    "    </span>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "\n" +
     "    <div class=\"btn-group\">\n" +
     "      <button ng-click=\"newModel()\" class=\"btn\">New</button>\n" +
@@ -349,9 +329,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      <option value=\"\">-- choose --</option>\n" +
     "    </select>\n" +
     "\n" +
-    "    <span ng-switch on=\"getFirstError()\">\n" +
-    "      <p ng-switch-when=\"required\" class=\"help-block\">Required</p>\n" +
-    "    </span>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</div>\n"
   );
@@ -364,13 +342,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      <input class=\"input-xlarge\" type=\"text\" ng-model=\"model\"/>\n" +
     "      <a ng-click=\"generate()\" class=\"btn\">Generate</a>\n" +
     "    </div>\n" +
-    "    <span ng-switch on=\"getFirstError()\">\n" +
-    "      <p ng-switch-when=\"required\" class=\"help-inline\">Required</p>\n" +
-    "      <p ng-switch-when=\"maxLength\" class=\"help-inline\">Value is longer than {{schema.maxLength}}</p>\n" +
-    "      <p ng-switch-when=\"minLength\" class=\"help-inline\">Value is shorter than {{schema.minLength}}</p>\n" +
-    "      <p ng-switch-when=\"pattern\" class=\"help-inline\">Value does not match the pattern</p>\n" +
-    "      <p ng-switch-when=\"format\" class=\"help-inline\">Value is no valid {{schema.format}}</p>\n" +
-    "    </span>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</span>\n"
   );
@@ -380,13 +352,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div class=\"controls\">\n" +
     "    <label>{{name}}:</label>\n" +
     "    <input class=\"input-xlarge\" type=\"text\" ng-model=\"model\"/>\n" +
-    "    <span ng-switch on=\"getFirstError()\">\n" +
-    "      <p ng-switch-when=\"required\" class=\"help-inline\">Required</p>\n" +
-    "      <p ng-switch-when=\"maxLength\" class=\"help-inline\">Value is longer than {{schema.maxLength}}</p>\n" +
-    "      <p ng-switch-when=\"minLength\" class=\"help-inline\">Value is shorter than {{schema.minLength}}</p>\n" +
-    "      <p ng-switch-when=\"pattern\" class=\"help-inline\">Value does not match the pattern</p>\n" +
-    "      <p ng-switch-when=\"format\" class=\"help-inline\">Value is no valid {{schema.format}}</p>\n" +
-    "    </span>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</span>\n"
   );
@@ -396,11 +362,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div class=\"controls\">\n" +
     "    <label>{{name}}:</label>\n" +
     "    <textarea ng-model=\"model\"/>\n" +
-    "    <span ng-switch on=\"getFirstError()\">\n" +
-    "      <p ng-switch-when=\"required\" class=\"help-inline\">Required</p>\n" +
-    "      <p ng-switch-when=\"maxLength\" class=\"help-inline\">Value is longer than {{schema.maxLength}}</p>\n" +
-    "      <p ng-switch-when=\"minLength\" class=\"help-inline\">Value is shorter than {{schema.minLength}}</p>\n" +
-    "    </span>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</span>"
   );
@@ -1420,7 +1382,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       watchExpr = watchExpr || 'model';
 
-      // client side errors
+      // clientside errors
       var errors = {};
       // serverside errors
       var customErrors = {};
@@ -1440,16 +1402,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       scope.getFirstError = function() {
         for (var x in errors) {
-          if (errors[x]) return x;
+          if (errors[x]) return errors[x];
         }
         for (var y in customErrors) {
-          if (customErrors[y]) return y;
+          if (customErrors[y]) return customErrors[y];
         }
       };
 
 
-      var setError = function(name) {
-        errors[name] = true;
+      var setError = function(name, message) {
+        errors[name] = message;
         scope.$emit('set:error', scope.path + ':' + name);
       };
 
@@ -1462,8 +1424,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       };
 
 
-      var setCustomError = function(name) {
-        customErrors[name] = true;
+      var setCustomError = function(name, message) {
+        customErrors[name] = message;
         scope.$emit('set:error', scope.path + ':' + name);
       };
 
@@ -1483,20 +1445,20 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       };
 
 
-      var addConstraint = function(name, condition, isCustomConstraint) {
+      var addConstraint = function(name, message, condition, isCustomConstraint) {
         // only check constraints that are defined in the schema
         if (!isCustomConstraint &&
             !scope.schema.hasOwnProperty(name)) return;
 
         constraints.push(function(value) {
-          condition(value) ? removeError(name) : setError(name);
+          condition(value) ? removeError(name) : setError(name, message);
         });
       };
 
 
       scope.$on('set:customError', function(e, path, code, message) {
         if (path === scope.path) {
-          setCustomError(code);
+          setCustomError(code, message);
           return true;
         }
       });
@@ -1676,7 +1638,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return !!value && value !== '';
           }, true);
         }
@@ -1778,7 +1740,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var validation = crValidation(scope, 'model.name');
 
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return !!scope.model.name && scope.model.name !== '';
           }, true);
         }
@@ -1845,16 +1807,22 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
-        validation.addConstraint('maxLength', function(value) {
-          return value.length <= scope.schema.maxLength;
-        });
+        validation.addConstraint(
+          'maxLength',
+          'Text is longer than ' + scope.schema.maxLength,
+          function(value) {
+            return value.length <= scope.schema.maxLength;
+          });
 
-        validation.addConstraint('minLength', function(value) {
-          return value.length >= scope.schema.minLength;
-        });
+        validation.addConstraint(
+          'minLength',
+          'Text is shorter than ' + scope.schema.minLength,
+          function(value) {
+            return value.length >= scope.schema.minLength;
+          });
 
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return !!value && value !== '';
           }, true);
         }
@@ -2252,29 +2220,41 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var validation = crValidation(scope);
 
         if (options.isInteger) {
-          validation.addConstraint('integer', function(value) {
-            return Math.floor(value) === value;
-          }, true);
+          validation.addConstraint(
+            'integer',
+            'Value is not an integer',
+            function(value) {
+              return Math.floor(value) === value;
+            }, true);
         }
         else {
           elem.find('input[type="number"]').attr('step', 'any');
         }
 
-        validation.addConstraint('multipleOf', function(value) {
-          return (value % scope.schema.multipleOf) === 0;
-        });
+        validation.addConstraint(
+          'multipleOf',
+          'Value is not a multiple of ' + scope.schema.multipleOf,
+          function(value) {
+            return (value % scope.schema.multipleOf) === 0;
+          });
 
-        validation.addConstraint('minimum', function(value) {
-          return value >= scope.schema.minimum;
-        });
+        validation.addConstraint(
+          'minimum',
+          'Value is less than ' + scope.schema.minimum,
+          function(value) {
+            return value >= scope.schema.minimum;
+          });
 
-        validation.addConstraint('maximum', function(value) {
-          return value <= scope.schema.maximum;
-        });
+        validation.addConstraint(
+          'maximum',
+          'Value is greater than ' + scope.schema.maximum,
+          function(value) {
+            return value <= scope.schema.maximum;
+          });
 
 
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return angular.isNumber(value);
           }, true);
         }
@@ -2386,16 +2366,22 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
-        validation.addConstraint('maxLength', function(value) {
-          return value.length <= scope.schema.maxLength;
-        });
+        validation.addConstraint(
+          'maxLength',
+          'Password is longer than ' + scope.schema.maxLength,
+          function(value) {
+            return value.length <= scope.schema.maxLength;
+          });
 
-        validation.addConstraint('minLength', function(value) {
-          return value.length >= scope.schema.minLength;
-        });
+        validation.addConstraint(
+          'minLength',
+          'Password is shorter than ' + scope.schema.minLength,
+          function(value) {
+            return value.length >= scope.schema.minLength;
+          });
 
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return value && value !== '';
           }, true);
         }
@@ -2417,7 +2403,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
           else {
             scope.model = oldPass;
-            validation.setError('match');
+            validation.setError('match', 'Passwords do not match');
           }
         };
 
@@ -2467,7 +2453,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         // validation
         var validation = crValidation(scope, 'model.id_');
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return !!scope.model.id_;
           }, true);
         }
@@ -2626,7 +2612,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         // validation
         var validation = crValidation(scope, 'model.id_');
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return !!scope.model.id_;
           }, true);
         }
@@ -2687,25 +2673,29 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
-        validation.addConstraint('maxLength', function(value) {
-          return value.length <= scope.schema.maxLength;
-        });
+        validation.addConstraint(
+          'maxLength',
+          'Slug is longer than ' + scope.schema.maxLength,
+          function(value) {
+            return value.length <= scope.schema.maxLength;
+          });
 
-        validation.addConstraint('minLength', function(value) {
-          return value.length >= scope.schema.minLength;
-        });
+        validation.addConstraint(
+          'minLength',
+          'Slug is shorter than ' + scope.schema.minLength,
+          function(value) {
+            return value.length >= scope.schema.minLength;
+          });
 
-        validation.addConstraint('pattern', function(value) {
-          return new RegExp(scope.schema.pattern).test(value);
-        });
-
-        // validation.addConstraint('format', function(value) {
-        //   throw new Error('not implemented');
-        //   return false;
-        // });
+        validation.addConstraint(
+          'pattern',
+          'Slug does not match the pattern',
+          function(value) {
+            return new RegExp(scope.schema.pattern).test(value);
+          });
 
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return !!value && value !== '';
           }, true);
         }
@@ -2758,25 +2748,29 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
-        validation.addConstraint('maxLength', function(value) {
-          return value.length <= scope.schema.maxLength;
-        });
+        validation.addConstraint(
+          'maxLength',
+          'Text is longer than ' + scope.schema.maxLength,
+          function(value) {
+            return value.length <= scope.schema.maxLength;
+          });
 
-        validation.addConstraint('minLength', function(value) {
-          return value.length >= scope.schema.minLength;
-        });
+        validation.addConstraint(
+          'minLength',
+          'Text is shorter than ' + scope.schema.minLength,
+          function(value) {
+            return value.length >= scope.schema.minLength;
+          });
 
-        validation.addConstraint('pattern', function(value) {
-          return new RegExp(scope.schema.pattern).test(value);
-        });
-
-        // validation.addConstraint('format', function(value) {
-        //   throw new Error('not implemented');
-        //   return false;
-        // });
+        validation.addConstraint(
+          'pattern',
+          'Text does not match the pattern',
+          function(value) {
+            return new RegExp(scope.schema.pattern).test(value);
+          });
 
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return !!value && value !== '';
           }, true);
         }
@@ -2808,16 +2802,29 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
-        validation.addConstraint('maxLength', function(value) {
-          return value.length <= scope.schema.maxLength;
-        });
+        validation.addConstraint(
+          'maxLength',
+          'Text is longer than ' + scope.schema.maxLength,
+          function(value) {
+            return value.length <= scope.schema.maxLength;
+          });
 
-        validation.addConstraint('minLength', function(value) {
-          return value.length >= scope.schema.minLength;
-        });
+        validation.addConstraint(
+          'minLength',
+          'Text is shorter than ' + scope.schema.minLength,
+          function(value) {
+            return value.length >= scope.schema.minLength;
+          });
+
+        validation.addConstraint(
+          'pattern',
+          'Text does not match the pattern',
+          function(value) {
+            return new RegExp(scope.schema.pattern).test(value);
+          });
 
         if (options.isRequired) {
-          validation.addConstraint('required', function(value) {
+          validation.addConstraint('required', 'Required', function(value) {
             return !!value && value !== '';
           }, true);
         }
