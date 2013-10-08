@@ -32,6 +32,16 @@
 })();
 angular.module("cores.templates").run(["$templateCache", function($templateCache) {
 
+  $templateCache.put("cr-anyof-array-item.html",
+    "<div class=\"cr-anyof-item\">\n" +
+    "  <div class=\"cr-item-controls btn-group\">\n" +
+    "    <button class=\"btn btn-small\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
+    "    <button class=\"btn btn-small\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
+    "    <button class=\"btn btn-small btn-danger\" ng-click=\"remove()\"><i class=\"icon-remove-circle\"></i></button>\n" +
+    "  </div>\n" +
+    "</div>\n"
+  );
+
   $templateCache.put("cr-anyof-array.html",
     "<div>\n" +
     "  <label>{{name}}:</label>\n" +
@@ -54,14 +64,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-array-item.html",
-    "<div>\n" +
-    "  <hr>\n" +
-    "  <div class=\"cr-item-controls\">\n" +
-    "    <div class=\"btn-group\">\n" +
-    "      <button class=\"btn btn-small\" ng-click=\"moveUp()\">Up</button>\n" +
-    "      <button class=\"btn btn-small\" ng-click=\"moveDown()\">Down</button>\n" +
-    "    </div>\n" +
-    "    <button class=\"btn btn-small btn-danger\" ng-click=\"remove()\">Remove</button>\n" +
+    "<div class=\"cr-array-item\">\n" +
+    "  <div class=\"cr-item-controls btn-group\">\n" +
+    "    <button class=\"btn btn-small\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
+    "    <button class=\"btn btn-small\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
+    "    <button class=\"btn btn-small btn-danger\" ng-click=\"remove()\"><i class=\"icon-remove-circle\"></i></button>\n" +
     "  </div>\n" +
     "</div>\n"
   );
@@ -265,17 +272,24 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</span>\n"
   );
 
+  $templateCache.put("cr-object-array.html",
+    "<div>\n" +
+    "  <label class=\"cr-object-label\">{{name}}:</label>\n" +
+    "  <div class=\"properties\"></div>\n" +
+    "</div>\n"
+  );
+
   $templateCache.put("cr-object-minimal.html",
-    "<fieldset> \n" +
-    "  <div class=\"properties\"></div> \n" +
-    "</fieldset>\n"
+    "<div>\n" +
+    "  <div class=\"properties\"></div>\n" +
+    "</div>\n"
   );
 
   $templateCache.put("cr-object.html",
-    "<fieldset>\n" +
-    "  <label>{{name}}:</label>\n" +
-    "  <div class=\"cr-indent properties\"></div>\n" +
-    "</fieldset>\n"
+    "<div>\n" +
+    "  <label ng-show=\"options.showLabel\" class=\"cr-object-label\">{{name}}:</label>\n" +
+    "  <div ng-class=\"{ 'cr-indent': options.indentProperties }\" class=\"properties\"></div>\n" +
+    "</div>\n"
   );
 
   $templateCache.put("cr-password.html",
@@ -299,23 +313,22 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-ref-preview.html",
-    "<p>{{ model | crJsonPointer:options.previewPath }}</p>\n"
+    "<p><strong>{{ model | crJsonPointer:options.previewPath }}</strong></p>\n"
   );
 
   $templateCache.put("cr-ref.html",
     "<div>\n" +
     "  <label>{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"cr-indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
+    "  <div class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
     "    <div cr-ref-preview type=\"{{schema.$ref}}\" options=\"options\"></div>\n" +
-    "\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "\n" +
     "    <div class=\"btn-group\">\n" +
     "      <button ng-click=\"newModel()\" class=\"btn\">New</button>\n" +
     "      <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn\">Edit</button>\n" +
     "      <button ng-click=\"selectModel()\" class=\"btn\">Select</button>\n" +
     "    </div>\n" +
+    "    <div ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</div>\n" +
     "  </div>\n" +
     "\n" +
     "  <div cr-model-modal\n" +
@@ -338,7 +351,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      <option value=\"\">-- choose --</option>\n" +
     "    </select>\n" +
     "\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</div>\n"
   );
@@ -397,10 +410,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
   module.controller('crAnyofArrayCtrl', function($injector, $controller, $scope, crSchema) {
-
-
-    // $injector.invoke(ArrayCtrl, this, { $scope: $scope });
-    // $injector.invoke('crArrayCtrl', this, { $scope: $scope });
 
     // inherit from ArrayCtrl
     $controller('crArrayCtrl', { $scope: $scope });
@@ -691,22 +700,21 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.services');
 
 
-  module.factory('crBuild', function(crOptions) {
+  module.factory('crBuild', function(crCommon, crOptions) {
 
     //
-    // get the name from the schema or alternativly from the path
+    // get the title from the schema or alternativly from the path
     //
     function getModelName(schema, modelPath) {
-      // use schema name if it exists
-      var name = schema.title || '';
 
-      // otherwise use name from model path
-      if (!name) {
-        var items = modelPath.split('.');
-        name = items[items.length - 1];
-        name = name.charAt(0).toUpperCase() + name.slice(1);
+      if (schema.title) {
+        return schema.title;
       }
-      return name;
+      if (schema.name) {
+        return crCommon.capitalize(schema.name);
+      }
+      var items = modelPath.split('.');
+      return crCommon.capitalize(items[items.length - 1]);
     }
 
 
@@ -1505,7 +1513,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       },
 
       replace: true,
-      templateUrl: 'cr-array-item.html',
+      templateUrl: 'cr-anyof-array-item.html',
 
       controller: 'crArrayItemCtrl',
 
@@ -1515,7 +1523,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.array = anyof;
 
         var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model', scope.path,
-                           { mode: 'minimal' });
+                           { indentProperties: false });
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
@@ -1565,7 +1573,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       link: function(scope, elem, attrs) {
 
         var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model', scope.path,
-                           { mode: 'minimal' });
+                           { showLabel: false, indentProperties: false });
 
         var link = $compile(tmpl);
         var e = link(scope);
@@ -1669,7 +1677,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         datepicker.datepicker('update', date);
 
         var timepicker = elem.find('.time').timepicker({
-          minuteStep: 15,
+          minuteStep: 5,
           defaultTime: date.getHours() + ':' + date.getMinutes(),
           showMeridian: false,
           showSeconds: false
@@ -1920,7 +1928,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
           // create markup
           var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
-                             scope.path || '', { mode: 'minimal'});
+                             scope.path || '', { showLabel: false, indentProperties: false });
 
           // compile and link with new scope
           childScope = scope.$new();
@@ -2294,62 +2302,55 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         path: '@'
       },
 
-      compile: function(tElem, tAttrs) {
+      templateUrl: 'cr-object.html',
 
-        var templates = {
-          'default': 'cr-object.html',
-          'minimal': 'cr-object-minimal.html'
+      link: function(scope, elem, attrs) {
+
+        var defaults = {
+          showLabel: true,
+          indentProperties: true
+        };
+        scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
+
+        var numProperties = 0;
+
+        var isRequired = function (name) {
+          var req = scope.schema.required || [];
+          return req.indexOf(name) !== -1;
         };
 
-        var options = crOptions.parse(tAttrs.options);
-        options.mode = options.mode || 'default';
+        // listen for childs ready event and ready up when all fired
+        var offready = scope.$on('ready', function(e) {
 
-        var template = $templateCache.get(templates[options.mode]);
-        tElem.append(template);
+          e.stopPropagation();
+          if (--numProperties === 0) {
+            offready();
+            scope.$emit('ready');
+          }
+        });
 
-        // Linking function
-        return function(scope, elem, attrs) {
+        // create templates for properties
+        var tmpl = '';
+        angular.forEach(scope.schema.properties, function(subSchema, key) {
 
-          var numProperties = 0;
+          // ignore some keys
+          if (crSchema.isPrivateProperty(key)) return;
 
-          var isRequired = function (name) {
-            var req = scope.schema.required || [];
-            return req.indexOf(name) !== -1;
-          };
+          if (!scope.model.hasOwnProperty(key)) {
+            scope.model[key] = crSchema.createValue(subSchema);
+          }
 
-          // listen for childs ready event and ready up when all fired
-          var offready = scope.$on('ready', function(e) {
+          numProperties += 1;
 
-            e.stopPropagation();
-            if (--numProperties === 0) {
-              offready();
-              scope.$emit('ready');
-            }
-          });
-
-          // create templates for properties
-          var tmpl = '';
-          angular.forEach(scope.schema.properties, function(subSchema, key) {
-
-            // ignore some keys
-            if (crSchema.isPrivateProperty(key)) return;
-
-            if (!scope.model.hasOwnProperty(key)) {
-              scope.model[key] = crSchema.createValue(subSchema);
-            }
-
-            numProperties += 1;
-
-            tmpl += crBuild(subSchema, scope.model[key],
-                            'schema.properties.' + key, 'model.' + key,
-                            (scope.path ? scope.path : '')  + '/' + key,
-                            { isRequired: isRequired(key) });
-          });
-          // compile and link template
-          var link = $compile(tmpl);
-          var content = link(scope);
-          elem.find('.properties').append(content);
-        };
+          tmpl += crBuild(subSchema, scope.model[key],
+                          'schema.properties.' + key, 'model.' + key,
+                          (scope.path ? scope.path : '')  + '/' + key,
+                          { isRequired: isRequired(key) });
+        });
+        // compile and link template
+        var link = $compile(tmpl);
+        var content = link(scope);
+        elem.find('.properties').append(content);
       }
     };
   });

@@ -1,4 +1,4 @@
-<fieldset>
-  <label>{{name}}:</label>
-  <div class="cr-indent properties"></div>
-</fieldset>
+<div>
+  <label ng-show="options.showLabel" class="cr-object-label">{{name}}:</label>
+  <div ng-class="{ 'cr-indent': options.indentProperties }" class="properties"></div>
+</div>

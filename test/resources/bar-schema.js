@@ -25,7 +25,7 @@ module.exports = j.object({
     .custom('view', {
       type: 'cr-ref',
       previewPath: '/bar',
-      defaults: { '/bar': 'somethingstupid' }
+      defaults: { '/bar': 'some value' }
     }),
 
   singleSelRef: j.ref('Foo')
@@ -41,11 +41,16 @@ module.exports = j.object({
 
   array: j.array(j.object({
     foo: j.boolean()
-  })),
+  }).title('Some Title')),
 
-  arrayRefs: j.array(
+  arrayRefs: j.array(j.object({
+    foo: j.ref('Foo')
+      .custom('view', { type: 'cr-ref', previewPath: 'bar' })
+  })),
+  arrayRefs2: j.array(
     j.ref('Foo')
       .custom('view', { type: 'cr-ref', previewPath: 'bar' })
+      .title('Yam')
   ),
 
   anyof: j.array(j.anyOf(
