@@ -34,6 +34,11 @@ module.exports = j.object({
   multiSelRef: j.array(j.ref('Foo'))
     .custom('view', { type: 'cr-multi-select-ref', previewPath: '/bar' }),
 
+  object: j.object({
+    foo: j.string(),
+    bar: j.string()
+  }),
+
   array: j.array(j.object({
     foo: j.boolean()
   })),

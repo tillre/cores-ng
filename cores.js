@@ -34,7 +34,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   $templateCache.put("cr-anyof-array.html",
     "<div>\n" +
-    "  <label><strong>{{name}}</strong></label>\n" +
+    "  <label>{{name}}:</label>\n" +
     "\n" +
     "  <div class=\"cr-indent\">\n" +
     "    <div class=\"btn-group\">\n" +
@@ -68,7 +68,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   $templateCache.put("cr-array.html",
     "<div>\n" +
-    "  <label><strong>{{name}}</strong></label>\n" +
+    "  <label>{{name}}:</label>\n" +
     "\n" +
     "  <div class=\"cr-indent\">\n" +
     "    <button class=\"btn\" ng-click=\"addItem(schema.items)\">Add</button>\n" +
@@ -273,7 +273,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   $templateCache.put("cr-object.html",
     "<fieldset>\n" +
-    "  <label><strong>{{name}}:<strong></label>\n" +
+    "  <label>{{name}}:</label>\n" +
     "  <div class=\"cr-indent properties\"></div>\n" +
     "</fieldset>\n"
   );
@@ -304,7 +304,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   $templateCache.put("cr-ref.html",
     "<div>\n" +
-    "  <label><strong>{{name}}:</strong></label>\n" +
+    "  <label>{{name}}:</label>\n" +
     "\n" +
     "  <div class=\"cr-indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
     "    <div cr-ref-preview type=\"{{schema.$ref}}\" options=\"options\"></div>\n" +
@@ -371,7 +371,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div class=\"controls\">\n" +
     "    <label>{{name}}:</label>\n" +
     "    <textarea ng-model=\"model\"/>\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</span>"
   );
@@ -1515,7 +1515,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.array = anyof;
 
         var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model', scope.path,
-                           { 'mode': 'minimal' });
+                           { mode: 'minimal' });
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
@@ -2301,8 +2301,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           'minimal': 'cr-object-minimal.html'
         };
 
-        // var mode = tAttrs.mode || 'default';
         var options = crOptions.parse(tAttrs.options);
+        options.mode = options.mode || 'default';
+
         var template = $templateCache.get(templates[options.mode]);
         tElem.append(template);
 
