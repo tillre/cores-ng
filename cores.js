@@ -623,7 +623,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       }, function(err) {
 
-        if (err.message === 'Validation failed') {
+        if (err.errors && angular.isArray(err.errors)) {
+          // error has form field errors
           data.state = STATE_EDITING;
 
           err.errors.forEach(function(v) {
@@ -1820,31 +1821,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       }
     };
   });
-
-
-  // module.directive('crImageRefPreview', function() {
-  //   return {
-  //     scope: {
-  //       model: '=',
-  //       file: '='
-  //     },
-
-  //     replace: true,
-  //     templateUrl: 'cr-image-preview.html',
-
-  //     link: function(scope, elem, attr) {
-  //       scope.$watch('file', function(file) {
-  //         if (file) {
-  //           var fr = new FileReader();
-  //           fr.onload = function(e) {
-  //             elem.find('img').attr('src', e.target.result);
-  //           };
-  //           fr.readAsDataURL(file);
-  //         }
-  //       });
-  //     }
-  //   };
-  // });
 
 })();
 (function() {
