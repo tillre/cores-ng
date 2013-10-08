@@ -8,6 +8,9 @@ module.exports = j.object({
   integer: j.integer().minimum(0).maximum(10).multipleOf(2),
   string: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
 
+  none: j.string().custom('view', 'none'),
+  readonly: j.string().default('readonly').custom('view', 'cr-readonly'),
+
   markdown: j.string().custom('view', 'cr-markdown'),
 
   slug: j.string()

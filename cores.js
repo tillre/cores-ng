@@ -289,6 +289,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
+  $templateCache.put("cr-readonly.html",
+    "<span class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
+    "  <div class=\"controls\">\n" +
+    "    <label>{{name}}:</label>\n" +
+    "    <span class=\"input-xlarge uneditable-input\">{{model}}</span>\n" +
+    "  </div>\n" +
+    "</span>\n"
+  );
+
   $templateCache.put("cr-ref-preview.html",
     "<p>{{ model | crJsonPointer:options.previewPath }}</p>\n"
   );
@@ -2420,6 +2429,29 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     };
   });
 
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
+  module.directive('crReadonly', function() {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@',
+        path: '@'
+      },
+
+      replace: true,
+      templateUrl: 'cr-readonly.html',
+
+      link: function(scope) {
+        scope.$emit('ready');
+      }
+    };
+  });
 })();
 (function() {
 
