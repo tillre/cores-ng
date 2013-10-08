@@ -46,20 +46,18 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div>\n" +
     "  <label>{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"cr-indent\">\n" +
-    "    <div class=\"btn-group\">\n" +
-    "      <a class=\"btn dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">Add <span class=\"caret\"/></a>\n" +
-    "      <ul class=\"dropdown-menu\" role=\"menu\">\n" +
-    "        <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
-    "          <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
-    "        </li>\n" +
-    "      </ul>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <ul class=\"unstyled\">\n" +
-    "      <li ng-repeat=\"model in model\"><div cr-anyof-item model=\"model\" path=\"{{path}}[ {{$index}} ]\"></div></li>\n" +
+    "  <div class=\"btn-group\">\n" +
+    "    <a class=\"btn dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">Add <span class=\"caret\"/></a>\n" +
+    "    <ul class=\"dropdown-menu\" role=\"menu\">\n" +
+    "      <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
+    "        <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
+    "      </li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
+    "\n" +
+    "  <ul class=\"unstyled\">\n" +
+    "    <li ng-repeat=\"model in model\"><div cr-anyof-item model=\"model\" path=\"{{path}}[ {{$index}} ]\"></div></li>\n" +
+    "  </ul>\n" +
     "</div>\n"
   );
 
@@ -270,19 +268,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</span>\n"
-  );
-
-  $templateCache.put("cr-object-array.html",
-    "<div>\n" +
-    "  <label class=\"cr-object-label\">{{name}}:</label>\n" +
-    "  <div class=\"properties\"></div>\n" +
-    "</div>\n"
-  );
-
-  $templateCache.put("cr-object-minimal.html",
-    "<div>\n" +
-    "  <div class=\"properties\"></div>\n" +
-    "</div>\n"
   );
 
   $templateCache.put("cr-object.html",

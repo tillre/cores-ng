@@ -1,18 +1,16 @@
 <div>
   <label>{{name}}:</label>
 
-  <div class="cr-indent">
-    <div class="btn-group">
-      <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Add <span class="caret"/></a>
-      <ul class="dropdown-menu" role="menu">
-        <li ng-repeat="schema in schema.items.anyOf">
-          <a ng-click="addItem(schema)">{{schema.name}}</a>
-        </li>
-      </ul>
-    </div>
-
-    <ul class="unstyled">
-      <li ng-repeat="model in model"><div cr-anyof-item model="model" path="{{path}}[ {{$index}} ]"></div></li>
+  <div class="btn-group">
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Add <span class="caret"/></a>
+    <ul class="dropdown-menu" role="menu">
+      <li ng-repeat="schema in schema.items.anyOf">
+        <a ng-click="addItem(schema)">{{schema.name}}</a>
+      </li>
     </ul>
   </div>
+
+  <ul class="unstyled">
+    <li ng-repeat="model in model"><div cr-anyof-item model="model" path="{{path}}[ {{$index}} ]"></div></li>
+  </ul>
 </div>
