@@ -26,6 +26,10 @@
     margin-right: 12px;
 }
 
+[cr-tab-object] .tab-content {
+    overflow: visible;
+}
+
 .cr-array-item, .cr-anyof-item {
     position: relative;
     margin: 15px 0;

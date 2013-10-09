@@ -366,7 +366,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   $templateCache.put("cr-tab-object.html",
     "<div>\n" +
     "  <label ng-show=\"options.showLabel\" class=\"cr-object-label\">{{name}}:</label>\n" +
-    "  <div ng-class=\"{ 'cr-indent': options.indentProperties }\" class=\"properties\"></div>\n" +
+    "  <div class=\"properties\"></div>\n" +
     "</div>\n"
   );
 
@@ -2781,9 +2781,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
 
           navTmpl += '<li' + (isFirst ? ' class="active"' : '') + '>' +
-            '<a href="#' + key + '">' + crBuild.getModelTitle(scope.schema, key) + '</a></li>';
+            '<a href="#' + key + '">' + crBuild.getModelTitle(subSchema, key) + '</a></li>';
 
-          contentTmpl += '<div class="cr-indent tab-pane' + (isFirst ? ' active' : '') + '" id="' + key + '">';
+          contentTmpl += '<div' +
+            ' ng-class="{ \'cr-indent\': options.indentProperties }"' +
+            ' class="tab-pane' + (isFirst ? ' active' : '') + '"' +
+            ' id="' + key + '">';
 
           contentTmpl += crBuild.buildTemplate(subSchema, scope.model[key],
                                                'schema.properties.' + key, 'model.' + key,

@@ -40,8 +40,8 @@ module.exports = j.object({
   }),
 
   tabObject: j.object({
-    foo: j.string(),
-    bar: j.string()
+    tab1: j.string(),
+    tab2: j.string()
   }).custom('view', 'cr-tab-object'),
 
   array: j.array(j.object({
