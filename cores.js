@@ -445,23 +445,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       if (index >= $scope.model.length) return;
       $scope.model.splice(index + 1, 0, $scope.model.splice(index, 1)[0]);
     });
-
-    // wait for ready event of items on initialization
-
-    var numItems = $scope.model.length;
-
-    if (numItems === 0) {
-      $scope.$emit('ready');
-    }
-    else {
-      var off = $scope.$on('ready', function(e) {
-        e.stopPropagation();
-        if (--numItems === 0) {
-          off();
-          $scope.$emit('ready');
-        }
-      });
-    }
   });
 })();
 (function() {
@@ -593,7 +576,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           data.state = STATE_EDITING;
 
           err.errors.forEach(function(v) {
-            console.log('broadcast', v);
             $scope.$broadcast('set:customError', v.path, v.code, v.message);
           });
         }
@@ -674,8 +656,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
         }
       });
-
-      $scope.$emit('model:ready');
     });
   });
 
@@ -685,7 +665,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.services');
 
 
-  module.factory('crBuild', function(crCommon, crOptions) {
+  module.factory('crBuild', function($compile, crCommon, crOptions, crSchema) {
 
     //
     // get the title from the schema or alternativly from the path
@@ -707,6 +687,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     // Create a template for a schema with optional view configuration
     //
     function buildTemplate(schema, model, schemaPath, modelPath, absPath, options) {
+
+      schemaPath = schemaPath || 'schema';
+      modelPath = modelPath || 'model';
+      absPath = absPath || '';
+      options = options || {};
 
       var viewType = schema.type;
       var viewName = getModelName(schema, modelPath);
@@ -769,14 +754,40 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     }
 
 
-    return function(schema, model, schemaPath, modelPath, absPath, options) {
+    //
+    // build and compile object template and set default values on model
+    // returns linking function
+    //
+    function buildObject(schema, model, path) {
 
-      schemaPath = schemaPath || 'schema';
-      modelPath = modelPath || 'model';
-      absPath = absPath || '';
-      options = options || {};
+      var isRequired = function (name) {
+        var req = schema.required || [];
+        return req.indexOf(name) !== -1;
+      };
 
-      return buildTemplate(schema, model, schemaPath, modelPath, absPath, options);
+      var tmpl = '';
+      angular.forEach(schema.properties, function(subSchema, key) {
+
+        // ignore some keys
+        if (crSchema.isPrivateProperty(key)) return;
+
+        if (!model.hasOwnProperty(key)) {
+          model[key] = crSchema.createValue(subSchema);
+        }
+
+        tmpl += buildTemplate(subSchema, model[key],
+                              'schema.properties.' + key, 'model.' + key,
+                              (path ? path : '')  + '/' + key,
+                              { isRequired: isRequired(key) });
+      });
+      // compile and link template
+      return $compile(tmpl);
+    }
+
+
+    return {
+      buildTemplate: buildTemplate,
+      buildObject: buildObject
     };
   });
 
@@ -1507,8 +1518,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.schema = anyof.getSchema(scope.model.type_);
         scope.array = anyof;
 
-        var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model', scope.path,
-                           { indentProperties: false });
+        var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model', scope.path,
+                                         { indentProperties: false });
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
@@ -1557,8 +1568,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model', scope.path,
-                           { showLabel: false, indentProperties: false });
+        var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model', scope.path,
+                                         { showLabel: false, indentProperties: false });
 
         var link = $compile(tmpl);
         var e = link(scope);
@@ -1609,12 +1620,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       },
 
       replace: true,
-      templateUrl: 'cr-boolean.html',
-
-      link: function(scope) {
-
-        scope.$emit('ready');
-      }
+      templateUrl: 'cr-boolean.html'
     };
   });
 })();
@@ -1688,8 +1694,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           scope.model = date.toISOString();
           scope.$apply();
         });
-
-        scope.$emit('ready');
       }
     };
   });
@@ -1709,11 +1713,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       },
 
       replace: true,
-      templateUrl: 'cr-enum.html',
-
-      link: function(scope) {
-        scope.$emit('ready');
-      }
+      templateUrl: 'cr-enum.html'
     };
   });
 
@@ -1780,8 +1780,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           scope.$emit('file:set', fileId, file);
           scope.$apply();
         });
-
-        scope.$emit('ready');
       }
     };
   });
@@ -1850,8 +1848,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             $area.trigger('autosize.resize');
           }
         });
-
-        scope.$emit('ready');
       }
     };
   });
@@ -1912,8 +1908,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             childScope.$destroy();
           }
           // create markup
-          var tmpl = crBuild(scope.schema, scope.model, 'schema', 'model',
-                             scope.path || '', { showLabel: false, indentProperties: false });
+          var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model',
+                                           scope.path || '', { showLabel: false, indentProperties: false });
 
           // compile and link with new scope
           childScope = scope.$new();
@@ -2260,8 +2256,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             return angular.isNumber(value);
           }, true);
         }
-
-        scope.$emit('ready');
       }
     };
   });
@@ -2290,50 +2284,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       templateUrl: 'cr-object.html',
 
       link: function(scope, elem, attrs) {
-
         var defaults = {
           showLabel: true,
           indentProperties: true
         };
         scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
 
-        var numProperties = 0;
-
-        var isRequired = function (name) {
-          var req = scope.schema.required || [];
-          return req.indexOf(name) !== -1;
-        };
-
-        // listen for childs ready event and ready up when all fired
-        var offready = scope.$on('ready', function(e) {
-
-          e.stopPropagation();
-          if (--numProperties === 0) {
-            offready();
-            scope.$emit('ready');
-          }
-        });
-
-        // create templates for properties
-        var tmpl = '';
-        angular.forEach(scope.schema.properties, function(subSchema, key) {
-
-          // ignore some keys
-          if (crSchema.isPrivateProperty(key)) return;
-
-          if (!scope.model.hasOwnProperty(key)) {
-            scope.model[key] = crSchema.createValue(subSchema);
-          }
-
-          numProperties += 1;
-
-          tmpl += crBuild(subSchema, scope.model[key],
-                          'schema.properties.' + key, 'model.' + key,
-                          (scope.path ? scope.path : '')  + '/' + key,
-                          { isRequired: isRequired(key) });
-        });
-        // compile and link template
-        var link = $compile(tmpl);
+        var link = crBuild.buildObject(scope.schema, scope.model, scope.path);
         var content = link(scope);
         elem.find('.properties').append(content);
       }
@@ -2410,8 +2367,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.$watch('pass2', function(newValue) {
           compareValue(newValue, scope.pass1);
         });
-
-        scope.$emit('ready');
       }
     };
   });
@@ -2432,11 +2387,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       },
 
       replace: true,
-      templateUrl: 'cr-readonly.html',
-
-      link: function(scope) {
-        scope.$emit('ready');
-      }
+      templateUrl: 'cr-readonly.html'
     };
   });
 })();
@@ -2639,7 +2590,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         // delay to give the preview time to initialize
         $timeout(function() {
           scope.$broadcast('update:preview', scope.model.id_);
-          scope.$emit('ready');
         });
       }
     };
@@ -2738,8 +2688,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           });
           scope.model = crCommon.createSlug(val);
         };
-
-        scope.$emit('ready');
       }
     };
   });
@@ -2793,8 +2741,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             return !!value && value !== '';
           }, true);
         }
-
-        scope.$emit('ready');
       }
     };
   });
@@ -2847,8 +2793,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             return !!value && value !== '';
           }, true);
         }
-
-        scope.$emit('ready');
       }
     };
   });
