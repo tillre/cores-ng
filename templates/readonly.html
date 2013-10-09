@@ -1,6 +1,6 @@
 <span class="control-group" ng-class="{ error: hasErrors() }">
   <div class="controls">
-    <label>{{name}}:</label>
+    <label ng-show="options.showLabel">{{name}}:</label>
     <span class="input-xlarge uneditable-input">{{model}}</span>
   </div>
 </span>

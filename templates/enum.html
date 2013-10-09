@@ -1,4 +1,4 @@
-<span> 
-  <label>{{name}}:</label> 
-  <select ng-model="model" ng-options="e for e in schema.enum"></select> 
+<span>
+  <label ng-show="options.showLabel">{{name}}:</label>
+  <select ng-model="model" ng-options="e for e in schema.enum"></select>
 </span>

@@ -39,6 +39,11 @@ module.exports = j.object({
     bar: j.string()
   }),
 
+  tabObject: j.object({
+    foo: j.string(),
+    bar: j.string()
+  }).custom('view', 'cr-tab-object'),
+
   array: j.array(j.object({
     foo: j.boolean()
   }).title('Some Title')),

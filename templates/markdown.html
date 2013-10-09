@@ -1,6 +1,6 @@
 <div class="control-group" ng-class="{ error: hasErrors() }">
   <div class="controls">
-    <label>{{name}}:</label>
+    <label ng-show="options.showLabel">{{name}}:</label>
 
     <div class="cr-editor">
       <textarea class="cr-editor-area" ng-model="model" rows="1"></textarea>

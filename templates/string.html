@@ -1,6 +1,6 @@
 <span class="control-group" ng-class="{ error: hasErrors() }">
   <div class="controls">
-    <label>{{name}}:</label>
+    <label ng-show="options.showLabel">{{name}}:</label>
     <input class="input-xlarge" type="text" ng-model="model"/>
     <p ng-show="hasErrors()" class="help-inline">{{ getFirstError() }}</p>
   </div>

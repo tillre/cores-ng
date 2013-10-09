@@ -1,5 +1,5 @@
 <div>
-  <label>{{name}}:</label>
+  <label ng-show="options.showLabel">{{name}}:</label>
 
   <div class="control-group" ng-class="{ error: hasErrors() }">
     <div cr-ref-preview type="{{schema.$ref}}" options="options"></div>
