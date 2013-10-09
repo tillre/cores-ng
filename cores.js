@@ -771,19 +771,25 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.services');
 
-  // Get a new file id
-  var getFileId = (function(id) {
+  // Create a new file id
+  var createFileId = (function(id) {
     return function() { return 'file' + ++id; };
   })(0);
 
 
-  // Get a new modal id
-  var getModalId = (function(id) {
+  // Create a new modal id
+  var createModalId = (function(id) {
     return function() { return 'modal-' + ++id; };
   })(0);
 
 
-  var createSlug = function(str) {
+  // Create a new object id
+  var createObjectId = (function(id) {
+    return function() { return 'object-' + ++id; };
+  })(0);
+
+
+  var slugify = function(str) {
     str = str.replace(/^\s+|\s+$/g, ''); // trim
     str = str.toLowerCase();
 
@@ -818,45 +824,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   };
 
 
-  // var jsonPointerGet = function(obj, path) {
-  //   // TODO: array paths
-  //   if (!path) return obj;
-  //   var parts = path.split('/');
-  //   if (parts.length && parts[0] === '') parts.shift();
-  //   if (parts.length && parts[parts.length - 1] === '') parts.pop();
-  //   if (parts.length === 0) return obj;
-
-  //   var value = obj[parts[0]];
-  //   for (var i = 1; i < parts.length; ++i) {
-  //     if (!value) break;
-  //     value = value[parts[i]];
-  //   }
-  //   return value;
-  // };
-
-
-  // var jsonPointerSet = function(obj, path, value) {
-  //   // TODO: array paths
-  //   var parts = path.split('/');
-  //   if (parts.length && parts[0] === '') parts.shift();
-  //   if (parts.length && parts[parts.length - 1] === '') parts.pop();
-  //   if (parts.length === 0) return;
-
-  //   var o = obj;
-  //   var p = parts[0];
-
-  //   while(true) {
-  //     parts.shift();
-  //     if (parts.length === 0) {
-  //       o[p] = value;
-  //       return;
-  //     }
-  //     o = o[p];
-  //     p = parts[0];
-  //   }
-  // };
-
-
   var merge = function(a, b) {
     for (var x in b) {
       a[x] = b[x];
@@ -868,14 +835,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   module.service('crCommon', function($q) {
 
     return {
-      getFileId: getFileId,
-      getModalId: getModalId,
+      createFileId: createFileId,
+      createModalId: createModalId,
+      createObjectId: createObjectId,
 
-      createSlug: createSlug,
+      slugify: slugify,
       capitalize: capitalize,
-
-      // jsonPointerSet: jsonPointerSet,
-      // jsonPointerGet: jsonPointerGet,
 
       merge: merge
     };
@@ -1736,7 +1701,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }, true);
         }
 
-        var fileId = crCommon.getFileId();
+        var fileId = crCommon.createFileId();
 
         var input = elem.find('input[type="file"]');
         var preview = elem.find('img');
@@ -2551,8 +2516,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.editModalId = crCommon.getModalId();
-        scope.selectModalId = crCommon.getModalId();
+        scope.editModalId = crCommon.createModalId();
+        scope.selectModalId = crCommon.createModalId();
 
         // scope methods
         scope.newModel = function() {
@@ -2676,7 +2641,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           angular.forEach(sources, function(src) {
             val += (val !== '' ? '-' : '') + scope.$parent.model[src];
           });
-          scope.model = crCommon.createSlug(val);
+          scope.model = crCommon.slugify(val);
         };
       })
     };
@@ -2763,6 +2728,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         };
         scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
 
+        var objId = crCommon.createObjectId();
+
         var isRequired = function (name) {
           var req = scope.schema.required || [];
           return req.indexOf(name) !== -1;
@@ -2779,14 +2746,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           if (!scope.model.hasOwnProperty(key)) {
             scope.model[key] = crSchema.createValue(subSchema);
           }
+          var id = key + '-' + objId;
 
           navTmpl += '<li' + (isFirst ? ' class="active"' : '') + '>' +
-            '<a href="#' + key + '">' + crBuild.getModelTitle(subSchema, key) + '</a></li>';
+            '<a href="#' + id + '">' + crBuild.getModelTitle(subSchema, key) + '</a></li>';
 
           contentTmpl += '<div' +
             ' ng-class="{ \'cr-indent\': options.indentProperties }"' +
             ' class="tab-pane' + (isFirst ? ' active' : '') + '"' +
-            ' id="' + key + '">';
+            ' id="' + id + '">';
 
           contentTmpl += crBuild.buildTemplate(subSchema, scope.model[key],
                                                'schema.properties.' + key, 'model.' + key,

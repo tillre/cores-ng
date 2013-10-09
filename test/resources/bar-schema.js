@@ -44,6 +44,12 @@ module.exports = j.object({
     tab2: j.string()
   }).custom('view', 'cr-tab-object'),
 
+  tabObject2: j.object({
+    tab1: j.string(),
+    tab2: j.string()
+  }).custom('view', 'cr-tab-object'),
+
+
   array: j.array(j.object({
     foo: j.boolean()
   }).title('Some Title')),
