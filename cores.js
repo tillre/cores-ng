@@ -2425,7 +2425,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             scope.rows = result.rows.map(function(row) {
               var r = {
                 id: row.id,
-                name: crJSONPointer.get(row.doc, options.previewPath)
+                name: crJSONPointer.get(row.doc, scope.options.previewPath)
               };
               if (scope.model.id_ && r.id === scope.model.id_) {
                 scope.selectedRow = r;
