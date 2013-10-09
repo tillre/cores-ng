@@ -886,6 +886,29 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.services');
 
+  //
+  // wraps link functions for generic stuff
+  //
+  module.factory('crFieldLink', function(crCommon, crOptions) {
+
+    return function(linkFn) {
+
+      return function(scope, elem, attrs) {
+        var defaults = {
+          showLabel: true
+        };
+        scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
+
+        linkFn(scope, elem, attrs);
+      };
+    };
+  });
+
+})();
+(function() {
+
+  var module = angular.module('cores.services');
+
   // TODO: very incomplete implmentation
 
 
@@ -1494,7 +1517,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   });
 
 
-  module.directive('crAnyofArray', function($compile, crOptions) {
+  module.directive('crAnyofArray', function($compile, crFieldLink) {
     return {
       scope: {
         model: '=',
@@ -1508,10 +1531,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       controller: 'crAnyofArrayCtrl',
 
-      link: function(scope, elem, attrs) {
-        scope.options = crOptions.parse(attrs.options);
+      link: crFieldLink(function(scope, elem, attrs) {
         elem.find('.dropdown-toggle').dropdown();
-      }
+      })
     };
   });
 })();
@@ -1546,7 +1568,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   });
 
 
-  module.directive('crArray', function(crSchema, crOptions) {
+  module.directive('crArray', function(crSchema, crFieldLink) {
     return {
       scope: {
         model: '=',
@@ -1560,10 +1582,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       controller: 'crArrayCtrl',
 
-      link: function(scope, elem, attrs) {
-
-        scope.options = crOptions.parse(attrs.options);
-
+      link: crFieldLink(function(scope, elem, attrs) {
         // ngrepeat can only bind to references when it comes to form fields
         // thats why we can only work with items of type object not primitives
         // this may change in a feature release
@@ -1571,7 +1590,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             !crSchema.isRefSchema(scope.schema.items)) {
           throw new Error('Array items schema is not of type object: ' + JSON.stringify(scope.schema.items));
         }
-      }
+      })
     };
   });
 })();
@@ -1599,7 +1618,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crDatetime', function(crOptions, crValidation) {
+  module.directive('crDatetime', function(crFieldLink, crValidation) {
     return {
       scope: {
         model: '=',
@@ -1611,9 +1630,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-datetime.html',
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
         if (scope.options.isRequired) {
           validation.addConstraint('required', 'Required', function(value) {
@@ -1664,7 +1682,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           scope.model = date.toISOString();
           scope.$apply();
         });
-      }
+      })
     };
   });
 })();
@@ -1673,7 +1691,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crEnum', function(crOptions) {
+  module.directive('crEnum', function(crFieldLink) {
     return {
       scope: {
         model: '=',
@@ -1685,9 +1703,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-enum.html',
 
-      link: function(scope, elem, attrs) {
-        scope.options = crOptions.parse(attrs.options);
-      }
+      link: crFieldLink(function(scope, elem, attrs) {
+      })
     };
   });
 
@@ -1697,7 +1714,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crImage', function($compile, crCommon, crOptions, crValidation) {
+  module.directive('crImage', function($compile, crCommon, crFieldLink, crValidation) {
     return {
       scope: {
         model: '=',
@@ -1710,11 +1727,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       templateUrl: 'cr-image.html',
 
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.options = crOptions.parse(attrs.options);
         var validation = crValidation(scope, 'model.name');
-
         if (scope.options.isRequired) {
           validation.addConstraint('required', 'Required', function(value) {
             return !!scope.model.name && scope.model.name !== '';
@@ -1754,7 +1769,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           scope.$emit('file:set', fileId, file);
           scope.$apply();
         });
-      }
+      })
     };
   });
 
@@ -1764,7 +1779,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crMarkdown', function(crCommon, crOptions, crValidation) {
+  module.directive('crMarkdown', function(crCommon, crFieldLink, crValidation) {
     return {
       scope: {
         model: '=',
@@ -1776,11 +1791,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-markdown.html',
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
-
         validation.addConstraint(
           'maxLength',
           'Text is longer than ' + scope.schema.maxLength,
@@ -1822,7 +1835,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             $area.trigger('autosize.resize');
           }
         });
-      }
+      })
     };
   });
 
@@ -2164,7 +2177,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crNumber', function(crOptions, crValidation) {
+  module.directive('crNumber', function(crFieldLink, crValidation) {
     return {
       scope: {
         model: '=',
@@ -2176,9 +2189,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-number.html',
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
         if (scope.options.isInteger) {
@@ -2220,7 +2232,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             return angular.isNumber(value);
           }, true);
         }
-      }
+      })
     };
   });
 })();
@@ -2286,7 +2298,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.directives');
 
-  module.directive('crPassword', function(crOptions, crValidation) {
+  module.directive('crPassword', function(crFieldLink, crValidation) {
     return {
       scope: {
         model: '=',
@@ -2298,9 +2310,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-password.html',
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
         validation.addConstraint(
@@ -2351,7 +2362,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.$watch('pass2', function(newValue) {
           compareValue(newValue, scope.pass1);
         });
-      }
+      })
     };
   });
 
@@ -2361,7 +2372,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crReadonly', function(crOptions) {
+  module.directive('crReadonly', function(crFieldLink) {
     return {
       scope: {
         model: '=',
@@ -2373,9 +2384,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-readonly.html',
 
-      link: function(scope, elem, attrs) {
-        scope.options = crOptions.parse(attrs.options);
-      }
+      link: crFieldLink(function(scope, elem, attrs) {
+      })
     };
   });
 })();
@@ -2385,7 +2395,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
   module.directive('crSingleSelectRef', function(
-    crOptions,
+    crFieldLink,
     crValidation,
     crResources,
     crCommon,
@@ -2402,10 +2412,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-single-select-ref.html',
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
         scope.rows = [];
-        scope.options = crOptions.parse(attrs.options);
 
         // validation
         var validation = crValidation(scope, 'model.id_');
@@ -2445,13 +2454,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             scope.model.id_ = newValue.id;
           }
         });
-      }
+      })
     };
   });
 
 
   module.directive('crMultiSelectRef', function(
-    crOptions,
+    crFieldLink,
     crResources,
     crCommon,
     crJSONPointer
@@ -2467,10 +2476,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-multi-select-ref.html',
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
         scope.rows = [];
-        scope.options = crOptions.parse(attrs.options);
 
         // load docs
         var unwatch = scope.$watch('schema.items.$ref', function(newValue) {
@@ -2508,12 +2516,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             return { id_: row.id };
           });
         }, true);
-      }
+      })
     };
   });
 
 
-  module.directive('crRef', function($timeout, crCommon, crOptions, crValidation) {
+  module.directive('crRef', function($timeout, crCommon, crFieldLink, crValidation) {
     return {
       scope: {
         model: '=',
@@ -2541,9 +2549,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       },
 
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.options = crOptions.parse(attrs.options);
         scope.editModalId = crCommon.getModalId();
         scope.selectModalId = crCommon.getModalId();
 
@@ -2576,7 +2583,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         $timeout(function() {
           scope.$broadcast('update:preview', scope.model.id_);
         });
-      }
+      })
     };
   });
 
@@ -2610,7 +2617,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crSlug', function(crCommon, crOptions, crValidation) {
+  module.directive('crSlug', function(crCommon, crFieldLink, crValidation) {
     return {
       scope: {
         model: '=',
@@ -2622,9 +2629,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-slug.html',
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
         validation.addConstraint(
@@ -2672,7 +2678,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           });
           scope.model = crCommon.createSlug(val);
         };
-      }
+      })
     };
   });
 
@@ -2682,7 +2688,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.directives');
 
-  module.directive('crString', function(crOptions, crValidation) {
+  module.directive('crString', function(crFieldLink, crValidation) {
     return {
       scope: {
         model: '=',
@@ -2694,9 +2700,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-string.html',
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
         validation.addConstraint(
@@ -2725,7 +2730,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             return !!value && value !== '';
           }, true);
         }
-      }
+      })
     };
   });
 })();
@@ -2809,7 +2814,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crText', function(crCommon, crOptions, crValidation) {
+  module.directive('crText', function(crCommon, crFieldLink, crValidation) {
     return {
       scope: {
         model: '=',
@@ -2821,9 +2826,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-text.html',
 
-      link: function(scope, elem, attrs) {
+      link: crFieldLink(function(scope, elem, attrs) {
 
-        scope.options = crOptions.parse(attrs.options);
         var validation = crValidation(scope);
 
         validation.addConstraint(
@@ -2852,7 +2856,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             return !!value && value !== '';
           }, true);
         }
-      }
+      })
     };
   });
 
