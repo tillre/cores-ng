@@ -208,13 +208,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    <button class=\"close\" data-dismiss=\"modal\">x</button>\n" +
     "    <h3>{{type}}</h3>\n" +
     "  </div>\n" +
-    "  <div class=\"modal-body\" ng-switch on=\"data.state\">\n" +
-    "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
-    "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
-    "    <div ng-switch-default cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\" path=\"{{path}}\"></div>\n" +
+    "  <div class=\"modal-body\">\n" +
+    "    <div cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\"></div>\n" +
+    "    <div ng-switch on=\"data.state\">\n" +
+    "      <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
+    "      <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
+    "      <div ng-switch-when=\"error\" class=\"alert alert-error\"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>\n" +
+    "    </div>\n" +
     "  </div>\n" +
     "  <div class=\"modal-footer\">\n" +
-    "    <div class=\"btn-toolbar\">\n" +
+    "    <div ng-show=\"data.state == 'editing'\" class=\"btn-toolbar\">\n" +
     "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary pull-left\">Save</button>\n" +
     "      <button ng-click=\"cancel()\" class=\"btn pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
     "      <button ng-click=\"toggleDebug()\" class=\"btn\">Debug</button>\n" +
@@ -225,7 +228,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   $templateCache.put("cr-model.html",
     "<div>\n" +
-    "  <div cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\" path=\"{{path}}\"></div>\n" +
+    "  <div cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\"></div>\n" +
     "  <div ng-switch on=\"data.state\">\n" +
     "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
     "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
@@ -542,7 +545,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     //
 
     this.load = function(id) {
-
       data.state = STATE_LOADING;
       return this._resource.load(id).then(function(doc) {
         self.setModel(doc);
@@ -556,7 +558,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
     this.save = function() {
-
       var def = $q.defer();
 
       if (!$scope.data.valid) {
@@ -576,11 +577,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         def.resolve(doc);
 
       }, function(err) {
-
         if (err.errors && angular.isArray(err.errors)) {
           // error has form field errors
           data.state = STATE_EDITING;
-
           err.errors.forEach(function(v) {
             $scope.$broadcast('set:customError', v.path, v.code, v.message);
           });
@@ -591,13 +590,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         }
         def.reject(err);
       });
-
       return def.promise;
     };
 
 
     this.destroy = function() {
-
       return this._resource.destroy($scope.model).then(
         function() {
           self.setModel();
@@ -1816,8 +1813,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         model: '=',
         schema: '=',
         valid: '=',
-        debug: '=',
-        path: '@'
+        debug: '='
       },
 
       replace: true,
@@ -1861,7 +1857,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
           // create markup
           var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-                                           scope.path || '', { showLabel: false, indentProperties: false });
+                                           '', { showLabel: false, indentProperties: false });
 
           // compile and link with new scope
           childScope = scope.$new();
@@ -2083,13 +2079,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.directives');
 
+
   module.directive('crModelModal', function() {
     return {
       scope: {
         type: '@',
-        path: '@',
-        modalId: '@',
-        defaults: '=?'
+        defaults: '=?',
+        modalId: '@'
       },
 
       replace: true,
@@ -2108,6 +2104,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.$on('showModal:model', function(e, modalId, modelId) {
           if (modalId === scope.modalId) {
             e.preventDefault();
+            console.log('show modal', modelId);
             scope.modelId = modelId;
             elem.modal('show');
           }
@@ -2125,7 +2122,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     return {
       scope: {
         type: '@',
-        path: '@',
         modelId: '=',
         defaults: '=?'
       },
