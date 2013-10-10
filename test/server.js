@@ -7,7 +7,7 @@ var coresServer = require('cores-server');
 function configureServer(server, callback) {
 
   server.on('response', function(req) {
-    console.log(req.method, req.path, req.raw.res.statusCode);
+    console.log(req.raw.res.statusCode, req.method.toUpperCase(), req.path);
   });
 
   server.on('internalError', function(req, error) {
@@ -50,6 +50,32 @@ function configureServer(server, callback) {
   fs.mkdir(app.upload.dir, function(err) {
     if (err && err.code !== 'EEXIST') return callback(err);
     server.start(callback);
+  });
+
+  // image resource handlers
+
+  function imageHandler(payload) {
+    var doc = payload;
+    if (payload.isMultipart) {
+      var numFiles = parseInt(payload.numFiles, 10);
+      console.log('isMultipart, numFiles', numFiles);
+      for (var i = 0; i < numFiles; ++i) {
+        console.log('file', i, payload['file' + i]);
+      }
+      doc = payload.doc;
+    }
+    console.log('doc', doc);
+    return doc;
+  };
+
+  server.app.api.addHandler('create', 'Image', function(payload) {
+    console.log('create image');
+    return imageHandler(payload);
+  });
+
+  server.app.api.addHandler('update', 'Image', function(payload) {
+    console.log('update image');
+    return imageHandler(payload);
   });
 }
 

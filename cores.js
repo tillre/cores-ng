@@ -1053,6 +1053,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         files = [files];
       }
       var isMultipart = false;
+      var docId = doc._id;
+      var docRev = doc._rev;
 
       // create multipart formdata when saving files
 
@@ -1067,8 +1069,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         fd.append('numFiles', files.length);
 
         // when updating, add the id and rev
-        if (doc._id)  fd.append('_id', doc._id);
-        if (doc._rev) fd.append('_rev', doc._rev);
+        if (docId)  fd.append('_id', docId);
+        if (docRev) fd.append('_rev', docRev);
 
         doc = fd;
         isMultipart = true;
@@ -1079,16 +1081,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         method: 'POST',
         data: doc
       };
-
-      if (doc._id && doc._rev) {
+      if (docId && docRev) {
         // update
         req.method = 'PUT';
-        req.url += '/' + doc._id + '/' + doc._rev;
+        req.url += '/' + docId + '/' + docRev;
       }
-      else if (doc._id) {
-        // new with id
+      else if (docId) {
+        // create with id
         req.method = 'PUT';
-        req.url += '/' + doc._id;
+        req.url += '/' + docId;
       }
 
       if (isMultipart) {
@@ -2104,7 +2105,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.$on('showModal:model', function(e, modalId, modelId) {
           if (modalId === scope.modalId) {
             e.preventDefault();
-            console.log('show modal', modelId);
             scope.modelId = modelId;
             elem.modal('show');
           }
