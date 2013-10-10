@@ -23,13 +23,12 @@ module.exports = j.object({
 
   ref: j.ref('Foo')
     .custom('view', {
-      type: 'cr-ref',
       previewPath: '/bar',
       defaults: { '/bar': 'some value' }
     }),
 
   image: j.ref('Image')
-    .custom('view', { type: 'cr-ref', previewPath: 'title' }),
+    .custom('view', { previewPath: 'title' }),
 
   singleSelRef: j.ref('Foo')
     .custom('view', { type: 'cr-single-select-ref', previewPath: '/bar' }),
@@ -59,11 +58,11 @@ module.exports = j.object({
 
   arrayRefs: j.array(j.object({
     foo: j.ref('Foo')
-      .custom('view', { type: 'cr-ref', previewPath: 'bar' })
+      .custom('view', { previewPath: 'bar' })
   })),
   arrayRefs2: j.array(
     j.ref('Foo')
-      .custom('view', { type: 'cr-ref', previewPath: 'bar' })
+      .custom('view', { previewPath: 'bar' })
       .title('Yam')
   ),
 
@@ -83,8 +82,8 @@ module.exports = j.object({
   )),
 
   anyofRefs: j.array(j.anyOf(
-    j.object({ foo: j.ref('Foo').custom('view', { type: 'cr-ref', previewPath: 'bar' }) }).custom('name', 'foo1'),
-    j.object({ bar: j.ref('Foo').custom('view', { type: 'cr-ref', previewPath: 'bar' }) }).custom('name', 'foo2')
+    j.object({ foo: j.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo1'),
+    j.object({ bar: j.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo2')
   )),
 
   object: j.object({

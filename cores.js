@@ -724,8 +724,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         options.isInteger = true;
       }
 
+      // add namespace prefix for default views
+      viewType = 'cr-' + viewType;
+
       if (schema.hasOwnProperty('view')) {
-        // view can be a string or object with additional options
+        // custom view type and options
         if (angular.isObject(schema.view)) {
           viewType = schema.view.type || viewType;
           viewName = schema.view.name || viewName;
@@ -741,10 +744,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           viewType = schema.view;
         }
         else throw new Error('View has to be of type object or string');
-      }
-      else {
-        // add namespace prefix for default views
-        viewType = 'cr-' + viewType;
       }
 
       return  '<div ' + viewType +
