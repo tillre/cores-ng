@@ -159,23 +159,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<form class=\"form-inline\">\n" +
     "  <label>Filter:</label>\n" +
     "  <select ng-model=\"selectedView\" ng-options=\"v.title for v in views\">\n" +
-    "    <option value=\"\">Default</option>\n" +
+    "    <option value=\"\">{{defaultTitle}}</option>\n" +
     "  </select>\n" +
     "</div>"
   );
 
   $templateCache.put("cr-model-list-modal.html",
-    "<div id=\"{{modalId}}\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\"> \n" +
-    "  <div class=\"modal-header\"> \n" +
-    "    <button class=\"close\" data-dismiss=\"modal\">x</button> \n" +
-    "    <h3>{{type}}</h3> \n" +
-    "  </div> \n" +
-    "  <div class=\"modal-body\"> \n" +
-    "    <div cr-model-list type=\"{{type}}\"></div> \n" +
-    "  </div> \n" +
-    "  <div class=\"modal-footer btn-toolbar\"> \n" +
-    "    <button ng-click=\"cancel\" class=\"btn pull-right\" data-dismiss=\"modal\">Cancel</button> \n" +
-    "  </div> \n" +
+    "<div id=\"{{modalId}}\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\">\n" +
+    "  <div class=\"modal-header\">\n" +
+    "    <button class=\"close\" data-dismiss=\"modal\">x</button>\n" +
+    "    <h3>{{type}}</h3>\n" +
+    "  </div>\n" +
+    "  <div class=\"modal-body\">\n" +
+    "    <div cr-model-list type=\"{{type}}\" view=\"view\"></div>\n" +
+    "  </div>\n" +
+    "  <div class=\"modal-footer btn-toolbar\">\n" +
+    "    <button ng-click=\"cancel\" class=\"btn pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
@@ -324,7 +324,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "       path=\"{{path}}\"\n" +
     "       defaults=\"options.defaults\"></div>\n" +
     "\n" +
-    "  <div cr-model-list-modal modal-id=\"{{selectModalId}}\" type=\"{{schema.$ref}}\"></div>\n" +
+    "  <div cr-model-list-modal\n" +
+    "       modal-id=\"{{selectModalId}}\"\n" +
+    "       type=\"{{schema.$ref}}\"\n" +
+    "       view=\"options.listView\"></div>\n" +
     "</div>\n"
   );
 
@@ -1889,6 +1892,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var firstSelect = true;
         var defaultConfig = '';
 
+        scope.defaultTitle = scope.view ? (scope.view.title || 'Default') : 'Default';
+
         scope.$watch('selectedView', function(newConfig, oldConfig) {
           if (firstSelect && newConfig) {
             // remeber default view config
@@ -2046,13 +2051,20 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     return {
       scope: {
         type: '@',
-        modalId: '@'
+        modalId: '@',
+        view: '=?'
       },
 
       replace: true,
       templateUrl: 'cr-model-list-modal.html',
 
       link: function(scope, elem, attrs) {
+
+        if (!scope.view) {
+          scope.view = {
+            name: 'all'
+          };
+        }
 
         scope.$on('list:select', function(e, id) {
           elem.modal('hide');
@@ -2063,7 +2075,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           if (modalId === scope.modalId) {
             e.preventDefault();
             elem.modal('show');
-
             if (reload) {
               scope.$broadcast('reload:list');
             }

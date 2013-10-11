@@ -24,7 +24,8 @@ module.exports = j.object({
   ref: j.ref('Foo')
     .custom('view', {
       previewPath: '/bar',
-      defaults: { '/bar': 'some value' }
+      defaults: { '/bar': 'some value' },
+      listView: { name: 'bars' }
     }),
 
   image: j.ref('Image')
