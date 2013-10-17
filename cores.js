@@ -549,7 +549,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     };
 
     $scope.buttonClick = function(e) {
-      $scope.$emit(e);
+      $scope.$emit(e, $scope.model);
     };
     //
     // methods

@@ -45,8 +45,8 @@
         e.stopPropagation();
         $location.path('/bars/' + id);
       });
-      $scope.$on('rick:roll', function(e) {
-        console.log('Never gonna give, never gonna give...');
+      $scope.$on('rick:roll', function(e, model) {
+        console.log('Never gonna give, never gonna give...',model);
       });
     })
   ;
