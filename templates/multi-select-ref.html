@@ -1,5 +1,5 @@
 <div>
-  <label>{{name}}:</label>
+  <label ng-show="options.showLabel">{{name}}:</label>
 
   <div class="cr-indent control-group" ng-class="{ error: hasErrors() }">
     <ul class="unstyled">
@@ -10,8 +10,6 @@
       </li>
     </ul>
 
-    <span ng-switch on="getFirstError()">
-      <p ng-switch-when="required" class="help-block">Required</p>
-    </span>
+    <p ng-show="hasErrors()" class="help-inline">{{ getFirstError() }}</p>
   </div>
 </div>

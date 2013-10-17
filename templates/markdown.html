@@ -1,0 +1,12 @@
+<div class="control-group" ng-class="{ error: hasErrors() }">
+  <div class="controls">
+    <label ng-show="options.showLabel">{{name}}:</label>
+
+    <div class="cr-editor">
+      <textarea class="cr-editor-area" ng-model="model" rows="1"></textarea>
+      <div class="cr-editor-preview"></div>
+      <button class="btn pull-right" ng-click="togglePreview()">{{ isPreview ? "Edit" : "Preview" }}</button>
+      <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
+    </div>
+  </div>
+</span>
