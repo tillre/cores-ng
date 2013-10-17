@@ -199,6 +199,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary pull-left\">Save</button>\n" +
     "      <button ng-click=\"cancel()\" class=\"btn pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
     "      <button ng-click=\"toggleDebug()\" class=\"btn\">Debug</button>\n" +
+    "      <button ng-repeat=\"button in data.buttons\" class=\"btn\" ng-click=\"buttonClick(button.event)\">{{button.name}}</button> \n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
@@ -215,6 +216,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary\">Save</button>\n" +
     "      <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\">Delete</button>\n" +
     "      <button ng-click=\"toggleDebug()\" class=\"btn\">Debug</button>\n" +
+    "      <button ng-repeat=\"button in data.buttons\" class=\"btn\" ng-click=\"buttonClick(button.event)\">{{button.name}}</button> \n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
@@ -526,12 +528,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     var STATE_SAVING = 'saving';
     var STATE_ERROR = 'error';
 
+    $scope.options = $scope.options || {};
+
     var self = this;
     var data = $scope.data = {
       valid: true,
       state: STATE_EDITING,
       debug: false,
-      files: {}
+      files: {},
+      buttons: $scope.options.buttons || []
     };
 
     // add/update/remove files from the model
@@ -571,6 +576,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       return !$scope.model._rev;
     };
 
+    $scope.buttonClick = function(e) {
+      $scope.$emit(e);
+    };
     //
     // methods
     //
@@ -690,6 +698,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   });
 
 })();
+
 (function() {
 
   var module = angular.module('cores.services');
@@ -2019,7 +2028,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       scope: {
         type: '@',
         path: '@',
-        modalId: '@'
+        modalId: '@',
+        options: '=?'
       },
 
       replace: true,
@@ -2045,6 +2055,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     };
   });
 })();
+
 (function() {
 
   var module = angular.module('cores.directives');
@@ -2055,7 +2066,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       scope: {
         type: '@',
         path: '@',
-        modelId: '='
+        modelId: '=',
+        options: '=?'
       },
 
       replace: true,
@@ -2065,6 +2077,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     };
   });
 })();
+
 (function() {
 
   var module = angular.module('cores.directives');
