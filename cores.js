@@ -41,14 +41,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  </div>\n" +
     "  <div class=\"cr-item-body\"></div>\n" +
     "  <div class=\"cr-item-footer\">\n" +
-    "    <button class=\"btn btn-mini dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">\n" +
-    "      <i class=\"icon-plus\"></i><span class=\"caret\"/>\n" +
-    "    </button>\n" +
-    "    <ul class=\"dropdown-menu pull-right\" role=\"menu\">\n" +
-    "      <li ng-repeat=\"schema in schemas\">\n" +
-    "        <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
-    "      </li>\n" +
-    "    </ul>\n" +
+    "    <div class=\"btn-group\">\n" +
+    "      <button class=\"btn btn-mini dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">\n" +
+    "        <i class=\"icon-plus\"></i><span class=\"caret\"/>\n" +
+    "      </button>\n" +
+    "      <ul class=\"dropdown-menu\" role=\"menu\">\n" +
+    "        <li ng-repeat=\"schema in schemas\">\n" +
+    "          <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
+    "        </li>\n" +
+    "      </ul>\n" +
+    "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
   );

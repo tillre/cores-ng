@@ -40,12 +40,10 @@
 
 .cr-array-item {
     padding-top: 12px;
-    padding-bottom: 8px;
 }
 
 .cr-anyof-item {
     padding-top: 34px;
-    padding-bottom: 8px;
 }
 
 .cr-array-item.cr-indent,
@@ -78,13 +76,20 @@
     margin-right: 8px;
 }
 
-.cr-item-footer {
-    position: absolute;
-    right: -1px;
-    bottom: -1px;
+.cr-item-body {
 }
-cr-item-footer btn-success {
-    color: white;
+
+.cr-item-footer {
+    text-align: center;
+}
+.cr-array-item .cr-item-footer {
+    margin-bottom: -11px;
+}
+.cr-anyof-item .cr-item-footer {
+    margin-bottom: -13px;
+}
+.cr-item-footer .btn-group {
+    text-align: left;
 }
 
 .cr-indent {
@@ -96,8 +101,13 @@ cr-item-footer btn-success {
 .cr-debug, .cr-editor {
     border: 1px solid #ccc;
     border-radius: 4px;
-    padding: 12px;
     overflow: hidden;
+}
+.cr-editor {
+    padding: 8px;
+}
+.cr-debug {
+    padding: 0 10px 10px;
 }
 
 .cr-editor-area {

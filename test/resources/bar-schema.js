@@ -52,15 +52,19 @@ module.exports = j.object({
     tab2: j.string()
   }).custom('view', 'cr-tab-object'),
 
-
   array: j.array(j.object({
     foo: j.boolean()
+  })).title('Some Array').custom('view', { item: { indent: false }}),
+
+  array2: j.array(j.object({
+    foo: j.string().custom('view', 'cr-markdown')
   })).title('Some Array').custom('view', { item: { indent: false }}),
 
   arrayRefs: j.array(j.object({
     foo: j.ref('Foo')
       .custom('view', { previewPath: 'bar' })
   })),
+
   arrayRefs2: j.array(
     j.ref('Foo')
       .custom('view', { previewPath: 'bar' })
