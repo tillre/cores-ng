@@ -55,7 +55,7 @@ module.exports = j.object({
 
   array: j.array(j.object({
     foo: j.boolean()
-  }).title('Some Title')),
+  })).title('Some Array').custom('view', { item: { indent: false }}),
 
   arrayRefs: j.array(j.object({
     foo: j.ref('Foo')
@@ -80,7 +80,7 @@ module.exports = j.object({
     j.object({
       images: j.array(j.object({ name: j.string() }))
     }).custom('name', 'gallery')
-  )),
+  )).custom('view', { item: { indent: false }}),
 
   anyofRefs: j.array(j.anyOf(
     j.object({ foo: j.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo1'),

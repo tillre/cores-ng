@@ -33,7 +33,7 @@
 angular.module("cores.templates").run(["$templateCache", function($templateCache) {
 
   $templateCache.put("cr-anyof-array-item.html",
-    "<div class=\"cr-anyof-item\">\n" +
+    "<div class=\"cr-anyof-item\" ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "  <div class=\"cr-item-controls btn-group\">\n" +
     "    <button class=\"btn btn-small\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
     "    <button class=\"btn btn-small\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
@@ -46,23 +46,27 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div>\n" +
     "  <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"btn-group\">\n" +
-    "    <a class=\"btn dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">Add <span class=\"caret\"/></a>\n" +
-    "    <ul class=\"dropdown-menu\" role=\"menu\">\n" +
-    "      <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
-    "        <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
+    "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
+    "    <div class=\"btn-group\">\n" +
+    "      <a class=\"btn dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">Add <span class=\"caret\"/></a>\n" +
+    "      <ul class=\"dropdown-menu\" role=\"menu\">\n" +
+    "        <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
+    "          <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
+    "        </li>\n" +
+    "      </ul>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <ul class=\"unstyled\">\n" +
+    "      <li ng-repeat=\"model in model\">\n" +
+    "        <div cr-anyof-item model=\"model\" path=\"{{path}}[ {{$index}} ]\" options=\"options.item\"></div>\n" +
     "      </li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
-    "\n" +
-    "  <ul class=\"unstyled\">\n" +
-    "    <li ng-repeat=\"model in model\"><div cr-anyof-item model=\"model\" path=\"{{path}}[ {{$index}} ]\"></div></li>\n" +
-    "  </ul>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-array-item.html",
-    "<div class=\"cr-array-item\">\n" +
+    "<div class=\"cr-array-item\" ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "  <div class=\"cr-item-controls btn-group\">\n" +
     "    <button class=\"btn btn-small\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
     "    <button class=\"btn btn-small\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
@@ -75,12 +79,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div>\n" +
     "  <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"cr-indent\">\n" +
+    "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "    <button class=\"btn\" ng-click=\"addItem(schema.items)\">Add</button>\n" +
     "\n" +
     "    <ul class=\"unstyled\">\n" +
     "      <li ng-repeat=\"model in model\">\n" +
-    "        <div cr-array-item schema=\"schema.items\" model=\"model\" path=\"{{path}}/{{$index}}\"></div>\n" +
+    "        <div cr-array-item\n" +
+    "             schema=\"schema.items\"\n" +
+    "             model=\"model\"\n" +
+    "             path=\"{{path}}/{{$index}}\"\n" +
+    "             options=\"options.item\"></div>\n" +
     "      </li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
@@ -275,7 +283,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   $templateCache.put("cr-object.html",
     "<div>\n" +
     "  <label ng-show=\"options.showLabel\" class=\"cr-object-label\">{{name}}:</label>\n" +
-    "  <div ng-class=\"{ 'cr-indent': options.indentProperties }\" class=\"properties\"></div>\n" +
+    "  <div ng-class=\"{ 'cr-indent': options.indent }\" class=\"properties\"></div>\n" +
     "</div>\n"
   );
 
@@ -427,7 +435,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       if (!schema) throw new Error('No schema for type found: ' + type);
       return schema;
     };
-  })
+  });
 })();
 (function() {
 
@@ -611,6 +619,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       if (!model) {
         // create default model
         model = crSchema.createValue($scope.schema);
+        console.log("schema", $scope.schema);
         // set custom default values
         if ($scope.defaults) {
           Object.keys($scope.defaults).forEach(function(key) {
@@ -1453,13 +1462,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crAnyofItem', function($compile, crBuild) {
+  module.directive('crAnyofItem', function($compile, crCommon, crBuild) {
     return {
       require: '^crAnyofArray',
       scope: {
         model: '=',
         name: '@',
-        path: '@'
+        path: '@',
+        options: '=?'
       },
 
       replace: true,
@@ -1468,12 +1478,18 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       controller: 'crArrayItemCtrl',
 
       link: function(scope, elem, attrs, anyof) {
+
+        var defaults = {
+          indent: true
+        };
+        scope.options = crCommon.merge(defaults, scope.options);
+
         // get the schema from the anyof-array
         scope.schema = anyof.getSchema(scope.model.type_);
         scope.array = anyof;
 
-        var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model', scope.path,
-                                         { indentProperties: false });
+        var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model',
+                                         scope.path, { indent: false });
         var link = $compile(tmpl);
         var e = link(scope);
         elem.append(e);
@@ -1482,7 +1498,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   });
 
 
-  module.directive('crAnyofArray', function($compile, crFieldLink) {
+  module.directive('crAnyofArray', function($compile, crCommon, crFieldLink) {
     return {
       scope: {
         model: '=',
@@ -1497,6 +1513,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       controller: 'crAnyofArrayCtrl',
 
       link: crFieldLink(function(scope, elem, attrs) {
+
+        var defaults = {
+          indent: true
+        };
+        scope.options = crCommon.merge(defaults, scope.options);
+
         elem.find('.dropdown-toggle').dropdown();
       })
     };
@@ -1507,12 +1529,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crArrayItem', function($compile, crBuild) {
+  module.directive('crArrayItem', function($compile, crCommon, crBuild) {
     return {
       scope: {
         model: '=',
         schema: '=',
-        path: '@'
+        path: '@',
+        options: '=?'
       },
 
       replace: true,
@@ -1522,8 +1545,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
+        var defaults = {
+          indent: true
+        };
+        scope.options = crCommon.merge(defaults, scope.options);
+
         var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model', scope.path,
-                                         { showLabel: false, indentProperties: false });
+                                         { showLabel: false, indent: false });
 
         var link = $compile(tmpl);
         var e = link(scope);
@@ -1533,7 +1561,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   });
 
 
-  module.directive('crArray', function(crSchema, crFieldLink) {
+  module.directive('crArray', function(crCommon, crSchema, crFieldLink) {
     return {
       scope: {
         model: '=',
@@ -1548,6 +1576,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       controller: 'crArrayCtrl',
 
       link: crFieldLink(function(scope, elem, attrs) {
+
+        var defaults = {
+          indent: true
+        };
+        scope.options = crCommon.merge(defaults, scope.options);
+
         // ngrepeat can only bind to references when it comes to form fields
         // thats why we can only work with items of type object not primitives
         // this may change in a feature release
@@ -1860,7 +1894,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
           // create markup
           var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-                                           '', { showLabel: false, indentProperties: false });
+                                           '', { showLabel: false, indent: false });
 
           // compile and link with new scope
           childScope = scope.$new();
@@ -2232,7 +2266,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       link: function(scope, elem, attrs) {
         var defaults = {
           showLabel: true,
-          indentProperties: true
+          indent: true
         };
         scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
 
@@ -2730,7 +2764,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       link: function(scope, elem, attrs) {
         var defaults = {
           showLabel: true,
-          indentProperties: false
+          indent: false
         };
         scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
 
@@ -2758,7 +2792,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             '<a href="#' + id + '">' + crBuild.getModelTitle(subSchema, key) + '</a></li>';
 
           contentTmpl += '<div' +
-            ' ng-class="{ \'cr-indent\': options.indentProperties }"' +
+            ' ng-class="{ \'cr-indent\': options.indent }"' +
             ' class="tab-pane' + (isFirst ? ' active' : '') + '"' +
             ' id="' + id + '">';
 
