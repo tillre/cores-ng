@@ -61,7 +61,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "    <div class=\"btn-group\">\n" +
-    "      <a class=\"btn dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">Add <span class=\"caret\"/></a>\n" +
+    "      <a class=\"btn btn-small dropdown-toggle\"\n" +
+    "         data-toggle=\"dropdown\" href=\"#\"><i class=\"icon-plus\"></i><span class=\"caret\"/></a>\n" +
     "      <ul class=\"dropdown-menu\" role=\"menu\">\n" +
     "        <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
     "          <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
@@ -101,8 +102,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
-    "    <button class=\"btn\" ng-click=\"addItem(schema.items)\">Add</button>\n" +
-    "\n" +
+    "    <button class=\"btn btn-small\" ng-click=\"addItem(schema.items)\"><i class=\"icon-plus\"></i></button>\n" +
     "    <ul class=\"unstyled\">\n" +
     "      <li ng-repeat=\"model in model\">\n" +
     "        <div cr-array-item\n" +

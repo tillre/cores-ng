@@ -2,8 +2,7 @@
   <label ng-show="options.showLabel">{{name}}:</label>
 
   <div ng-class="{ 'cr-indent': options.indent }">
-    <button class="btn" ng-click="addItem(schema.items)">Add</button>
-
+    <button class="btn btn-small" ng-click="addItem(schema.items)"><i class="icon-plus"></i></button>
     <ul class="unstyled">
       <li ng-repeat="model in model">
         <div cr-array-item

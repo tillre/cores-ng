@@ -3,7 +3,8 @@
 
   <div ng-class="{ 'cr-indent': options.indent }">
     <div class="btn-group">
-      <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Add <span class="caret"/></a>
+      <a class="btn btn-small dropdown-toggle"
+         data-toggle="dropdown" href="#"><i class="icon-plus"></i><span class="caret"/></a>
       <ul class="dropdown-menu" role="menu">
         <li ng-repeat="schema in schema.items.anyOf">
           <a ng-click="addItem(schema)">{{schema.name}}</a>
