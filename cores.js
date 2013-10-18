@@ -35,9 +35,20 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   $templateCache.put("cr-anyof-array-item.html",
     "<div class=\"cr-anyof-item\" ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "  <div class=\"cr-item-controls btn-group\">\n" +
-    "    <button class=\"btn btn-small\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
-    "    <button class=\"btn btn-small\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
-    "    <button class=\"btn btn-small btn-danger\" ng-click=\"remove()\"><i class=\"icon-remove-circle\"></i></button>\n" +
+    "    <button class=\"btn btn-mini\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
+    "    <button class=\"btn btn-mini\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
+    "    <button class=\"btn btn-mini btn-danger\" ng-click=\"remove()\"><i class=\"icon-remove-circle\"></i></button>\n" +
+    "  </div>\n" +
+    "  <div class=\"cr-item-body\"></div>\n" +
+    "  <div class=\"cr-item-footer\">\n" +
+    "    <button class=\"btn btn-mini dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">\n" +
+    "      <i class=\"icon-plus\"></i><span class=\"caret\"/>\n" +
+    "    </button>\n" +
+    "    <ul class=\"dropdown-menu pull-right\" role=\"menu\">\n" +
+    "      <li ng-repeat=\"schema in schemas\">\n" +
+    "        <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
+    "      </li>\n" +
+    "    </ul>\n" +
     "  </div>\n" +
     "</div>\n"
   );
@@ -58,7 +69,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "\n" +
     "    <ul class=\"unstyled\">\n" +
     "      <li ng-repeat=\"model in model\">\n" +
-    "        <div cr-anyof-item model=\"model\" path=\"{{path}}[ {{$index}} ]\" options=\"options.item\"></div>\n" +
+    "        <div cr-anyof-item\n" +
+    "             model=\"model\"\n" +
+    "             path=\"{{path}}[ {{$index}} ]\"\n" +
+    "             schemas=\"schema.items.anyOf\"\n" +
+    "             options=\"options.item\"></div>\n" +
     "      </li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
@@ -68,9 +83,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   $templateCache.put("cr-array-item.html",
     "<div class=\"cr-array-item\" ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "  <div class=\"cr-item-controls btn-group\">\n" +
-    "    <button class=\"btn btn-small\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
-    "    <button class=\"btn btn-small\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
-    "    <button class=\"btn btn-small btn-danger\" ng-click=\"remove()\"><i class=\"icon-remove-circle\"></i></button>\n" +
+    "    <button class=\"btn btn-mini\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
+    "    <button class=\"btn btn-mini\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
+    "    <button class=\"btn btn-mini btn-danger\" ng-click=\"remove()\"><i class=\"icon-remove-circle\"></i></button>\n" +
+    "  </div>\n" +
+    "  <div class=\"cr-item-body\"></div>\n" +
+    "  <div class=\"cr-item-footer\">\n" +
+    "    <button class=\"btn btn-mini\" ng-click=\"addItem()\"><i class=\"icon-plus\"></i></button>\n" +
     "  </div>\n" +
     "</div>\n"
   );
@@ -444,14 +463,24 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   module.controller('crArrayCtrl', function($scope, crSchema) {
 
-    $scope.addItem = function(schema) {
+    $scope.addItem = function(schema, index) {
       var obj = crSchema.createValue(schema, schema.name);
-      $scope.model.push(obj);
+      if (typeof index === 'undefined' || index >= $scope.model.length) {
+        $scope.model.push(obj);
+      }
+      else {
+        $scope.model.splice(index, 0, obj);
+      }
     };
 
     $scope.$on('remove:item', function(e, index) {
       e.stopPropagation();
       $scope.model.splice(index, 1);
+    });
+
+    $scope.$on('add:item', function(e, schema, index) {
+      e.stopPropagation();
+      $scope.addItem(schema, index + 1);
     });
 
     $scope.$on('moveUp:item', function(e, index) {
@@ -484,6 +513,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
     $scope.remove = function() {
       $scope.$emit('remove:item', $scope.$parent.$index);
+    };
+
+    $scope.addItem = function(schema) {
+      schema = schema || $scope.schema;
+      $scope.$emit('add:item', schema, $scope.$parent.$index);
     };
   });
 })();
@@ -619,7 +653,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       if (!model) {
         // create default model
         model = crSchema.createValue($scope.schema);
-        console.log("schema", $scope.schema);
         // set custom default values
         if ($scope.defaults) {
           Object.keys($scope.defaults).forEach(function(key) {
@@ -1469,6 +1502,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         model: '=',
         name: '@',
         path: '@',
+        schemas: '=',
         options: '=?'
       },
 
@@ -1492,7 +1526,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
                                          scope.path, { indent: false });
         var link = $compile(tmpl);
         var e = link(scope);
-        elem.append(e);
+        elem.find('.cr-item-body').html(e);
+        elem.find('.dropdown-toggle').dropdown();
       }
     };
   });
@@ -1555,7 +1590,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
         var link = $compile(tmpl);
         var e = link(scope);
-        elem.append(e);
+        elem.find('.cr-item-body').html(e);
       }
     };
   });

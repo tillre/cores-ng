@@ -1,7 +1,11 @@
 <div class="cr-array-item" ng-class="{ 'cr-indent': options.indent }">
   <div class="cr-item-controls btn-group">
-    <button class="btn btn-small" ng-click="moveUp()"><i class="icon-arrow-up"></i></button>
-    <button class="btn btn-small" ng-click="moveDown()"><i class="icon-arrow-down"></i></button>
-    <button class="btn btn-small btn-danger" ng-click="remove()"><i class="icon-remove-circle"></i></button>
+    <button class="btn btn-mini" ng-click="moveUp()"><i class="icon-arrow-up"></i></button>
+    <button class="btn btn-mini" ng-click="moveDown()"><i class="icon-arrow-down"></i></button>
+    <button class="btn btn-mini btn-danger" ng-click="remove()"><i class="icon-remove-circle"></i></button>
+  </div>
+  <div class="cr-item-body"></div>
+  <div class="cr-item-footer">
+    <button class="btn btn-mini" ng-click="addItem()"><i class="icon-plus"></i></button>
   </div>
 </div>
