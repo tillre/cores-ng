@@ -35,12 +35,18 @@
         { title: 'Only asd', name: 'onlyASD' },
         { title: 'By String1', name: 'by_string', params: { keys: ['foo'] }}
       ];
+      $scope.modelOptions = {
+        buttons: [{name: 'ClickMe!', event: 'rick:roll'}]
+      };
       // $scope.view = { title: 'All', name: 'all' };
       $scope.limit = 2;
 
       $scope.$on('list:select', function(e, id) {
         e.stopPropagation();
         $location.path('/bars/' + id);
+      });
+      $scope.$on('rick:roll', function(e, model) {
+        console.log('Never gonna give, never gonna give...',model);
       });
     })
   ;

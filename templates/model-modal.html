@@ -16,6 +16,7 @@
       <button ng-click="save()" ng-class="{ disabled: !data.valid }" class="btn btn-primary pull-left">Save</button>
       <button ng-click="cancel()" class="btn pull-right" data-dismiss="modal">Cancel</button>
       <button ng-click="toggleDebug()" class="btn">Debug</button>
+      <button ng-repeat="button in data.buttons" class="btn" ng-click="buttonClick(button.event)">{{button.name}}</button> 
     </div>
   </div>
 </div>
