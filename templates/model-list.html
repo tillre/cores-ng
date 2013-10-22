@@ -11,7 +11,7 @@
       </tr>
     </tbody>
   </table>
-  <div ng-show="rows && rows.length > 0" class="pagination">
+  <div ng-show="showPagination" class="pagination">
     <ul>
       <li class="{{ !isLoading && prevKeys.length  ? '' : 'disabled' }}"><a href="" ng-click="prev()">Prev</a></li>
       <li class="{{ !isLoading && nextKey ? '' : 'disabled' }}"><a href="" ng-click="next()">Next</a></li>

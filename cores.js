@@ -222,7 +222,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      </tr>\n" +
     "    </tbody>\n" +
     "  </table>\n" +
-    "  <div ng-show=\"rows && rows.length > 0\" class=\"pagination\">\n" +
+    "  <div ng-show=\"showPagination\" class=\"pagination\">\n" +
     "    <ul>\n" +
     "      <li class=\"{{ !isLoading && prevKeys.length  ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"prev()\">Prev</a></li>\n" +
     "      <li class=\"{{ !isLoading && nextKey ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"next()\">Next</a></li>\n" +
@@ -2021,6 +2021,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           scope.curKey = null;
           scope.nextKey = null;
           scope.rows = [];
+          scope.showPagination = false;
         }
         initScope();
 
@@ -2070,6 +2071,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
                 // there a more pages left, remember the last row's key and do not display it
                 scope.nextKey = result.rows[limit].key;
                 scope.rows.pop();
+                scope.showPagination = true;
               }
             }
             scope.isLoading = false;

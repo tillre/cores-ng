@@ -99,4 +99,4 @@ module.exports = j.object({
   text: j.string().custom('view', 'cr-text'),
   password: j.string().minLength(8).custom('view', 'cr-password')
 
-}).required('string2', 'number', 'ref', 'enum', 'slug', 'text', 'singleSelRef');
+}).required('string', 'number', 'ref', 'enum', 'slug', 'text', 'singleSelRef');
