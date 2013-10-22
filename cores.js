@@ -160,7 +160,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div class=\"controls\">\n" +
     "    <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "    <div class=\"cr-editor\">\n" +
+    "    <div class=\"cr-editor clearfix\" ng-class=\"{ 'cr-border': options.showBorder }\">\n" +
     "      <textarea class=\"cr-editor-area\" ng-model=\"model\" rows=\"1\"></textarea>\n" +
     "      <div class=\"cr-editor-preview\"></div>\n" +
     "      <button class=\"btn pull-right\" ng-click=\"togglePreview()\">{{ isPreview ? \"Edit\" : \"Preview\" }}</button>\n" +
@@ -917,14 +917,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   //
   module.factory('crFieldLink', function(crCommon, crOptions) {
 
-    return function(linkFn) {
+    return function(/*[defaults], linkFn*/) {
+
+      var defaults = arguments.length === 2 ? arguments[0] : {
+          showLabel: true
+      };
+      var linkFn = arguments[arguments.length - 1];
 
       return function(scope, elem, attrs) {
-        var defaults = {
-          showLabel: true
-        };
-        scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
-
+        scope.options = crCommon.merge(angular.copy(defaults),
+                                       crOptions.parse(attrs.options));
         linkFn(scope, elem, attrs);
       };
     };
@@ -1845,7 +1847,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-markdown.html',
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: crFieldLink({
+        showLabel: true,
+        showBorder: true
+      }, function(scope, elem, attrs) {
 
         var validation = crValidation(scope);
         validation.addConstraint(

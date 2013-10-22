@@ -82,14 +82,18 @@ module.exports = j.object({
     }).custom('name', 'video'),
 
     j.object({
+      text: j.string().custom('view', { type: 'cr-markdown', showBorder: false })
+    }).custom('name', 'markdown'),
+
+    j.object({
       images: j.array(j.object({ name: j.string() }))
     }).custom('name', 'gallery')
-  )).custom('view', { item: { indent: false }}),
+  )),
 
   anyofRefs: j.array(j.anyOf(
     j.object({ foo: j.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo1'),
     j.object({ bar: j.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo2')
-  )),
+  )).custom('view', { item: { indent: false }}),
 
   object: j.object({
     foo: j.number(),

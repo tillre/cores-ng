@@ -2,7 +2,7 @@
   <div class="controls">
     <label ng-show="options.showLabel">{{name}}:</label>
 
-    <div class="cr-editor">
+    <div class="cr-editor clearfix" ng-class="{ 'cr-border': options.showBorder }">
       <textarea class="cr-editor-area" ng-model="model" rows="1"></textarea>
       <div class="cr-editor-preview"></div>
       <button class="btn pull-right" ng-click="togglePreview()">{{ isPreview ? "Edit" : "Preview" }}</button>
