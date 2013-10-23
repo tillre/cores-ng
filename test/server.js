@@ -28,6 +28,13 @@ function configureServer(server, callback) {
     handler: { file: './test/public/index.html' }
   });
 
+  server.route({
+    path: '/test',
+    method: 'GET',
+    handler: { file: './test/public/test.html' }
+  });
+
+
   // serve files
 
   server.route({

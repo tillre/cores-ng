@@ -1,4 +1,4 @@
-<span>
-  <label ng-show="options.showLabel">{{name}}:</label>
-  <select ng-model="model" ng-options="e for e in schema.enum"></select>
-</span>
+<div class="form-group" ng-class="{ 'has-error': hasErrors() }">
+  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
+  <select class="form-control" ng-model="model" ng-options="e for e in schema.enum"></select>
+</div>

@@ -39,12 +39,15 @@ module.exports = j.object({
 
   object: j.object({
     foo: j.string(),
-    bar: j.string()
+    bar: j.number()
   }),
 
   tabObject: j.object({
     tab1: j.string(),
-    tab2: j.string()
+    tab2: j.object({
+      foo: j.string(),
+      bar: j.number()
+    })
   }).custom('view', 'cr-tab-object'),
 
   tabObject2: j.object({
@@ -54,11 +57,11 @@ module.exports = j.object({
 
   array: j.array(j.object({
     foo: j.boolean()
-  })).title('Some Array').custom('view', { item: { indent: false }}),
+  })).title('Some Array').custom('view'),
 
   array2: j.array(j.object({
     foo: j.string().custom('view', 'cr-markdown')
-  })).title('Some Array').custom('view', { item: { indent: false }}),
+  })).title('Some Array').custom('view', { indent: false }),
 
   arrayRefs: j.array(j.object({
     foo: j.ref('Foo')
@@ -82,7 +85,7 @@ module.exports = j.object({
     }).custom('name', 'video'),
 
     j.object({
-      text: j.string().custom('view', { type: 'cr-markdown', showBorder: false })
+      text: j.string().custom('view', { type: 'cr-markdown', showBorder: false, showLabel: false })
     }).custom('name', 'markdown'),
 
     j.object({
@@ -94,11 +97,6 @@ module.exports = j.object({
     j.object({ foo: j.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo1'),
     j.object({ bar: j.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo2')
   )).custom('view', { item: { indent: false }}),
-
-  object: j.object({
-    foo: j.number(),
-    bar: j.string()
-  }),
 
   text: j.string().custom('view', 'cr-text'),
   password: j.string().minLength(8).custom('view', 'cr-password')

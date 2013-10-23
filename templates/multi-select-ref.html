@@ -1,15 +1,15 @@
-<div>
-  <label ng-show="options.showLabel">{{name}}:</label>
+<div class="form-group" ng-class="{ 'has-error': hasErrors() }">
+  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
 
-  <div class="cr-indent control-group" ng-class="{ error: hasErrors() }">
-    <ul class="unstyled">
-      <li ng-repeat="row in rows">
-        <label class="checkbox">{{row.name}}
-          <input type="checkbox" ng-model="row.selected"/>
+  <div class="cr-indent">
+    <ul class="list-unstyled">
+      <li class="checkbox" ng-repeat="row in rows">
+        <label class="control-label">
+          <input type="checkbox" ng-model="row.selected"/> {{row.name}}
         </label>
       </li>
     </ul>
 
-    <p ng-show="hasErrors()" class="help-inline">{{ getFirstError() }}</p>
+    <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
   </div>
 </div>

@@ -1,14 +1,22 @@
-<div class="cr-anyof-item" ng-class="{ 'cr-indent': options.indent }">
-  <div class="cr-item-controls btn-group">
-    <button class="btn btn-mini" ng-click="moveUp()"><i class="icon-arrow-up"></i></button>
-    <button class="btn btn-mini" ng-click="moveDown()"><i class="icon-arrow-down"></i></button>
-    <button class="btn btn-mini btn-danger" ng-click="remove()"><i class="icon-remove-circle"></i></button>
+<div>
+  <div class="cr-anyof-item-group">
+    <div class="cr-item-controls btn-group">
+      <button class="btn btn-default btn-xs" ng-click="moveUp()">
+        <span class="glyphicon glyphicon-arrow-up"></span>
+      </button>
+      <button class="btn btn-default btn-xs" ng-click="moveDown()">
+        <span class="glyphicon glyphicon-arrow-down"></span>
+      </button>
+      <button class="btn btn-danger btn-xs" ng-click="remove()">
+        <span class="glyphicon glyphicon-minus"></span>
+      </button>
+    </div>
+    <div class="cr-item-body"></div>
   </div>
-  <div class="cr-item-body"></div>
   <div class="cr-item-footer">
     <div class="btn-group">
-      <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
-        <i class="icon-plus"></i><span class="caret"/>
+      <button class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" href="#">
+        <span class="glyphicon glyphicon-plus"></span><span class="caret"/>
       </button>
       <ul class="dropdown-menu" role="menu">
         <li ng-repeat="schema in schemas">

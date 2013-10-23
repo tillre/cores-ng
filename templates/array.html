@@ -1,9 +1,11 @@
-<div>
-  <label ng-show="options.showLabel">{{name}}:</label>
+<div class="form-group">
+  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
 
-  <div ng-class="{ 'cr-indent': options.indent }">
-    <button class="btn btn-small" ng-click="addItem(schema.items)"><i class="icon-plus"></i></button>
-    <ul class="unstyled">
+  <div>
+    <button class="btn btn-default btn-sm" ng-click="addItem(schema.items)">
+      <span class="glyphicon glyphicon-plus"></span>
+    </button>
+    <ul class="list-unstyled">
       <li ng-repeat="model in model">
         <div cr-array-item
              schema="schema.items"

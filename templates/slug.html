@@ -1,10 +1,10 @@
-<span class="control-group" ng-class="{ error: hasErrors() }">
-  <div class="controls">
-    <label ng-show="options.showLabel">{{name}}:</label>
-    <div class="input-append">
-      <input class="input-xlarge" type="text" ng-model="model"/>
-      <a ng-click="generate()" class="btn">Generate</a>
-    </div>
-    <p ng-show="hasErrors()" class="help-inline">{{ getFirstError() }}</p>
+<div class="form-group" ng-class="{ 'has-error': hasErrors() }">
+  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
+  <div class="input-group">
+    <input class="form-control" type="text" ng-model="model"/>
+    <span class="input-group-btn">
+      <button ng-click="generate()" class="btn btn-default">Generate</button>
+    </span>
   </div>
-</span>
+  <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
+</div>

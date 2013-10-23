@@ -1,6 +1,8 @@
 <form class="form-inline">
-  <label>Filter:</label>
-  <select ng-model="selectedView" ng-options="v.title for v in views">
-    <option value="">{{defaultTitle}}</option>
-  </select>
+  <div class="form-group">
+    <label>Filter:</label>
+    <select class="form-control input-sm" ng-model="selectedView" ng-options="v.title for v in views">
+      <option value="">{{defaultTitle}}</option>
+    </select>
+  </div>
 </div>

@@ -1,7 +1,5 @@
-<span class="control-group" ng-class="{ error: hasErrors() }">
-  <div class="controls">
-    <label ng-show="options.showLabel">{{name}}:</label>
-    <textarea ng-model="model"/>
-    <p ng-show="hasErrors()" class="help-inline">{{ getFirstError() }}</p>
-  </div>
-</span>
+<div class="form-group" ng-class="{ 'has-error': hasErrors() }">
+  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
+  <textarea class="form-control" ng-model="model"/>
+  <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
+</div>
