@@ -33,17 +33,25 @@
 angular.module("cores.templates").run(["$templateCache", function($templateCache) {
 
   $templateCache.put("cr-anyof-array-item.html",
-    "<div class=\"cr-anyof-item\" ng-class=\"{ 'cr-indent': options.indent }\">\n" +
-    "  <div class=\"cr-item-controls btn-group\">\n" +
-    "    <button class=\"btn btn-mini\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
-    "    <button class=\"btn btn-mini\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
-    "    <button class=\"btn btn-mini btn-danger\" ng-click=\"remove()\"><i class=\"icon-remove-circle\"></i></button>\n" +
+    "<div>\n" +
+    "  <div class=\"cr-anyof-item-group\">\n" +
+    "    <div class=\"cr-item-controls btn-group\">\n" +
+    "      <button class=\"btn btn-default btn-xs\" ng-click=\"moveUp()\">\n" +
+    "        <span class=\"glyphicon glyphicon-arrow-up\"></span>\n" +
+    "      </button>\n" +
+    "      <button class=\"btn btn-default btn-xs\" ng-click=\"moveDown()\">\n" +
+    "        <span class=\"glyphicon glyphicon-arrow-down\"></span>\n" +
+    "      </button>\n" +
+    "      <button class=\"btn btn-danger btn-xs\" ng-click=\"remove()\">\n" +
+    "        <span class=\"glyphicon glyphicon-minus\"></span>\n" +
+    "      </button>\n" +
+    "    </div>\n" +
+    "    <div class=\"cr-item-body\"></div>\n" +
     "  </div>\n" +
-    "  <div class=\"cr-item-body\"></div>\n" +
     "  <div class=\"cr-item-footer\">\n" +
     "    <div class=\"btn-group\">\n" +
-    "      <button class=\"btn btn-mini dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">\n" +
-    "        <i class=\"icon-plus\"></i><span class=\"caret\"/>\n" +
+    "      <button class=\"btn btn-default btn-xs dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">\n" +
+    "        <span class=\"glyphicon glyphicon-plus\"></span><span class=\"caret\"/>\n" +
     "      </button>\n" +
     "      <ul class=\"dropdown-menu\" role=\"menu\">\n" +
     "        <li ng-repeat=\"schema in schemas\">\n" +
@@ -56,13 +64,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-anyof-array.html",
-    "<div>\n" +
-    "  <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "<div class=\"form-group\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
+    "  <div>\n" +
     "    <div class=\"btn-group\">\n" +
-    "      <a class=\"btn btn-small dropdown-toggle\"\n" +
-    "         data-toggle=\"dropdown\" href=\"#\"><i class=\"icon-plus\"></i><span class=\"caret\"/></a>\n" +
+    "      <button class=\"btn btn-default btn-sm dropdown-toggle\"\n" +
+    "              data-toggle=\"dropdown\" href=\"#\">\n" +
+    "        <span class=\"glyphicon glyphicon-plus\"></span><span class=\"caret\"/>\n" +
+    "      </button>\n" +
     "      <ul class=\"dropdown-menu\" role=\"menu\">\n" +
     "        <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
     "          <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
@@ -70,7 +80,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      </ul>\n" +
     "    </div>\n" +
     "\n" +
-    "    <ul class=\"unstyled\">\n" +
+    "    <ul class=\"list-unstyled\">\n" +
     "      <li ng-repeat=\"model in model\">\n" +
     "        <div cr-anyof-item\n" +
     "             model=\"model\"\n" +
@@ -84,26 +94,38 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-array-item.html",
-    "<div class=\"cr-array-item\" ng-class=\"{ 'cr-indent': options.indent }\">\n" +
-    "  <div class=\"cr-item-controls btn-group\">\n" +
-    "    <button class=\"btn btn-mini\" ng-click=\"moveUp()\"><i class=\"icon-arrow-up\"></i></button>\n" +
-    "    <button class=\"btn btn-mini\" ng-click=\"moveDown()\"><i class=\"icon-arrow-down\"></i></button>\n" +
-    "    <button class=\"btn btn-mini btn-danger\" ng-click=\"remove()\"><i class=\"icon-remove-circle\"></i></button>\n" +
+    "<div>\n" +
+    "  <div class=\"cr-array-item-group\">\n" +
+    "    <div class=\"cr-item-controls btn-group\">\n" +
+    "      <button class=\"btn btn-default btn-xs\" ng-click=\"moveUp()\">\n" +
+    "        <span class=\"glyphicon glyphicon-arrow-up\"></span>\n" +
+    "      </button>\n" +
+    "      <button class=\"btn btn-default btn-xs\" ng-click=\"moveDown()\">\n" +
+    "        <span class=\"glyphicon glyphicon-arrow-down\"></span>\n" +
+    "      </button>\n" +
+    "      <button class=\"btn btn-danger btn-xs\" ng-click=\"remove()\">\n" +
+    "        <span class=\"glyphicon glyphicon-minus\"></span>\n" +
+    "      </button>\n" +
+    "    </div>\n" +
+    "    <div class=\"cr-item-body\"></div>\n" +
     "  </div>\n" +
-    "  <div class=\"cr-item-body\"></div>\n" +
     "  <div class=\"cr-item-footer\">\n" +
-    "    <button class=\"btn btn-mini\" ng-click=\"addItem()\"><i class=\"icon-plus\"></i></button>\n" +
+    "    <button class=\"btn btn-default btn-xs\" ng-click=\"addItem()\">\n" +
+    "      <span class=\"glyphicon glyphicon-plus\"></span>\n" +
+    "    </button>\n" +
     "  </div>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-array.html",
-    "<div>\n" +
-    "  <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "<div class=\"form-group\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
-    "    <button class=\"btn btn-small\" ng-click=\"addItem(schema.items)\"><i class=\"icon-plus\"></i></button>\n" +
-    "    <ul class=\"unstyled\">\n" +
+    "  <div>\n" +
+    "    <button class=\"btn btn-default btn-sm\" ng-click=\"addItem(schema.items)\">\n" +
+    "      <span class=\"glyphicon glyphicon-plus\"></span>\n" +
+    "    </button>\n" +
+    "    <ul class=\"list-unstyled\">\n" +
     "      <li ng-repeat=\"model in model\">\n" +
     "        <div cr-array-item\n" +
     "             schema=\"schema.items\"\n" +
@@ -117,63 +139,77 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-boolean.html",
-    "<span>\n" +
-    "  <label class=\"checkbox\">{{name}}\n" +
-    "    <input type=\"checkbox\" ng-model=\"model\"/>\n" +
+    "<div class=\"checkbox\">\n" +
+    "  <label class=\"control-label\">\n" +
+    "    <input type=\"checkbox\" ng-model=\"model\"> {{name}}\n" +
     "  </label>\n" +
-    "</span>\n"
+    "</div>\n"
   );
 
   $templateCache.put("cr-datetime.html",
-    "<span>\n" +
-    "  <label ng-show=\"options.showLabel\">{{name}}</label>\n" +
+    "<div class=\"form-group row\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"col-md-12 control-label\" ng-show=\"options.showLabel\">{{name}}</label>\n" +
     "\n" +
-    "  <div class=\"input-append date\" id=\"dp3\" data-date-format=\"dd.mm.yyyy\">\n" +
-    "    <input type=\"text\" class=\"input-small\">\n" +
-    "    <span class=\"add-on\"><i class=\"icon-th\"></i></span>\n" +
+    "  <div class=\"col-md-3\">\n" +
+    "    <div class=\"input-group date\">\n" +
+    "      <input type=\"text\" class=\"form-control\" data-format=\"dd.MM.yyyy\" />\n" +
+    "      <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-calendar\"></span></span>\n" +
+    "    </div>\n" +
     "  </div>\n" +
     "\n" +
-    "  <div class=\"input-append bootstrap-timepicker\">\n" +
-    "    <input class=\"time input-small\" type=\"text\" class=\"input-small\">\n" +
-    "    <span class=\"add-on\"><i class=\"icon-time\"></i></span>\n" +
+    "  <div class=\"col-md-3\">\n" +
+    "    <div class=\"input-group time\">\n" +
+    "      <input type=\"text\" class=\"form-control\" data-format=\"hh:mm\"/>\n" +
+    "      <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-time\"></span></span>\n" +
+    "    </div>\n" +
     "  </div>\n" +
-    "</span>\n"
+    "\n" +
+    "  <!-- <div class=\"input-append date\" id=\"dp3\" data-date-format=\"dd.mm.yyyy\"> -->\n" +
+    "  <!--   <input type=\"text\" class=\"input-small\"> -->\n" +
+    "  <!--   <span class=\"add-on\"><i class=\"icon-th\"></i></span> -->\n" +
+    "  <!-- </div> -->\n" +
+    "\n" +
+    "  <!-- <div class=\"input-append bootstrap-timepicker\"> -->\n" +
+    "  <!--   <input class=\"time input-small\" type=\"text\" class=\"input-small\"> -->\n" +
+    "  <!--   <span class=\"add-on\"><i class=\"icon-time\"></i></span> -->\n" +
+    "  <!-- </div> -->\n" +
+    "</div>\n"
   );
 
   $templateCache.put("cr-enum.html",
-    "<span>\n" +
-    "  <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "  <select ng-model=\"model\" ng-options=\"e for e in schema.enum\"></select>\n" +
-    "</span>\n"
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "  <select class=\"form-control\" ng-model=\"model\" ng-options=\"e for e in schema.enum\"></select>\n" +
+    "</div>\n"
   );
 
   $templateCache.put("cr-image.html",
-    "<div>\n" +
-    "  <label>{{name}}</label>\n" +
+    "<div class=\"form-group\">\n" +
+    "  <label class=\"control-label\">{{name}}</label>\n" +
     "  <input type=\"file\"/>\n" +
     "  <img class=\"img-rounded\" height=\"140\">\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-markdown.html",
-    "<div class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "  <div class=\"controls\">\n" +
-    "    <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "    <div class=\"cr-editor clearfix\" ng-class=\"{ 'cr-border': options.showBorder }\">\n" +
-    "      <textarea class=\"cr-editor-area\" ng-model=\"model\" rows=\"1\"></textarea>\n" +
-    "      <div class=\"cr-editor-preview\"></div>\n" +
-    "      <button class=\"btn pull-right\" ng-click=\"togglePreview()\">{{ isPreview ? \"Edit\" : \"Preview\" }}</button>\n" +
-    "      <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "  <div class=\"cr-editor clearfix\" ng-class=\"{ 'cr-border': options.showBorder }\">\n" +
+    "    <textarea class=\"form-control cr-editor-area\" ng-model=\"model\" rows=\"1\"></textarea>\n" +
+    "    <div class=\"cr-editor-preview\"></div>\n" +
+    "    <div class=\"btn-group pull-right\">\n" +
+    "      <button class=\"btn btn-default\" ng-click=\"togglePreview()\">{{ isPreview ? \"Edit\" : \"Preview\" }}</button>\n" +
     "    </div>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
-    "</span>"
+    "</div>"
   );
 
   $templateCache.put("cr-model-form.html",
     "<div>\n" +
     "  <form name=\"modelForm\"></form>\n" +
-    "  <div ng-show=\"!valid\" class=\"alert alert-error\">The form has errors</div>\n" +
+    "  <div ng-show=\"!valid\" class=\"alert alert-danger\">The form has errors</div>\n" +
     "  <div ng-show=\"debug\" class=\"cr-debug\">\n" +
     "    <h4>Debug</h4>\n" +
     "    <h5>Model</h5>\n" +
@@ -186,24 +222,30 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   $templateCache.put("cr-model-list-filter.html",
     "<form class=\"form-inline\">\n" +
-    "  <label>Filter:</label>\n" +
-    "  <select ng-model=\"selectedView\" ng-options=\"v.title for v in views\">\n" +
-    "    <option value=\"\">{{defaultTitle}}</option>\n" +
-    "  </select>\n" +
+    "  <div class=\"form-group\">\n" +
+    "    <label>Filter:</label>\n" +
+    "    <select class=\"form-control input-sm\" ng-model=\"selectedView\" ng-options=\"v.title for v in views\">\n" +
+    "      <option value=\"\">{{defaultTitle}}</option>\n" +
+    "    </select>\n" +
+    "  </div>\n" +
     "</div>"
   );
 
   $templateCache.put("cr-model-list-modal.html",
-    "<div id=\"{{modalId}}\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\">\n" +
-    "  <div class=\"modal-header\">\n" +
-    "    <button class=\"close\" data-dismiss=\"modal\">x</button>\n" +
-    "    <h3>{{type}}</h3>\n" +
-    "  </div>\n" +
-    "  <div class=\"modal-body\">\n" +
-    "    <div cr-model-list type=\"{{type}}\" view=\"view\"></div>\n" +
-    "  </div>\n" +
-    "  <div class=\"modal-footer btn-toolbar\">\n" +
-    "    <button ng-click=\"cancel\" class=\"btn pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
+    "<div id=\"{{modalId}}\" class=\"modal fade\" tabindex=\"-1\">\n" +
+    "  <div class=\"modal-dialog\">\n" +
+    "    <div class=\"modal-content\">\n" +
+    "      <div class=\"modal-header\">\n" +
+    "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n" +
+    "        <h4 class=\"modal-title\">{{type}}</h4>\n" +
+    "      </div>\n" +
+    "      <div class=\"modal-body\">\n" +
+    "        <div cr-model-list type=\"{{type}}\" view=\"view\"></div>\n" +
+    "      </div>\n" +
+    "      <div class=\"modal-footer\">\n" +
+    "        <button ng-click=\"cancel\" class=\"btn btn-default pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
+    "      </div>\n" +
+    "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
   );
@@ -232,25 +274,27 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-model-modal.html",
-    "<div id=\"{{modalId}}\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\">\n" +
-    "  <div class=\"modal-header\">\n" +
-    "    <button class=\"close\" data-dismiss=\"modal\">x</button>\n" +
-    "    <h3>{{type}}</h3>\n" +
-    "  </div>\n" +
-    "  <div class=\"modal-body\">\n" +
-    "    <div cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\"></div>\n" +
-    "    <div ng-switch on=\"data.state\">\n" +
-    "      <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
-    "      <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
-    "      <div ng-switch-when=\"error\" class=\"alert alert-error\"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>\n" +
-    "    </div>\n" +
-    "  </div>\n" +
-    "  <div class=\"modal-footer\">\n" +
-    "    <div ng-show=\"data.state == 'editing'\" class=\"btn-toolbar\">\n" +
-    "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary pull-left\">Save</button>\n" +
-    "      <button ng-click=\"cancel()\" class=\"btn pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
-    "      <button ng-click=\"toggleDebug()\" class=\"btn\">Debug</button>\n" +
-    "      <button ng-repeat=\"button in data.buttons\" class=\"btn\" ng-click=\"buttonClick(button.event)\">{{button.name}}</button> \n" +
+    "<div id=\"{{modalId}}\" class=\"modal fade\" tabindex=\"-1\">\n" +
+    "  <div class=\"modal-dialog\">\n" +
+    "    <div class=\"modal-content\">\n" +
+    "      <div class=\"modal-header\">\n" +
+    "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n" +
+    "        <h4 class=\"modal-title\">{{type}}</h4>\n" +
+    "      </div>\n" +
+    "      <div class=\"modal-body\">\n" +
+    "        <div cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\"></div>\n" +
+    "        <div ng-switch on=\"data.state\">\n" +
+    "          <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
+    "          <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
+    "          <div ng-switch-when=\"error\" class=\"alert alert-danger\"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>\n" +
+    "        </div>\n" +
+    "      </div>\n" +
+    "      <div class=\"modal-footer\" ng-show=\"data.state == 'editing'\">\n" +
+    "        <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary pull-left\">Save</button>\n" +
+    "        <button ng-click=\"cancel()\" class=\"btn btn-default pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
+    "        <button ng-click=\"toggleDebug()\" class=\"btn btn-default\">Debug</button>\n" +
+    "        <button ng-repeat=\"button in data.buttons\" class=\"btn btn-default\" ng-click=\"buttonClick(button.event)\">{{button.name}}</button>\n" +
+    "      </div>\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
@@ -262,72 +306,71 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div ng-switch on=\"data.state\">\n" +
     "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
     "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
-    "    <div ng-switch-when=\"error\" class=\"alert alert-error\"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>\n" +
-    "    <div ng-switch-when=\"editing\" class=\"form-actions btn-toolbar\">\n" +
+    "    <div ng-switch-when=\"error\" class=\"alert alert-danger\"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>\n" +
+    "    <div ng-switch-when=\"editing\" class=\"well\">\n" +
     "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary\">Save</button>\n" +
     "      <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\">Delete</button>\n" +
-    "      <button ng-click=\"toggleDebug()\" class=\"btn\">Debug</button>\n" +
-    "      <button ng-repeat=\"button in data.buttons\" class=\"btn\" ng-click=\"buttonClick(button.event)\">{{button.name}}</button> \n" +
+    "      <button ng-click=\"toggleDebug()\" class=\"btn btn-default\">Debug</button>\n" +
+    "      <button ng-repeat=\"button in data.buttons\" class=\"btn btn-default\" ng-click=\"buttonClick(button.event)\">{{button.name}}</button>\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-multi-select-ref.html",
-    "<div>\n" +
-    "  <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"cr-indent control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "    <ul class=\"unstyled\">\n" +
-    "      <li ng-repeat=\"row in rows\">\n" +
-    "        <label class=\"checkbox\">{{row.name}}\n" +
-    "          <input type=\"checkbox\" ng-model=\"row.selected\"/>\n" +
+    "  <div class=\"cr-indent\">\n" +
+    "    <ul class=\"list-unstyled\">\n" +
+    "      <li class=\"checkbox\" ng-repeat=\"row in rows\">\n" +
+    "        <label class=\"control-label\">\n" +
+    "          <input type=\"checkbox\" ng-model=\"row.selected\"/> {{row.name}}\n" +
     "        </label>\n" +
     "      </li>\n" +
     "    </ul>\n" +
     "\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
+    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-number.html",
-    "<span class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "  <div class=\"controls\">\n" +
-    "    <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "\n" +
-    "    <input type=\"number\" ng-model=\"model\"/>\n" +
-    "\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
-    "  </div>\n" +
-    "</span>\n"
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "  <input class=\"form-control\" type=\"number\" ng-model=\"model\"/>\n" +
+    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "</div>\n"
   );
 
   $templateCache.put("cr-object.html",
-    "<div>\n" +
-    "  <label ng-show=\"options.showLabel\" class=\"cr-object-label\">{{name}}:</label>\n" +
+    "<div class=\"form-group\">\n" +
+    "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent }\" class=\"properties\"></div>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-password.html",
-    "<div class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "  <label ng-show=\"options.showLabel\" class=\"control-label\">{{name}}:</label>\n" +
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <input type=\"password\" ng-model=\"pass1\" style=\"margin-right: 4px\"/>\n" +
-    "  <input type=\"password\" ng-model=\"pass2\"/>\n" +
-    "\n" +
-    "  <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
+    "  <div class=\"row\">\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "      <input class=\"form-control\" type=\"password\" ng-model=\"pass1\"/>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "      <input class=\"form-control\" type=\"password\" ng-model=\"pass2\"/>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-readonly.html",
-    "<span class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "  <div class=\"controls\">\n" +
-    "    <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "    <span class=\"input-xlarge uneditable-input\">{{model}}</span>\n" +
-    "  </div>\n" +
-    "</span>\n"
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "  <span class=\"form-control\" disabled>{{model}}</span>\n" +
+    "</div>\n"
   );
 
   $templateCache.put("cr-ref-preview.html",
@@ -335,19 +378,17 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-ref.html",
-    "<div>\n" +
-    "  <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "    <div cr-ref-preview type=\"{{schema.$ref}}\" options=\"options\"></div>\n" +
+    "  <div cr-ref-preview type=\"{{schema.$ref}}\" options=\"options\"></div>\n" +
     "\n" +
-    "    <div class=\"btn-group\">\n" +
-    "      <button ng-click=\"newModel()\" class=\"btn\">New</button>\n" +
-    "      <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn\">Edit</button>\n" +
-    "      <button ng-click=\"selectModel()\" class=\"btn\">Select</button>\n" +
-    "    </div>\n" +
-    "    <div ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</div>\n" +
+    "  <div class=\"btn-group\">\n" +
+    "    <button ng-click=\"newModel()\" class=\"btn btn-default\">New</button>\n" +
+    "    <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn btn-default\">Edit</button>\n" +
+    "    <button ng-click=\"selectModel()\" class=\"btn btn-default\">Select</button>\n" +
     "  </div>\n" +
+    "  <div ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</div>\n" +
     "\n" +
     "  <div cr-model-modal\n" +
     "       modal-id=\"{{editModalId}}\"\n" +
@@ -363,58 +404,50 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-single-select-ref.html",
-    "<div>\n" +
-    "  <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "\n" +
-    "    <select ng-model=\"selectedRow\" ng-options=\"r.name for r in rows\">\n" +
-    "      <option value=\"\">-- choose --</option>\n" +
-    "    </select>\n" +
-    "\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
-    "  </div>\n" +
+    "  <select class=\"form-control\" ng-model=\"selectedRow\" ng-options=\"r.name for r in rows\">\n" +
+    "    <option value=\"\">-- choose --</option>\n" +
+    "  </select>\n" +
+    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-slug.html",
-    "<span class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "  <div class=\"controls\">\n" +
-    "    <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "    <div class=\"input-append\">\n" +
-    "      <input class=\"input-xlarge\" type=\"text\" ng-model=\"model\"/>\n" +
-    "      <a ng-click=\"generate()\" class=\"btn\">Generate</a>\n" +
-    "    </div>\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "  <div class=\"input-group\">\n" +
+    "    <input class=\"form-control\" type=\"text\" ng-model=\"model\"/>\n" +
+    "    <span class=\"input-group-btn\">\n" +
+    "      <button ng-click=\"generate()\" class=\"btn btn-default\">Generate</button>\n" +
+    "    </span>\n" +
     "  </div>\n" +
-    "</span>\n"
+    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "</div>\n"
   );
 
   $templateCache.put("cr-string.html",
-    "<span class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "  <div class=\"controls\">\n" +
-    "    <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "    <input class=\"input-xlarge\" type=\"text\" ng-model=\"model\"/>\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
-    "  </div>\n" +
-    "</span>\n"
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "  <input class=\"form-control\" type=\"text\" ng-model=\"model\"/>\n" +
+    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "</div>\n"
   );
 
   $templateCache.put("cr-tab-object.html",
-    "<div>\n" +
-    "  <label ng-show=\"options.showLabel\" class=\"cr-object-label\">{{name}}:</label>\n" +
+    "<div class=\"form-group\">\n" +
+    "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "  <div class=\"properties\"></div>\n" +
     "</div>\n"
   );
 
   $templateCache.put("cr-text.html",
-    "<span class=\"control-group\" ng-class=\"{ error: hasErrors() }\">\n" +
-    "  <div class=\"controls\">\n" +
-    "    <label ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "    <textarea ng-model=\"model\"/>\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-inline\">{{ getFirstError() }}</p>\n" +
-    "  </div>\n" +
-    "</span>"
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "  <textarea class=\"form-control\" ng-model=\"model\"/>\n" +
+    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "</div>"
   );
 
 }]);
@@ -1496,7 +1529,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
       scope.$watch(watchExpr, function(newValue, oldValue, scope) {
-
         constraints.forEach(function(c) {
           c(newValue);
         });
@@ -1535,11 +1567,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs, anyof) {
 
-        var defaults = {
-          indent: true
-        };
-        scope.options = crCommon.merge(defaults, scope.options);
-
         // get the schema from the anyof-array
         scope.schema = anyof.getSchema(scope.model.type_);
         scope.array = anyof;
@@ -1569,12 +1596,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       controller: 'crAnyofArrayCtrl',
 
-      link: crFieldLink(function(scope, elem, attrs) {
-
-        var defaults = {
-          indent: true
-        };
-        scope.options = crCommon.merge(defaults, scope.options);
+      link: crFieldLink({ showLabel: true, indent: true }, function(scope, elem, attrs) {
 
         elem.find('.dropdown-toggle').dropdown();
       })
@@ -1602,11 +1624,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        var defaults = {
-          indent: true
-        };
-        scope.options = crCommon.merge(defaults, scope.options);
-
         var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model', scope.path,
                                          { showLabel: false, indent: false });
 
@@ -1632,12 +1649,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       controller: 'crArrayCtrl',
 
-      link: crFieldLink(function(scope, elem, attrs) {
-
-        var defaults = {
-          indent: true
-        };
-        scope.options = crCommon.merge(defaults, scope.options);
+      link: crFieldLink({ showLabel: true, indent: true }, function(scope, elem, attrs) {
 
         // ngrepeat can only bind to references when it comes to form fields
         // thats why we can only work with items of type object not primitives
@@ -1697,47 +1709,42 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
         var date = new Date();
 
-        if (scope.model && scope.model !== '') {
-          // get date from model
-          date = new Date(scope.model);
-        }
-        else {
-          // set today as start date
-          scope.model = date.toISOString();
-        }
+        // datepicker
+        elem.find('.date').datetimepicker({
+          maskInput: true,
+          pickDate: true,
+          pickTime: false
+        })
+          .datetimepicker('setValue', date)
+          .on('changeDate', function(e) {
+            e.stopPropagation();
 
-        var datepicker = elem.find('.date').datepicker({
-          todayHighlight: true
-        });
-        datepicker.datepicker('update', date);
+            date.setFullYear(e.date.getFullYear());
+            date.setMonth(e.date.getMonth());
+            date.setDate(e.date.getDate());
 
-        var timepicker = elem.find('.time').timepicker({
-          minuteStep: 5,
-          defaultTime: date.getHours() + ':' + date.getMinutes(),
-          showMeridian: false,
-          showSeconds: false
-        });
+            scope.model = date.toISOString();
+            scope.$apply();
+          });
 
-        datepicker.on('changeDate', function(e) {
-          e.stopPropagation();
+        // timepicker
+        elem.find('.time').datetimepicker({
+          maskInput: true,
+          pickDate: false,
+          pickTime: true,
+          pickSeconds: false
+        })
+          .datetimepicker('setValue', date)
+          .on('changeDate', function(e) {
+            e.stopPropagation();
 
-          date.setFullYear(e.date.getFullYear());
-          date.setMonth(e.date.getMonth());
-          date.setDate(e.date.getDate());
+            date.setHours(e.date.getHours());
+            date.setMinutes(e.date.getMinutes());
 
-          scope.model = date.toISOString();
-          scope.$apply();
-        });
+            scope.model = date.toISOString();
+            scope.$apply();
+          });
 
-        timepicker.on('changeTime.timepicker', function(e) {
-          e.stopPropagation();
-
-          date.setHours(e.time.hours);
-          date.setMinutes(e.time.minutes);
-
-          scope.model = date.toISOString();
-          scope.$apply();
-        });
       })
     };
   });
