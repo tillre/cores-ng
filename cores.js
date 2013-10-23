@@ -1708,6 +1708,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         }
 
         var date = new Date();
+        if (!scope.model) {
+          scope.model = date.toISOString();
+        }
 
         // datepicker
         elem.find('.date').datetimepicker({
