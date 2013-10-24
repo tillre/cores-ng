@@ -298,8 +298,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      </tr>\n" +
     "    </tbody>\n" +
     "  </table>\n" +
-    "  <div ng-show=\"showPagination\" class=\"pagination\">\n" +
-    "    <ul>\n" +
+    "  <div ng-show=\"showPagination\">\n" +
+    "    <ul class=\"pagination\">\n" +
     "      <li class=\"{{ !isLoading && prevKeys.length  ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"prev()\">Prev</a></li>\n" +
     "      <li class=\"{{ !isLoading && nextKey ? '' : 'disabled' }}\"><a href=\"\" ng-click=\"next()\">Next</a></li>\n" +
     "    </ul>\n" +

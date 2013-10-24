@@ -24,8 +24,8 @@
       </tr>
     </tbody>
   </table>
-  <div ng-show="showPagination" class="pagination">
-    <ul>
+  <div ng-show="showPagination">
+    <ul class="pagination">
       <li class="{{ !isLoading && prevKeys.length  ? '' : 'disabled' }}"><a href="" ng-click="prev()">Prev</a></li>
       <li class="{{ !isLoading && nextKey ? '' : 'disabled' }}"><a href="" ng-click="next()">Next</a></li>
     </ul>
