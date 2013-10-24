@@ -29,7 +29,14 @@
 
       $scope.type = 'Bar';
       $scope.modelId = $routeParams.id;
-      $scope.headers = ['string1', 'ref/bar'];
+      $scope.headers = [
+        'string',
+        'slug',
+        { path: 'datetime', filter: function(val) {
+          return 'DAS FILTER<br>BOOW';
+        }},
+        'ref/bar'
+      ];
       $scope.views = [
         { title: 'Alt All', name: 'altall' },
         { title: 'Only asd', name: 'onlyASD' },

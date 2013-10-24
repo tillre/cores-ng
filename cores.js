@@ -277,12 +277,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    <thead>\n" +
     "      <tr>\n" +
     "        <th ng-repeat=\"title in titles\" style=\"text-transform:capitalize;\">{{title}}</th>\n" +
-    "        <th ng-if=\"options.buttons && options.buttons.length\">Actions</th>\n" +
+    "        <th ng-if=\"options.buttons && options.buttons.length\" class=\"text-center\">\n" +
+    "          <span class=\"glyphicon glyphicon-cog\"></span>\n" +
+    "        </th>\n" +
     "      </tr>\n" +
     "    </thead>\n" +
     "    <tbody>\n" +
     "      <tr ng-repeat=\"row in rows\" style=\"cursor:pointer;\" ng-click=\"select(row.id)\">\n" +
-    "        <td ng-repeat=\"item in row.items\">{{item.value}}</td>\n" +
+    "        <td ng-repeat=\"item in row.items\" ng-bind-html=\"item.value\"></td>\n" +
     "        <td ng-if=\"options.buttons && options.buttons.length\" class=\"cr-list-buttons\">\n" +
     "          <div class=\"btn-group\">\n" +
     "            <btn ng-repeat=\"button in options.buttons\"\n" +
@@ -2056,7 +2058,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   });
 
 
-  module.directive('crModelList', function(crCommon, crResources, crSchema, crJSONPointer) {
+  module.directive('crModelList', function(
+    $sce,
+    crCommon,
+    crResources,
+    crSchema,
+    crJSONPointer
+  ) {
     return {
       scope: {
         type: '@',
@@ -2125,8 +2133,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             scope.rows = result.rows.map(function(row) {
               return {
                 id: row.id,
-                items: scope.headers.map(function(path, i) {
-                  return { value: crJSONPointer.get(row.doc, path) };
+                items: scope.headers.map(function(header, i) {
+                  // header has to be the path itself or an object
+                  // of form: { path: 'string', filter: function(val) }
+                  var path = typeof header === 'string' ? header : header.path;
+                  var val = crJSONPointer.get(row.doc, path);
+                  if (header.filter) val = header.filter(val);
+                  if (typeof val !== 'string') val = String(val);
+                  return { value: $sce.trustAsHtml(val) };
                 })
               };
             });
@@ -2186,7 +2200,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             }
             // table column titles
             scope.titles = scope.headers.map(function(header) {
-              return header.split('.')[0];
+              // header can either be a string or object
+              return (typeof header === 'string' ? header : header.path).split('/')[0];
             });
 
             load();
