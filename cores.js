@@ -183,11 +183,32 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
+  $templateCache.put("cr-image-preview.html",
+    "<div class=\"row\">\n" +
+    "  <div class=\"col-md-3\">\n" +
+    "    <div class=\"thumbnail\">\n" +
+    "      <img src=\"{{model.file.url}}\">\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "</div>"
+  );
+
   $templateCache.put("cr-image.html",
     "<div class=\"form-group\">\n" +
     "  <label class=\"control-label\">{{name}}</label>\n" +
-    "  <input type=\"file\"/>\n" +
-    "  <img class=\"img-rounded\" height=\"140\">\n" +
+    "\n" +
+    "  <div class=\"row\">\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "      <div class=\"thumbnail\">\n" +
+    "        <img class=\"img-rounded\" height=\"140\">\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "      <span class=\"btn btn-default cr-btn-file\">\n" +
+    "        Browse <input type=\"file\">\n" +
+    "      </span>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
@@ -382,12 +403,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
     "    <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "    <div cr-ref-preview type=\"{{schema.$ref}}\" options=\"options\"></div>\n" +
+    "    <div ng-show=\"model.id_\" class=\"cr-preview\"></div>\n" +
     "\n" +
-    "    <div class=\"btn-group\">\n" +
-    "      <button ng-click=\"newModel()\" class=\"btn btn-default\">New</button>\n" +
-    "      <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn btn-default\">Edit</button>\n" +
-    "      <button ng-click=\"selectModel()\" class=\"btn btn-default\">Select</button>\n" +
+    "    <div>\n" +
+    "      <div class=\"btn-group\">\n" +
+    "        <button ng-click=\"newModel()\" class=\"btn btn-default\">New</button>\n" +
+    "        <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn btn-default\">Edit</button>\n" +
+    "        <button ng-click=\"selectModel()\" class=\"btn btn-default\">Select</button>\n" +
+    "      </div>\n" +
     "    </div>\n" +
     "    <div ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</div>\n" +
     "  </div>\n" +
@@ -2545,7 +2568,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crRef', function($timeout, crCommon, crFieldLink, crValidation) {
+  module.directive('crRef', function(
+    $compile,
+    $timeout,
+    crCommon,
+    crFieldLink,
+    crValidation
+  ) {
     return {
       scope: {
         model: '=',
@@ -2562,18 +2591,20 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         $scope.$on('model:saved', function(e, model) {
           e.stopPropagation();
           $scope.model.id_ = model._id;
-          $scope.$broadcast('update:preview', model._id);
+          $scope.$broadcast('update:preview');
         });
 
         $scope.$on('list:select', function(e, id) {
           e.stopPropagation();
           $scope.model.id_ = id;
-          $scope.$broadcast('update:preview', id);
+          $scope.$broadcast('update:preview');
         });
       },
 
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: crFieldLink({
+        showLabel: true, preview: 'cr-ref-preview'
+      }, function(scope, elem, attrs) {
 
         scope.editModalId = crCommon.createModalId();
         scope.selectModalId = crCommon.createModalId();
@@ -2603,36 +2634,76 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }, true);
         }
 
-        // delay to give the preview time to initialize
-        $timeout(function() {
-          scope.$broadcast('update:preview', scope.model.id_);
-        });
+        // create preview
+        var tmpl = '<div ' + scope.options.preview +
+              ' type="{{schema.$ref}}"' +
+              ' id="model.id_"' +
+              ' options="options">' +
+              '</div>';
+
+        var link = $compile(tmpl);
+        var content = link(scope);
+        elem.find('.cr-preview').html(content);
       })
     };
   });
+
+
+
+
+  var previewLink = function(crResources) {
+    return function(scope, elem, attrs) {
+
+      var update = function(id) {
+        if (id) {
+          crResources.get(scope.type).load(id).then(function(doc) {
+            scope.model = doc;
+          });
+        }
+      };
+
+      scope.$watch('id', function(newValue, oldValue) {
+        if (newValue !== oldValue) {
+          update(newValue);
+        }
+      });
+
+      scope.$on('update:preview', function(e) {
+        update(scope.id);
+      });
+      update(scope.id);
+    };
+  };
 
 
   module.directive('crRefPreview', function(crResources) {
     return {
       scope: {
         type: '@',
+        id: '=',
         options: '='
       },
 
       replace: true,
       templateUrl: 'cr-ref-preview.html',
 
-      link: function(scope, elem, attrs) {
+      link: previewLink(crResources)
+    };
+  });
 
-        scope.$on('update:preview', function(e, id) {
-          e.preventDefault();
-          if (id) {
-            crResources.get(scope.type).load(id).then(function(doc) {
-              scope.model = doc;
-            });
-          }
-        });
-      }
+
+  module.directive('crImagePreview', function(crResources) {
+    return {
+      scope: {
+        type: '@',
+        id: '=',
+        options: '='
+      },
+
+      replace: true,
+      templateUrl: 'cr-image-preview.html',
+
+      link: previewLink(crResources)
     };
   });
 })();

@@ -1,7 +1,7 @@
 var path = require('path');
 var fs = require('fs');
-
-var coresServer = require('cores-server');
+var Q = require('kew');
+var cs = require('cores-server');
 
 
 function configureServer(server, callback) {
@@ -63,25 +63,37 @@ function configureServer(server, callback) {
 
   function imageHandler(payload) {
     var doc = payload;
+
     if (payload.isMultipart) {
+
       var numFiles = parseInt(payload.numFiles, 10);
-      console.log('isMultipart, numFiles', numFiles);
-      for (var i = 0; i < numFiles; ++i) {
-        console.log('file', i, payload['file' + i]);
-      }
+      // console.log('isMultipart, numFiles', numFiles);
+      // for (var i = 0; i < numFiles; ++i) {
+      //   console.log('file', i, payload['file' + i]);
+      // }
       doc = payload.doc;
+
+      if (numFiles > 0) {
+        var file = payload['file0'];
+        var destFile = app.upload.dir + '/' + file.name;
+        var defer = Q.defer();
+
+        fs.rename(file.path, destFile, function(err) {
+          if (err) return defer.reject(err);
+          doc.file.url = '/test/public/upload/' + file.name;
+          defer.resolve(doc);
+        });
+        return defer.promise;
+      }
     }
-    console.log('doc', doc);
-    return doc;
+    return Q.resolve(doc);
   };
 
-  server.app.api.addHandler('create', 'Image', function(payload) {
-    console.log('create image');
+  server.app.api.setHandler('create', 'Image', function(payload) {
     return imageHandler(payload);
   });
 
-  server.app.api.addHandler('update', 'Image', function(payload) {
-    console.log('update image');
+  server.app.api.setHandler('update', 'Image', function(payload) {
     return imageHandler(payload);
   });
 }
@@ -89,7 +101,7 @@ function configureServer(server, callback) {
 
 module.exports = function setupServer(callback) {
 
-  coresServer({
+  cs.createServer({
     server: {
       host: '0.0.0.0',
       port: 3333,
@@ -109,7 +121,11 @@ module.exports = function setupServer(callback) {
     resourcesDir: __dirname + '/resources'
 
   }).then(function(server) {
+    return cs.createApi(server);
+
+  }).then(function(server) {
     configureServer(server, callback);
+
   }, function(err) {
     callback(err);
   });

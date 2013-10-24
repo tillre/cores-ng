@@ -1,20 +1,5 @@
-[cr-image-preview] img {
-    max-height: 64px;
-    min-width: 64px;
-    margin-top: 8px;
-}
-
-[cr-image] {
-    overflow: hidden;
-}
-
-[cr-image] img {
-    float: left;
-    display: block;
-    background-color: #ddd;
-    max-height: 140px;
-    min-width: 140px;
-    margin-right: 12px;
+[cr-image-preview] {
+    margin-bottom: 12px;
 }
 
 [cr-tab-object] .tab-content {
@@ -111,4 +96,24 @@
 
 .cr-debug {
     padding: 0 10px 10px;
+}
+
+/* http://www.abeautifulsite.net/blog/2013/08/whipping-file-inputs-into-shape-with-bootstrap-3/ */
+.cr-btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.cr-btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 999px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    background: red;
+    cursor: inherit;
+    display: block;
 }
