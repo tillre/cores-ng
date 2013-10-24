@@ -374,21 +374,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-ref-preview.html",
-    "<p><strong>{{ model | crJsonPointer:options.previewPath }}</strong></p>\n"
+    "<p>{{ model | crJsonPointer:options.previewPath }}</p>\n"
   );
 
   $templateCache.put("cr-ref.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "<div>\n" +
+    "  <div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "    <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div cr-ref-preview type=\"{{schema.$ref}}\" options=\"options\"></div>\n" +
+    "    <div cr-ref-preview type=\"{{schema.$ref}}\" options=\"options\"></div>\n" +
     "\n" +
-    "  <div class=\"btn-group\">\n" +
-    "    <button ng-click=\"newModel()\" class=\"btn btn-default\">New</button>\n" +
-    "    <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn btn-default\">Edit</button>\n" +
-    "    <button ng-click=\"selectModel()\" class=\"btn btn-default\">Select</button>\n" +
+    "    <div class=\"btn-group\">\n" +
+    "      <button ng-click=\"newModel()\" class=\"btn btn-default\">New</button>\n" +
+    "      <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn btn-default\">Edit</button>\n" +
+    "      <button ng-click=\"selectModel()\" class=\"btn btn-default\">Select</button>\n" +
+    "    </div>\n" +
+    "    <div ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</div>\n" +
     "  </div>\n" +
-    "  <div ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</div>\n" +
     "\n" +
     "  <div cr-model-modal\n" +
     "       modal-id=\"{{editModalId}}\"\n" +
@@ -418,10 +420,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "  <div class=\"input-group\">\n" +
-    "    <input class=\"form-control\" type=\"text\" ng-model=\"model\"/>\n" +
     "    <span class=\"input-group-btn\">\n" +
     "      <button ng-click=\"generate()\" class=\"btn btn-default\">Generate</button>\n" +
     "    </span>\n" +
+    "    <input class=\"form-control\" type=\"text\" ng-model=\"model\"/>\n" +
     "  </div>\n" +
     "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "</div>\n"
@@ -2260,6 +2262,72 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
+  module.directive('crMultiSelectRef', function(
+    crFieldLink,
+    crResources,
+    crCommon,
+    crJSONPointer
+  ) {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@',
+        path: '@'
+      },
+
+      replace: true,
+      templateUrl: 'cr-multi-select-ref.html',
+
+      link: crFieldLink(function(scope, elem, attrs) {
+
+        scope.rows = [];
+
+        // load docs
+        var unwatch = scope.$watch('schema.items.$ref', function(newValue) {
+          if (!scope.schema.items.$ref) return;
+          unwatch();
+
+          crResources.get(scope.schema.items.$ref).view(
+            'all', { include_docs: true }
+          ).then(function(result) {
+            // create rows
+            scope.rows = result.rows.map(function(row) {
+              var r = {
+                id: row.id,
+                selected: false,
+                name: crJSONPointer.get(row.doc, scope.options.previewPath)
+              };
+              return r;
+            });
+            // select rows when id is in model
+            scope.model.forEach(function(ref) {
+              scope.rows.forEach(function(row) {
+                if (row.id == ref.id_) { row.selected = true; }
+              });
+            });
+          });
+        });
+
+        // watch for selection changes
+        scope.$watch('rows', function(newValue, oldValue) {
+          if (!newValue || (newValue && newValue.length === 0)) return;
+          // sync selected rows with model
+          scope.model = scope.rows.filter(function(row) {
+            return row.selected;
+          }).map(function(row) {
+            return { id_: row.id };
+          });
+        }, true);
+      })
+    };
+  });
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
   module.directive('crNumber', function(crFieldLink, crValidation) {
     return {
       scope: {
@@ -2477,133 +2545,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crSingleSelectRef', function(
-    crFieldLink,
-    crValidation,
-    crResources,
-    crCommon,
-    crJSONPointer
-  ) {
-    return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
-      replace: true,
-      templateUrl: 'cr-single-select-ref.html',
-
-      link: crFieldLink(function(scope, elem, attrs) {
-
-        scope.rows = [];
-
-        // validation
-        var validation = crValidation(scope, 'model.id_');
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return !!scope.model.id_;
-          }, true);
-        }
-
-        // load docs
-        var unwatch = scope.$watch('schema.$ref', function() {
-          if (!scope.schema.$ref) return;
-          unwatch();
-
-          crResources.get(scope.schema.$ref).view('all', { include_docs: true }).then(function(result) {
-
-            scope.rows = result.rows.map(function(row) {
-              var r = {
-                id: row.id,
-                name: crJSONPointer.get(row.doc, scope.options.previewPath)
-              };
-              if (scope.model.id_ && r.id === scope.model.id_) {
-                scope.selectedRow = r;
-              }
-              return r;
-            });
-          });
-        });
-
-        // watch for selection changes
-        scope.$watch('selectedRow', function(newValue, oldValue) {
-          if (newValue === oldValue) return;
-          if (!newValue) {
-            delete scope.model.id_;
-          }
-          else {
-            scope.model.id_ = newValue.id;
-          }
-        });
-      })
-    };
-  });
-
-
-  module.directive('crMultiSelectRef', function(
-    crFieldLink,
-    crResources,
-    crCommon,
-    crJSONPointer
-  ) {
-    return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
-      replace: true,
-      templateUrl: 'cr-multi-select-ref.html',
-
-      link: crFieldLink(function(scope, elem, attrs) {
-
-        scope.rows = [];
-
-        // load docs
-        var unwatch = scope.$watch('schema.items.$ref', function(newValue) {
-          if (!scope.schema.items.$ref) return;
-          unwatch();
-
-          crResources.get(scope.schema.items.$ref).view(
-            'all', { include_docs: true }
-          ).then(function(result) {
-            // create rows
-            scope.rows = result.rows.map(function(row) {
-              var r = {
-                id: row.id,
-                selected: false,
-                name: crJSONPointer.get(row.doc, scope.options.previewPath)
-              };
-              return r;
-            });
-            // select rows when id is in model
-            scope.model.forEach(function(ref) {
-              scope.rows.forEach(function(row) {
-                if (row.id == ref.id_) { row.selected = true; }
-              });
-            });
-          });
-        });
-
-        // watch for selection changes
-        scope.$watch('rows', function(newValue, oldValue) {
-          if (!newValue || (newValue && newValue.length === 0)) return;
-          // sync selected rows with model
-          scope.model = scope.rows.filter(function(row) {
-            return row.selected;
-          }).map(function(row) {
-            return { id_: row.id };
-          });
-        }, true);
-      })
-    };
-  });
-
-
   module.directive('crRef', function($timeout, crCommon, crFieldLink, crValidation) {
     return {
       scope: {
@@ -2692,6 +2633,75 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
         });
       }
+    };
+  });
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
+  module.directive('crSingleSelectRef', function(
+    crFieldLink,
+    crValidation,
+    crResources,
+    crCommon,
+    crJSONPointer
+  ) {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@',
+        path: '@'
+      },
+
+      replace: true,
+      templateUrl: 'cr-single-select-ref.html',
+
+      link: crFieldLink(function(scope, elem, attrs) {
+
+        scope.rows = [];
+
+        // validation
+        var validation = crValidation(scope, 'model.id_');
+        if (scope.options.isRequired) {
+          validation.addConstraint('required', 'Required', function(value) {
+            return !!scope.model.id_;
+          }, true);
+        }
+
+        // load docs
+        var unwatch = scope.$watch('schema.$ref', function() {
+          if (!scope.schema.$ref) return;
+          unwatch();
+
+          crResources.get(scope.schema.$ref).view('all', { include_docs: true }).then(function(result) {
+
+            scope.rows = result.rows.map(function(row) {
+              var r = {
+                id: row.id,
+                name: crJSONPointer.get(row.doc, scope.options.previewPath)
+              };
+              if (scope.model.id_ && r.id === scope.model.id_) {
+                scope.selectedRow = r;
+              }
+              return r;
+            });
+          });
+        });
+
+        // watch for selection changes
+        scope.$watch('selectedRow', function(newValue, oldValue) {
+          if (newValue === oldValue) return;
+          if (!newValue) {
+            delete scope.model.id_;
+          }
+          else {
+            scope.model.id_ = newValue.id;
+          }
+        });
+      })
     };
   });
 })();

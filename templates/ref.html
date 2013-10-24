@@ -1,14 +1,16 @@
-<div class="form-group" ng-class="{ 'has-error': hasErrors() }">
-  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
+<div>
+  <div class="form-group" ng-class="{ 'has-error': hasErrors() }">
+    <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
 
-  <div cr-ref-preview type="{{schema.$ref}}" options="options"></div>
+    <div cr-ref-preview type="{{schema.$ref}}" options="options"></div>
 
-  <div class="btn-group">
-    <button ng-click="newModel()" class="btn btn-default">New</button>
-    <button ng-show="hasModel()" ng-click="updateModel()" class="btn btn-default">Edit</button>
-    <button ng-click="selectModel()" class="btn btn-default">Select</button>
+    <div class="btn-group">
+      <button ng-click="newModel()" class="btn btn-default">New</button>
+      <button ng-show="hasModel()" ng-click="updateModel()" class="btn btn-default">Edit</button>
+      <button ng-click="selectModel()" class="btn btn-default">Select</button>
+    </div>
+    <div ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</div>
   </div>
-  <div ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</div>
 
   <div cr-model-modal
        modal-id="{{editModalId}}"
