@@ -50,6 +50,7 @@
         e.stopPropagation();
         $location.path('/bars/' + id);
       });
+
       $scope.$on('rick:roll', function(e, data) {
         console.log('Never gonna give, never gonna give...', data);
       });

@@ -286,7 +286,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "        <td ng-if=\"options.buttons && options.buttons.length\" class=\"cr-list-buttons\">\n" +
     "          <div class=\"btn-group\">\n" +
     "            <btn ng-repeat=\"button in options.buttons\"\n" +
-    "                 ng-click=\"buttonClick(button.event, row.id)\"\n" +
+    "                 ng-click=\"buttonClick($event, button.event, row.id)\"\n" +
     "                 class=\"btn btn-default btn-xs\">\n" +
     "              <span ng-if=\"button.icon\" class=\"glyphicon glyphicon-{{button.icon}}\"></span>\n" +
     "              {{button.title}}\n" +
@@ -345,7 +345,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      <button ng-click=\"toggleDebug()\" class=\"btn btn-default pull-right\">Debug</button>\n" +
     "\n" +
     "      <button ng-repeat=\"button in options.buttons\"\n" +
-    "              ng-click=\"buttonClick(button.event)\"\n" +
+    "              ng-click=\"buttonClick($event, button.event)\"\n" +
     "              class=\"btn btn-default\">\n" +
     "        <span ng-if=\"button.icon\" class=\"glyphicon glyphicon-{{button.icon}}\"></span>\n" +
     "        {{button.title}}\n" +
@@ -666,9 +666,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       return !$scope.model._rev;
     };
 
-    $scope.buttonClick = function(e) {
-      $scope.$emit(e, $scope.model);
+    $scope.buttonClick = function(e, eventName) {
+      e.stopPropagation();
+      $scope.$emit(eventName, $scope.model);
     };
+
     //
     // methods
     //
@@ -2068,8 +2070,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       templateUrl: 'cr-model-list.html',
 
       controller: function($scope) {
-        $scope.buttonClick = function(e, id) {
-          $scope.$emit(e, id);
+        $scope.buttonClick = function(e, eventName, id) {
+          e.stopPropagation();
+          $scope.$emit(eventName, id);
         };
       },
 

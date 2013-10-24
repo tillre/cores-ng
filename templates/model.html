@@ -10,7 +10,7 @@
       <button ng-click="toggleDebug()" class="btn btn-default pull-right">Debug</button>
 
       <button ng-repeat="button in options.buttons"
-              ng-click="buttonClick(button.event)"
+              ng-click="buttonClick($event, button.event)"
               class="btn btn-default">
         <span ng-if="button.icon" class="glyphicon glyphicon-{{button.icon}}"></span>
         {{button.title}}
