@@ -276,7 +276,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <table class=\"table table-hover\">\n" +
     "    <thead>\n" +
     "      <tr>\n" +
-    "        <th ng-repeat=\"title in titles\" style=\"text-transform:capitalize;\">{{title}}</th>\n" +
+    "        <th ng-repeat=\"title in titles\">{{title}}</th>\n" +
     "        <th ng-if=\"options.buttons && options.buttons.length\" class=\"text-center\">\n" +
     "          <span class=\"glyphicon glyphicon-cog\"></span>\n" +
     "        </th>\n" +
@@ -2134,13 +2134,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
               return {
                 id: row.id,
                 items: scope.headers.map(function(header, i) {
-                  // header has to be the path itself or an object
-                  // of form: { path: 'string', filter: function(val) }
-                  var path = typeof header === 'string' ? header : header.path;
-                  var val = crJSONPointer.get(row.doc, path);
-                  if (header.filter) val = header.filter(val);
-                  if (typeof val !== 'string') val = String(val);
-                  return { value: $sce.trustAsHtml(val) };
+                  var val = '';
+                  if (header.path) {
+                    val = crJSONPointer.get(row.doc, header.path);
+                  }
+                  else if (header.map) {
+                    val = header.map(row.doc);
+                  }
+                  return { value: $sce.trustAsHtml(String(val)) };
                 })
               };
             });
@@ -2196,12 +2197,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             if (!scope.headers || scope.headers.length === 0) {
               scope.headers = Object.keys(schema.properties).filter(function(key) {
                 return !crSchema.isPrivateProperty(key);
+              }).map(function(key) {
+                return { title: crCommon.capitalize(key).split('/')[0], path: key };
               });
             }
             // table column titles
             scope.titles = scope.headers.map(function(header) {
-              // header can either be a string or object
-              return (typeof header === 'string' ? header : header.path).split('/')[0];
+              return header.title ||
+                (header.path ? crCommon.capitalize(header.path).split('/')[0] : '');
             });
 
             load();

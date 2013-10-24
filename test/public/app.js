@@ -30,12 +30,12 @@
       $scope.type = 'Bar';
       $scope.modelId = $routeParams.id;
       $scope.headers = [
-        'string',
-        'slug',
-        { path: 'datetime', filter: function(val) {
-          return 'DAS FILTER<br>BOOW';
+        { title: 'Stringy', path: 'string' },
+        { path: 'slug' },
+        { title: 'NOW OR NEVER', map: function(doc) {
+          return doc.date;
         }},
-        'ref/bar'
+        { path: 'ref/bar' }
       ];
       $scope.views = [
         { title: 'Alt All', name: 'altall' },
