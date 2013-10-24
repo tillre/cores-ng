@@ -4,14 +4,17 @@
     <div ng-switch-when="loading" class="alert alert-info">Loading...</div>
     <div ng-switch-when="saving" class="alert alert-info">Saving...</div>
     <div ng-switch-when="error" class="alert alert-danger"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>
-    <div ng-switch-when="editing" class="well">
+    <div ng-switch-when="editing" class="well cr-model-controls">
       <button ng-click="save()" ng-class="{ disabled: !data.valid }" class="btn btn-primary">Save</button>
       <button ng-click="destroy()" ng-show="!isNew()" class="btn btn-danger pull-right">Delete</button>
       <button ng-click="toggleDebug()" class="btn btn-default pull-right">Debug</button>
 
-      <button ng-repeat="button in data.buttons"
-              class="btn btn-default"
-              ng-click="buttonClick(button.event)">{{button.name}}</button>
+      <button ng-repeat="button in options.buttons"
+              ng-click="buttonClick(button.event)"
+              class="btn btn-default">
+        <span ng-if="button.icon" class="glyphicon glyphicon-{{button.icon}}"></span>
+        {{button.title}}
+      </button>
     </div>
   </div>
 </div>

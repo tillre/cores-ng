@@ -3,11 +3,22 @@
     <thead>
       <tr>
         <th ng-repeat="title in titles" style="text-transform:capitalize;">{{title}}</th>
+        <th ng-if="options.buttons && options.buttons.length">Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="row in rows" style="cursor:pointer;" ng-click="select(row.id)">
         <td ng-repeat="item in row.items">{{item.value}}</td>
+        <td ng-if="options.buttons && options.buttons.length" class="cr-list-buttons">
+          <div class="btn-group">
+            <btn ng-repeat="button in options.buttons"
+                 ng-click="buttonClick(button.event, row.id)"
+                 class="btn btn-default btn-xs">
+              <span ng-if="button.icon" class="glyphicon glyphicon-{{button.icon}}"></span>
+              {{button.title}}
+            </button>
+          </div>
+        </td>
       </tr>
     </tbody>
   </table>

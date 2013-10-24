@@ -97,6 +97,19 @@
     margin-top: 6px;
 }
 
+.cr-model-controls .btn {
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.cr-list-buttons {
+    width: 1%;
+    white-space: nowrap;
+}
+.cr-list-buttons .btn {
+    float: none;
+}
+
 /* http://www.abeautifulsite.net/blog/2013/08/whipping-file-inputs-into-shape-with-bootstrap-3/ */
 .cr-btn-file {
     position: relative;

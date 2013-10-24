@@ -277,11 +277,22 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    <thead>\n" +
     "      <tr>\n" +
     "        <th ng-repeat=\"title in titles\" style=\"text-transform:capitalize;\">{{title}}</th>\n" +
+    "        <th ng-if=\"options.buttons && options.buttons.length\">Actions</th>\n" +
     "      </tr>\n" +
     "    </thead>\n" +
     "    <tbody>\n" +
     "      <tr ng-repeat=\"row in rows\" style=\"cursor:pointer;\" ng-click=\"select(row.id)\">\n" +
     "        <td ng-repeat=\"item in row.items\">{{item.value}}</td>\n" +
+    "        <td ng-if=\"options.buttons && options.buttons.length\" class=\"cr-list-buttons\">\n" +
+    "          <div class=\"btn-group\">\n" +
+    "            <btn ng-repeat=\"button in options.buttons\"\n" +
+    "                 ng-click=\"buttonClick(button.event, row.id)\"\n" +
+    "                 class=\"btn btn-default btn-xs\">\n" +
+    "              <span ng-if=\"button.icon\" class=\"glyphicon glyphicon-{{button.icon}}\"></span>\n" +
+    "              {{button.title}}\n" +
+    "            </button>\n" +
+    "          </div>\n" +
+    "        </td>\n" +
     "      </tr>\n" +
     "    </tbody>\n" +
     "  </table>\n" +
@@ -328,14 +339,17 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
     "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
     "    <div ng-switch-when=\"error\" class=\"alert alert-danger\"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>\n" +
-    "    <div ng-switch-when=\"editing\" class=\"well\">\n" +
+    "    <div ng-switch-when=\"editing\" class=\"well cr-model-controls\">\n" +
     "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary\">Save</button>\n" +
     "      <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\">Delete</button>\n" +
     "      <button ng-click=\"toggleDebug()\" class=\"btn btn-default pull-right\">Debug</button>\n" +
     "\n" +
-    "      <button ng-repeat=\"button in data.buttons\"\n" +
-    "              class=\"btn btn-default\"\n" +
-    "              ng-click=\"buttonClick(button.event)\">{{button.name}}</button>\n" +
+    "      <button ng-repeat=\"button in options.buttons\"\n" +
+    "              ng-click=\"buttonClick(button.event)\"\n" +
+    "              class=\"btn btn-default\">\n" +
+    "        <span ng-if=\"button.icon\" class=\"glyphicon glyphicon-{{button.icon}}\"></span>\n" +
+    "        {{button.title}}\n" +
+    "      </button>\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
@@ -612,8 +626,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       valid: true,
       state: STATE_EDITING,
       debug: false,
-      files: {},
-      buttons: $scope.options.buttons || []
+      files: {}
     };
 
     // add/update/remove files from the model
@@ -2047,13 +2060,22 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         type: '@',
         view: '=?',
         limit: '=?',
-        headers: '=?'
+        headers: '=?',
+        options: '=?'
       },
 
       replace: true,
       templateUrl: 'cr-model-list.html',
 
+      controller: function($scope) {
+        $scope.buttonClick = function(e, id) {
+          $scope.$emit(e, id);
+        };
+      },
+
       link: function(scope, elem, attrs) {
+
+        scope.options = scope.options || {};
 
         var resource;
         var schema;

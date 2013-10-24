@@ -36,7 +36,12 @@
         { title: 'By String1', name: 'by_string', params: { keys: ['foo'] }}
       ];
       $scope.modelOptions = {
-        buttons: [{name: 'ClickMe!', event: 'rick:roll'}]
+        buttons: [{ title: 'ClickMe!', event: 'rick:roll' },
+                  { event: 'rick:roll', icon: 'minus' }]
+      };
+      $scope.listOptions = {
+        buttons: [{ title: 'ClickMe!', event: 'rick:roll' },
+                  { title: 'Bam', event: 'rick:roll', icon: 'plus' }]
       };
       // $scope.view = { title: 'All', name: 'all' };
       $scope.limit = 2;
@@ -45,8 +50,8 @@
         e.stopPropagation();
         $location.path('/bars/' + id);
       });
-      $scope.$on('rick:roll', function(e, model) {
-        console.log('Never gonna give, never gonna give...',model);
+      $scope.$on('rick:roll', function(e, data) {
+        console.log('Never gonna give, never gonna give...', data);
       });
     })
   ;
