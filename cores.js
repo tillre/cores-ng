@@ -331,8 +331,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    <div ng-switch-when=\"editing\" class=\"well\">\n" +
     "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary\">Save</button>\n" +
     "      <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\">Delete</button>\n" +
-    "      <button ng-click=\"toggleDebug()\" class=\"btn btn-default\">Debug</button>\n" +
-    "      <button ng-repeat=\"button in data.buttons\" class=\"btn btn-default\" ng-click=\"buttonClick(button.event)\">{{button.name}}</button>\n" +
+    "      <button ng-click=\"toggleDebug()\" class=\"btn btn-default pull-right\">Debug</button>\n" +
+    "\n" +
+    "      <button ng-repeat=\"button in data.buttons\"\n" +
+    "              class=\"btn btn-default\"\n" +
+    "              ng-click=\"buttonClick(button.event)\">{{button.name}}</button>\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
@@ -405,7 +408,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "\n" +
     "    <div ng-show=\"model.id_\" class=\"cr-preview\"></div>\n" +
     "\n" +
-    "    <div>\n" +
+    "    <div class=\"cr-ref-controls\">\n" +
     "      <div class=\"btn-group\">\n" +
     "        <button ng-click=\"newModel()\" class=\"btn btn-default\">New</button>\n" +
     "        <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn btn-default\">Edit</button>\n" +
@@ -535,23 +538,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       }
     };
 
-    $scope.$on('remove:item', function(e, index) {
+    $scope.$on('cr:remove:item', function(e, index) {
       e.stopPropagation();
       $scope.model.splice(index, 1);
     });
 
-    $scope.$on('add:item', function(e, schema, index) {
+    $scope.$on('cr:add:item', function(e, schema, index) {
       e.stopPropagation();
       $scope.addItem(schema, index + 1);
     });
 
-    $scope.$on('moveUp:item', function(e, index) {
+    $scope.$on('cr:moveUp:item', function(e, index) {
       e.stopPropagation();
       if (index === 0) return;
       $scope.model.splice(index - 1, 0, $scope.model.splice(index, 1)[0]);
     });
 
-    $scope.$on('moveDown:item', function(e, index) {
+    $scope.$on('cr:moveDown:item', function(e, index) {
       e.stopPropagation();
       if (index >= $scope.model.length) return;
       $scope.model.splice(index + 1, 0, $scope.model.splice(index, 1)[0]);
@@ -566,20 +569,20 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   module.controller('crArrayItemCtrl', function($scope) {
 
     $scope.moveUp = function() {
-      $scope.$emit('moveUp:item', $scope.$parent.$index);
+      $scope.$emit('cr:moveUp:item', $scope.$parent.$index);
     };
 
     $scope.moveDown = function() {
-      $scope.$emit('moveDown:item', $scope.$parent.$index);
+      $scope.$emit('cr:moveDown:item', $scope.$parent.$index);
     };
 
     $scope.remove = function() {
-      $scope.$emit('remove:item', $scope.$parent.$index);
+      $scope.$emit('cr:remove:item', $scope.$parent.$index);
     };
 
     $scope.addItem = function(schema) {
       schema = schema || $scope.schema;
-      $scope.$emit('add:item', schema, $scope.$parent.$index);
+      $scope.$emit('cr:add:item', schema, $scope.$parent.$index);
     };
   });
 })();
@@ -615,12 +618,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
     // add/update/remove files from the model
 
-    $scope.$on('file:set', function(e, id, file) {
+    $scope.$on('cr:file:set', function(e, id, file) {
       e.stopPropagation();
       data.files[id] = file;
     });
 
-    $scope.$on('file:remove', function(e, id) {
+    $scope.$on('cr:file:remove', function(e, id) {
       e.stopPropagation();
       delete data.files[id];
     });
@@ -628,16 +631,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     // button methods
 
     $scope.save = function() {
-      $scope.$emit('model:save');
+      $scope.$emit('cr:model:save');
       return self.save();
     };
 
     $scope.cancel = function() {
-      $scope.$emit('model:cancel');
+      $scope.$emit('cr:model:cancel');
     };
 
     $scope.destroy = function() {
-      $scope.$emit('model:destroy');
+      $scope.$emit('cr:model:destroy');
       return self.destroy();
     };
 
@@ -686,7 +689,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         self.setModel(doc);
         $scope.modelId = doc._id;
         data.state = STATE_EDITING;
-        $scope.$emit('model:saved', $scope.model);
+        $scope.$emit('cr:model:saved', $scope.model);
         def.resolve(doc);
 
       }, function(err) {
@@ -699,7 +702,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
               rootErrors.push(v);
             }
             else {
-              $scope.$broadcast('set:customError', v.path, v.code, v.message);
+              $scope.$broadcast('cr:set:customError', v.path, v.code, v.message);
             }
           });
         }
@@ -720,7 +723,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       return this._resource.destroy($scope.model).then(
         function() {
           self.setModel();
-          $scope.$emit('model:destroyed');
+          $scope.$emit('cr:model:destroyed');
         }
       );
     };
@@ -1501,28 +1504,28 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       var setError = function(name, message) {
         errors[name] = message;
-        scope.$emit('set:error', scope.path + ':' + name);
+        scope.$emit('cr:set:error', scope.path + ':' + name);
       };
 
 
       var removeError = function(name) {
         if (errors.hasOwnProperty(name)) {
           delete errors[name];
-          scope.$emit('remove:error', scope.path + ':' + name);
+          scope.$emit('cr:remove:error', scope.path + ':' + name);
         }
       };
 
 
       var setCustomError = function(name, message) {
         customErrors[name] = message;
-        scope.$emit('set:error', scope.path + ':' + name);
+        scope.$emit('cr:set:error', scope.path + ':' + name);
       };
 
 
       var removeCustomError = function(name) {
         if (customErrors.hasOwnProperty(name)) {
           delete customErrors[name];
-          scope.$emit('remove:error', scope.path + ':' + name);
+          scope.$emit('cr:remove:error', scope.path + ':' + name);
         };
       };
 
@@ -1545,7 +1548,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       };
 
 
-      scope.$on('set:customError', function(e, path, code, message) {
+      scope.$on('cr:set:customError', function(e, path, code, message) {
         if (path === scope.path) {
           setCustomError(code, message);
           return true;
@@ -1857,7 +1860,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           scope.model.name = file.name;
 
           // notify model about file
-          scope.$emit('file:set', fileId, file);
+          scope.$emit('cr:file:set', fileId, file);
           scope.$apply();
         });
       })
@@ -1956,13 +1959,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         $scope.valid = true;
         $scope.errors = {};
 
-        $scope.$on('set:error', function(e, id) {
+        $scope.$on('cr:set:error', function(e, id) {
           e.stopPropagation();
           $scope.errors[id] = true;
           $scope.valid = false;
         });
 
-        $scope.$on('remove:error', function(e, id) {
+        $scope.$on('cr:remove:error', function(e, id) {
           e.stopPropagation();
           delete $scope.errors[id];
           $scope.valid = Object.keys($scope.errors).length === 0;
@@ -2123,7 +2126,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         }
 
         scope.select = function(id) {
-          scope.$emit('list:select', id);
+          scope.$emit('cr:list:select', id);
         };
 
         scope.next = function() {
@@ -2139,7 +2142,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }
         };
 
-        scope.$on('reload:list', function(e) {
+        scope.$on('cr:reload:list', function(e) {
           e.preventDefault();
           load();
         });
@@ -2197,17 +2200,17 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           };
         }
 
-        scope.$on('list:select', function(e, id) {
+        scope.$on('cr:list:select', function(e, id) {
           elem.modal('hide');
         });
 
-        scope.$on('showModal:list', function(e, modalId, reload) {
+        scope.$on('cr:showModal:list', function(e, modalId, reload) {
 
           if (modalId === scope.modalId) {
             e.preventDefault();
             elem.modal('show');
             if (reload) {
-              scope.$broadcast('reload:list');
+              scope.$broadcast('cr:reload:list');
             }
           }
         });
@@ -2240,12 +2243,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        scope.$on('model:saved', function() {
+        scope.$on('cr:model:saved', function() {
           // close on save
           elem.modal('hide');
         });
 
-        scope.$on('showModal:model', function(e, modalId, modelId) {
+        scope.$on('cr:showModal:model', function(e, modalId, modelId) {
           if (modalId === scope.modalId) {
             e.preventDefault();
             scope.modelId = modelId;
@@ -2588,16 +2591,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       controller: function($scope) {
 
-        $scope.$on('model:saved', function(e, model) {
+        $scope.$on('cr:model:saved', function(e, model) {
           e.stopPropagation();
           $scope.model.id_ = model._id;
-          $scope.$broadcast('update:preview');
+          $scope.$broadcast('cr:update:preview');
         });
 
-        $scope.$on('list:select', function(e, id) {
+        $scope.$on('cr:list:select', function(e, id) {
           e.stopPropagation();
           $scope.model.id_ = id;
-          $scope.$broadcast('update:preview');
+          $scope.$broadcast('cr:update:preview');
         });
       },
 
@@ -2611,15 +2614,15 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
         // scope methods
         scope.newModel = function() {
-          scope.$broadcast('showModal:model', scope.editModalId, null);
+          scope.$broadcast('cr:showModal:model', scope.editModalId, null);
         };
 
         scope.updateModel = function() {
-          scope.$broadcast('showModal:model', scope.editModalId, scope.model.id_);
+          scope.$broadcast('cr:showModal:model', scope.editModalId, scope.model.id_);
         };
 
         scope.selectModel = function() {
-          scope.$broadcast('showModal:list', scope.selectModalId, true);
+          scope.$broadcast('cr:showModal:list', scope.selectModalId, true);
         };
 
         scope.hasModel = function() {
@@ -2668,7 +2671,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         }
       });
 
-      scope.$on('update:preview', function(e) {
+      scope.$on('cr:update:preview', function(e) {
         update(scope.id);
       });
       update(scope.id);

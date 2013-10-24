@@ -41,7 +41,7 @@
       // $scope.view = { title: 'All', name: 'all' };
       $scope.limit = 2;
 
-      $scope.$on('list:select', function(e, id) {
+      $scope.$on('cr:list:select', function(e, id) {
         e.stopPropagation();
         $location.path('/bars/' + id);
       });
