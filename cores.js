@@ -147,32 +147,22 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-datetime.html",
-    "<div class=\"form-group row\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
+    "<div class=\"row\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
     "  <label class=\"col-md-12 control-label\" ng-show=\"options.showLabel\">{{name}}</label>\n" +
     "\n" +
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"input-group date\">\n" +
-    "      <input type=\"text\" class=\"form-control\" data-format=\"dd.MM.yyyy\" />\n" +
     "      <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-calendar\"></span></span>\n" +
+    "      <input type=\"text\" class=\"form-control\" data-format=\"dd.MM.yyyy\" />\n" +
     "    </div>\n" +
     "  </div>\n" +
     "\n" +
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"input-group time\">\n" +
-    "      <input type=\"text\" class=\"form-control\" data-format=\"hh:mm\"/>\n" +
     "      <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-time\"></span></span>\n" +
+    "      <input type=\"text\" class=\"form-control\" data-format=\"hh:mm\"/>\n" +
     "    </div>\n" +
     "  </div>\n" +
-    "\n" +
-    "  <!-- <div class=\"input-append date\" id=\"dp3\" data-date-format=\"dd.mm.yyyy\"> -->\n" +
-    "  <!--   <input type=\"text\" class=\"input-small\"> -->\n" +
-    "  <!--   <span class=\"add-on\"><i class=\"icon-th\"></i></span> -->\n" +
-    "  <!-- </div> -->\n" +
-    "\n" +
-    "  <!-- <div class=\"input-append bootstrap-timepicker\"> -->\n" +
-    "  <!--   <input class=\"time input-small\" type=\"text\" class=\"input-small\"> -->\n" +
-    "  <!--   <span class=\"add-on\"><i class=\"icon-time\"></i></span> -->\n" +
-    "  <!-- </div> -->\n" +
     "</div>\n"
   );
 

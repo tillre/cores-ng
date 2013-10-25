@@ -11,6 +11,10 @@
     width: auto;
 }
 
+[cr-datetime] .input-group {
+    margin-bottom: 15px
+}
+
  /* array and anyof array */
 
 [cr-anyof-item] .cr-object-label {
