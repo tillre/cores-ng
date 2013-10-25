@@ -52,7 +52,7 @@ module.exports = j.object({
 
   tabObject2: j.object({
     tab1: j.string(),
-    tab2: j.string()
+    tab2: j.string().custom('view', 'cr-markdown')
   }).custom('view', 'cr-tab-object'),
 
   array: j.array(j.object({

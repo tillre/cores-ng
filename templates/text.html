@@ -1,5 +1,5 @@
 <div class="form-group" ng-class="{ 'has-error': hasErrors() }">
   <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
-  <textarea class="form-control" ng-model="model"/>
+  <textarea class="form-control" ng-model="model" rows="1"/>
   <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
 </div>

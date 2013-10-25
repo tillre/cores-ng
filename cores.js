@@ -479,7 +479,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   $templateCache.put("cr-text.html",
     "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "  <textarea class=\"form-control\" ng-model=\"model\"/>\n" +
+    "  <textarea class=\"form-control\" ng-model=\"model\" rows=\"1\"/>\n" +
     "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "</div>"
   );
@@ -1475,6 +1475,25 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.services');
 
 
+  module.factory('crTextareaAutosize', function() {
+
+    return function($textarea) {
+      var update = function() {
+        $textarea.css('height', 'auto');
+        $textarea.css('height', $textarea[0].scrollHeight);
+      };
+      $textarea.on('keyup', update);
+      $textarea.on('input', update);
+      $(window).on('resize', update);
+      return update;
+    };
+  });
+})();
+(function() {
+
+  var module = angular.module('cores.services');
+
+
   module.factory('crValidation', function() {
 
     return function(scope, watchExpr) {
@@ -1880,7 +1899,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crMarkdown', function(crCommon, crFieldLink, crValidation) {
+  module.directive('crMarkdown', function(
+    crCommon,
+    crFieldLink,
+    crValidation,
+    crTextareaAutosize
+  ) {
     return {
       scope: {
         model: '=',
@@ -1921,30 +1945,31 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         var $area = elem.find('.cr-editor-area');
         var $preview = elem.find('.cr-editor-preview');
 
+        var updateSize = crTextareaAutosize($area);
+
         scope.isPreview = false;
         scope.togglePreview = function() {
           scope.isPreview = !scope.isPreview;
           if (scope.isPreview) {
             $preview.html(markdown.toHTML($area.val()));
           }
+          else {
+            updateSize();
+          }
           $area.toggle();
           $preview.toggle();
         };
-
-        function updateHeight() {
-          $area.css('height', 'auto');
-          $area.css('height', $area[0].scrollHeight);
-        }
-        $area.on('keyup', updateHeight);
-        $area.on('input', updateHeight);
-        updateHeight();
 
         // manually trigger autosize on first model change
         var unwatch = scope.$watch('model', function(newValue, oldValue) {
           if (newValue) {
             unwatch();
-            updateHeight();
+            updateSize();
           }
+        });
+        // update size when tab changes
+        scope.$on('cr:tab:shown', function(e) {
+          updateSize();
         });
       })
     };
@@ -3016,6 +3041,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         elem.find('.nav-tabs a').on('click', function(e) {
           e.preventDefault();
           $(this).tab('show');
+
+        }).on('shown.bs.tab', function(e) {
+          e.preventDefault();
+          scope.$broadcast('cr:tab:shown');
         });
       }
     };
@@ -3027,7 +3056,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crText', function(crCommon, crFieldLink, crValidation) {
+  module.directive('crText', function(
+    crCommon,
+    crFieldLink,
+    crValidation,
+    crTextareaAutosize
+  ) {
     return {
       scope: {
         model: '=',
@@ -3069,8 +3103,21 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             return !!value && value !== '';
           }, true);
         }
+
+        var updateSize = crTextareaAutosize(elem.find('textarea'));
+
+        // manually trigger autosize on first model change
+        var unwatch = scope.$watch('model', function(newValue, oldValue) {
+          if (newValue) {
+            unwatch();
+            updateSize();
+          }
+        });
+        // update size when tab changes
+        scope.$on('cr:tab:shown', function(e) {
+          updateSize();
+        });
       })
     };
   });
-
 })();
