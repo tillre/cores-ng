@@ -210,7 +210,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    <textarea class=\"form-control cr-editor-area\" ng-model=\"model\" rows=\"1\"></textarea>\n" +
     "    <div class=\"cr-editor-preview\"></div>\n" +
     "    <div class=\"btn-group pull-right\">\n" +
-    "      <button class=\"btn btn-default\" ng-click=\"togglePreview()\">{{ isPreview ? \"Edit\" : \"Preview\" }}</button>\n" +
+    "      <button class=\"btn btn-default btn-sm\" ng-click=\"togglePreview()\">\n" +
+    "        {{ isPreview ? \"Edit\" : \"Preview\" }}\n" +
+    "      </button>\n" +
     "    </div>\n" +
     "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +

@@ -5,7 +5,9 @@
     <textarea class="form-control cr-editor-area" ng-model="model" rows="1"></textarea>
     <div class="cr-editor-preview"></div>
     <div class="btn-group pull-right">
-      <button class="btn btn-default" ng-click="togglePreview()">{{ isPreview ? "Edit" : "Preview" }}</button>
+      <button class="btn btn-default btn-sm" ng-click="togglePreview()">
+        {{ isPreview ? "Edit" : "Preview" }}
+      </button>
     </div>
     <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
   </div>
