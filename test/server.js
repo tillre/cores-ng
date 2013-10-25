@@ -4,47 +4,32 @@ var Q = require('kew');
 var cs = require('cores-server');
 
 
-function configureServer(server, callback) {
+function init(server) {
 
+  // logging
   server.on('response', function(req) {
     console.log(req.raw.res.statusCode, req.method.toUpperCase(), req.path);
   });
-
   server.on('internalError', function(req, error) {
     console.log('ERROR', error);
   });
 
-  // listen on pack events to get plugin log events as well
-
-  server.pack.events.on('log', function(e) {
-    console.log('-- log', e.tags, e.data);
-  });
-
-  // serve index.html
-
-  server.route({
-    path: '/',
-    method: 'GET',
-    handler: { file: './test/public/index.html' }
-  });
-
-  server.route({
-    path: '/test',
-    method: 'GET',
-    handler: { file: './test/public/test.html' }
-  });
-
-
-  // serve files
-
-  server.route({
-    path: '/{path*}',
-    method: 'GET',
-    handler: { directory: { path: '.', listing: true }}
-  });
+  server.route([
+    // index
+    {
+      path: '/',
+      method: 'GET',
+      handler: { file: './test/public/index.html' }
+    },
+    // static files
+    {
+      path: '/{path*}',
+      method: 'GET',
+      handler: { directory: { path: '.', listing: true }}
+    }
+  ]);
 
   // app data
-
   var app = server.pack.app = {
     upload: {
       dir: path.join(__dirname, '/public/upload'),
@@ -52,15 +37,7 @@ function configureServer(server, callback) {
     }
   };
 
-  // create upload dir
-
-  fs.mkdir(app.upload.dir, function(err) {
-    if (err && err.code !== 'EEXIST') return callback(err);
-    server.start(callback);
-  });
-
   // image resource handlers
-
   function imageHandler(payload) {
     var doc = payload;
 
@@ -80,7 +57,7 @@ function configureServer(server, callback) {
 
         fs.rename(file.path, destFile, function(err) {
           if (err) return defer.reject(err);
-          doc.file.url = '/test/public/upload/' + file.name;
+          doc.file.url = app.upload.url /*'/test/public/upload/'*/ + file.name;
           defer.resolve(doc);
         });
         return defer.promise;
@@ -96,6 +73,17 @@ function configureServer(server, callback) {
   server.app.api.setHandler('update', 'Image', function(payload) {
     return imageHandler(payload);
   });
+
+  // create upload dir
+  var defer = Q.defer();
+  fs.mkdir(app.upload.dir, function(err) {
+    if (err && err.code !== 'EEXIST') return defer.reject(err);
+    server.start(function(err) {
+      if (err) return defer.reject(err);
+      defer.resolve();
+    });
+  });
+  return defer.promise;
 }
 
 
@@ -124,8 +112,10 @@ module.exports = function setupServer(callback) {
     return cs.createApi(server);
 
   }).then(function(server) {
-    configureServer(server, callback);
+    return init(server);
 
+  }).then(function() {
+    callback();
   }, function(err) {
     callback(err);
   });

@@ -58,6 +58,7 @@ module.exports = function(grunt) {
     var startServer = require('./test/server.js');
     startServer(function(err) {
       if (err) console.log(err);
+      console.log('server up');
     });
     // never call done to run endlessly
   });
