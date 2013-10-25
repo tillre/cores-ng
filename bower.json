@@ -1,6 +1,6 @@
 {
   "name": "cores-ng",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "ignore": [
     "**/.*",
     "lib",
@@ -16,7 +16,6 @@
     "angular": "PatternConsulting/bower-angular#v1.2.0-rc.3",
     "bootstrap": "~3.x.x",
     "bootstrap-datetimepicker": "git@github.com:Eonasdan/bootstrap-datetimepicker.git",
-    "jquery-autosize": "~1.18.x",
     "markdown": "~0.5.0"
   }
 }

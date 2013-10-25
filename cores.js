@@ -1930,7 +1930,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
         var $area = elem.find('.cr-editor-area');
         var $preview = elem.find('.cr-editor-preview');
-        $area.autosize();
 
         scope.isPreview = false;
         scope.togglePreview = function() {
@@ -1942,11 +1941,19 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           $preview.toggle();
         };
 
+        function updateHeight() {
+          $area.css('height', 'auto');
+          $area.css('height', $area[0].scrollHeight);
+        }
+        $area.on('keyup', updateHeight);
+        $area.on('input', updateHeight);
+        updateHeight();
+
         // manually trigger autosize on first model change
         var unwatch = scope.$watch('model', function(newValue, oldValue) {
           if (newValue) {
             unwatch();
-            $area.trigger('autosize.resize');
+            updateHeight();
           }
         });
       })
