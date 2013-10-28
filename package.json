@@ -11,16 +11,19 @@
   "license": "BSD",
   "devDependencies": {
     "nano": "~4.1.x",
+    "jski": "~0.3.x",
+    "kew": "~0.2.x",
+    "hapi": "~1.x.x",
+    "cores": "~0.5.x",
+    "cores-hapi": "~0.5.x",
+
     "grunt": "~0.4.x",
     "grunt-karma": "~0.4.x",
     "bower": "~0.8.x",
     "karma": "~0.9.x",
     "karma-mocha": "0.0.x",
     "chai": "~1.6.x",
-    "cores-server": "0.2.x",
     "grunt-contrib-concat": "~0.3.x",
-    "grunt-angular-templates": "~0.3.x",
-    "jski": "~0.3.x",
-    "kew": "~0.2.x"
+    "grunt-angular-templates": "~0.3.x"
   }
 }
