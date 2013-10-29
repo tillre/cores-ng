@@ -1,7 +1,7 @@
 <div class="form-group" ng-class="{ 'has-error': hasErrors() }">
   <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
 
-  <div class="cr-indent">
+  <div ng-class="{ 'cr-indent': options.indent }">
     <ul class="list-unstyled">
       <li class="checkbox" ng-repeat="row in rows">
         <label class="control-label">
