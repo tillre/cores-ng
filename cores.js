@@ -153,14 +153,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"input-group date\">\n" +
     "      <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-calendar\"></span></span>\n" +
-    "      <input type=\"text\" class=\"form-control\" data-format=\"dd.MM.yyyy\" />\n" +
+    "      <input type=\"text\" class=\"form-control\" data-format=\"D.MM.YYYY\" />\n" +
     "    </div>\n" +
     "  </div>\n" +
     "\n" +
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"input-group time\">\n" +
     "      <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-time\"></span></span>\n" +
-    "      <input type=\"text\" class=\"form-control\" data-format=\"hh:mm\"/>\n" +
+    "      <input type=\"text\" class=\"form-control\" data-format=\"H:mm\"/>\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
@@ -353,7 +353,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div class=\"cr-indent\">\n" +
+    "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "    <ul class=\"list-unstyled\">\n" +
     "      <li class=\"checkbox\" ng-repeat=\"row in rows\">\n" +
     "        <label class=\"control-label\">\n" +
@@ -1481,8 +1481,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
     return function($textarea) {
       var update = function() {
+        var p = 0;
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+          // add padding to height in firefox
+          p += parseInt($textarea.css('padding-top'), 10);
+          p += parseInt($textarea.css('padding-bottom'), 10);
+        }
         $textarea.css('height', 'auto');
-        $textarea.css('height', $textarea[0].scrollHeight);
+        $textarea.css('height', $textarea[0].scrollHeight + p);
       };
       $textarea.on('keyup', update);
       $textarea.on('input', update);
@@ -1763,47 +1769,47 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           }, true);
         }
 
-        var date = new Date();
+        // the date
+        var date = scope.model ? new Date(scope.model) : new Date();
         if (!scope.model) {
           scope.model = date.toISOString();
         }
 
         // datepicker
-        elem.find('.date').datetimepicker({
+        var dtDate = elem.find('.date').datetimepicker({
           maskInput: true,
           pickDate: true,
           pickTime: false
-        })
-          .datetimepicker('setValue', date)
-          .on('changeDate', function(e) {
-            e.stopPropagation();
+        });
+        dtDate.data('DateTimePicker').setDate(date);
+        dtDate.on('change.dp', function(e) {
+          e.stopPropagation();
 
-            date.setFullYear(e.date.getFullYear());
-            date.setMonth(e.date.getMonth());
-            date.setDate(e.date.getDate());
+          date.setFullYear(e.date.year());
+          date.setMonth(e.date.month());
+          date.setDate(e.date.date());
 
-            scope.model = date.toISOString();
-            scope.$apply();
-          });
+          scope.model = date.toISOString();
+          scope.$apply();
+        });
 
         // timepicker
-        elem.find('.time').datetimepicker({
+        var dtTime = elem.find('.time').datetimepicker({
           maskInput: true,
           pickDate: false,
           pickTime: true,
           pickSeconds: false
-        })
-          .datetimepicker('setValue', date)
-          .on('changeDate', function(e) {
-            e.stopPropagation();
+        });
+        dtTime.data('DateTimePicker').setDate(date);
+        dtTime.on('change.dp', function(e) {
+          e.stopPropagation();
 
-            date.setHours(e.date.getHours());
-            date.setMinutes(e.date.getMinutes());
+          date.setHours(e.date.hours());
+          date.setMinutes(e.date.minutes());
 
-            scope.model = date.toISOString();
-            scope.$apply();
-          });
-
+          scope.model = date.toISOString();
+          scope.$apply();
+        });
       })
     };
   });
@@ -2372,7 +2378,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       replace: true,
       templateUrl: 'cr-multi-select-ref.html',
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: crFieldLink({
+        showLabel: true, indent: true
+      }, function(scope, elem, attrs) {
 
         scope.rows = [];
 
