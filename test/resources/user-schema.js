@@ -1,4 +1,4 @@
-var j = require('jski');
+var j = require('jski')();
 
 module.exports = j.object({
 

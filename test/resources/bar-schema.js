@@ -1,104 +1,104 @@
-var j = require('jski');
+var J = require('jski')();
 
 
-module.exports = j.object({
+module.exports = J.object({
 
-  boolean: j.boolean(),
-  number: j.number().minimum(-1.5).maximum(1.5),
-  integer: j.integer().minimum(0).maximum(10).multipleOf(2),
-  string: j.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
+  boolean: J.boolean(),
+  number: J.number().minimum(-1.5).maximum(1.5),
+  integer: J.integer().minimum(0).maximum(10).multipleOf(2),
+  string: J.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
 
-  none: j.string().custom('view', 'none'),
-  readonly: j.string().default('readonly').custom('view', 'cr-readonly'),
+  none: J.string().custom('view', 'none'),
+  readonly: J.string().default('readonly').custom('view', 'cr-readonly'),
 
-  markdown: j.string().custom('view', 'cr-markdown'),
+  markdown: J.string().custom('view', 'cr-markdown'),
 
-  slug: j.string()
+  slug: J.string()
     .format('slug')
     .custom('view', { type: 'cr-slug', source: ['string'] }),
 
-  date: j.string().custom('view', 'cr-datetime'),
+  date: J.string().custom('view', 'cr-datetime'),
 
-  'enum': j.enum(1, 2, 3),
+  'enum': J.enum(1, 2, 3),
 
-  ref: j.ref('Foo')
+  ref: J.ref('Foo')
     .custom('view', {
       previewPath: '/bar',
       defaults: { '/bar': 'some value' },
       listView: { name: 'bars' }
     }),
 
-  image: j.ref('Image')
+  image: J.ref('Image')
     .custom('view', { preview: 'cr-image-preview' }),
 
-  singleSelRef: j.ref('Foo')
+  singleSelRef: J.ref('Foo')
     .custom('view', { type: 'cr-single-select-ref', previewPath: '/bar' }),
 
-  multiSelRef: j.array(j.ref('Foo'))
+  multiSelRef: J.array(J.ref('Foo'))
     .custom('view', { type: 'cr-multi-select-ref', previewPath: '/bar' }),
 
-  object: j.object({
-    foo: j.string(),
-    bar: j.number()
+  object: J.object({
+    foo: J.string(),
+    bar: J.number()
   }),
 
-  tabObject: j.object({
-    tab1: j.string(),
-    tab2: j.object({
-      foo: j.string(),
-      bar: j.number()
+  tabObject: J.object({
+    tab1: J.string(),
+    tab2: J.object({
+      foo: J.string(),
+      bar: J.number()
     })
   }).custom('view', 'cr-tab-object'),
 
-  tabObject2: j.object({
-    tab1: j.string(),
-    tab2: j.string().custom('view', 'cr-markdown')
+  tabObject2: J.object({
+    tab1: J.string(),
+    tab2: J.string().custom('view', 'cr-markdown')
   }).custom('view', 'cr-tab-object'),
 
-  array: j.array(j.object({
-    foo: j.boolean()
+  array: J.array(J.object({
+    foo: J.boolean()
   })).title('Some Array').custom('view'),
 
-  array2: j.array(j.object({
-    foo: j.string().custom('view', 'cr-markdown')
+  array2: J.array(J.object({
+    foo: J.string().custom('view', 'cr-markdown')
   })).title('Some Array').custom('view', { indent: false }),
 
-  arrayRefs: j.array(j.object({
-    foo: j.ref('Foo')
+  arrayRefs: J.array(J.object({
+    foo: J.ref('Foo')
       .custom('view', { previewPath: 'bar' })
   })),
 
-  arrayRefs2: j.array(
-    j.ref('Foo')
+  arrayRefs2: J.array(
+    J.ref('Foo')
       .custom('view', { previewPath: 'bar' })
       .title('Yam')
   ),
 
-  anyof: j.array(j.anyOf(
-    j.object({
-      text: j.string(),
-      images: j.array(j.object({ name: j.string() }))
+  anyof: J.array(J.anyOf(
+    J.object({
+      text: J.string(),
+      images: J.array(J.object({ name: J.string() }))
     }).custom('name', 'textimage'),
 
-    j.object({
-      embed: j.string()
+    J.object({
+      embed: J.string()
     }).custom('name', 'video'),
 
-    j.object({
-      text: j.string().custom('view', { type: 'cr-markdown', showBorder: false, showLabel: false })
+    J.object({
+      text: J.string().custom('view', { type: 'cr-markdown', showBorder: false, showLabel: false })
     }).custom('name', 'markdown'),
 
-    j.object({
-      images: j.array(j.object({ name: j.string() }))
+    J.object({
+      images: J.array(J.object({ name: J.string() }))
     }).custom('name', 'gallery')
   )),
 
-  anyofRefs: j.array(j.anyOf(
-    j.object({ foo: j.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo1'),
-    j.object({ bar: j.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo2')
+  anyofRefs: J.array(J.anyOf(
+    J.object({ foo: J.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo1'),
+    J.object({ bar: J.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo2')
   )).custom('view', { item: { indent: false }}),
 
-  text: j.string().custom('view', 'cr-text'),
-  password: j.string().minLength(8).custom('view', 'cr-password')
+  text: J.string().custom('view', 'cr-text'),
+  password: J.string().minLength(8).custom('view', 'cr-password')
 
 }).required('string', 'number', 'ref', 'enum', 'slug', 'text', 'singleSelRef');

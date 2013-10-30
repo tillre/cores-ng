@@ -11,7 +11,7 @@
   "license": "BSD",
   "devDependencies": {
     "nano": "~4.1.x",
-    "jski": "~0.4.x",
+    "jski": "~0.5.x",
     "kew": "~0.2.x",
     "hapi": "~1.x.x",
     "cores": "~0.5.x",
