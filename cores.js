@@ -708,7 +708,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           data.state = STATE_EDITING;
           err.errors.forEach(function(v) {
             if (!v.path) {
-              rootErrors.push(v);
+              rootErrors.push({
+                code: v.code,
+                message: v.message
+              });
             }
             else {
               $scope.$broadcast('cr:set:customError', v.path, v.code, v.message);
@@ -716,7 +719,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           });
         }
         else {
-          rootErrors.push(err);
+          rootErrors.push({
+            code: err.code,
+            message: err.message
+          });
         }
         if (rootErrors.length) {
           data.state = STATE_ERROR;
