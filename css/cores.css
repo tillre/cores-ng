@@ -3,6 +3,14 @@
     margin-top: 12px;
 }
 
+[cr-tab-object] .active {
+    font-weight: bold;
+}
+
+[cr-object] .form-inline .form-group {
+    margin-right: 10px;
+}
+
 [cr-slug] input[type=text] {
     text-transform: lowercase;
 }

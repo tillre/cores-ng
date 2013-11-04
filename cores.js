@@ -378,7 +378,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   $templateCache.put("cr-object.html",
     "<div class=\"form-group\">\n" +
     "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "  <div ng-class=\"{ 'cr-indent': options.indent }\" class=\"properties\"></div>\n" +
+    "  <div ng-class=\"{ 'cr-indent': options.indent, 'form-inline': options.inline }\" class=\"properties\"></div>\n" +
     "</div>\n"
   );
 
@@ -474,7 +474,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   $templateCache.put("cr-tab-object.html",
     "<div class=\"form-group\">\n" +
     "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "  <div class=\"properties\"></div>\n" +
+    "  <div ng-class=\"{ 'form-inline': options.inline }\" class=\"properties\"></div>\n" +
     "</div>\n"
   );
 
@@ -2519,7 +2519,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       link: function(scope, elem, attrs) {
         var defaults = {
           showLabel: true,
-          indent: true
+          indent: true,
+          inline: false
         };
         scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
 
@@ -3007,7 +3008,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       link: function(scope, elem, attrs) {
         var defaults = {
           showLabel: true,
-          indent: false
+          indent: false,
+          inline: false
         };
         scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
 

@@ -42,12 +42,17 @@ module.exports = J.object({
     bar: J.number()
   }),
 
+  inlineObject: J.object({
+    foo: J.string(),
+    bar: J.number()
+  }).custom('view', { inline: true }),
+
   tabObject: J.object({
     tab1: J.string(),
     tab2: J.object({
       foo: J.string(),
       bar: J.number()
-    })
+    }).custom('view', { inline: true })
   }).custom('view', 'cr-tab-object'),
 
   tabObject2: J.object({
