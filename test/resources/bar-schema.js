@@ -25,7 +25,10 @@ module.exports = J.object({
     .custom('view', {
       previewPath: '/bar',
       defaults: { '/bar': 'some value' },
-      listView: { name: 'bars' }
+      list: {
+        headers: [ { path: 'slug' } ],
+        view: { name: 'bars' }
+      }
     }),
 
   image: J.ref('Image')

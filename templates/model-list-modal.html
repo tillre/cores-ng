@@ -6,7 +6,11 @@
         <h4 class="modal-title">{{type}}</h4>
       </div>
       <div class="modal-body">
-        <div cr-model-list type="{{type}}" view="view"></div>
+        <div cr-model-list
+             type="{{type}}"
+             view="list.view"
+             headers="list.headers"
+             autoload="false"></div>
       </div>
       <div class="modal-footer">
         <button ng-click="cancel" class="btn btn-default pull-right" data-dismiss="modal">Cancel</button>

@@ -3,7 +3,7 @@
     margin-top: 12px;
 }
 
-[cr-tab-object] .active {
+[cr-tab-object] .active > a{
     font-weight: bold;
 }
 

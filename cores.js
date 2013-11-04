@@ -253,7 +253,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "        <h4 class=\"modal-title\">{{type}}</h4>\n" +
     "      </div>\n" +
     "      <div class=\"modal-body\">\n" +
-    "        <div cr-model-list type=\"{{type}}\" view=\"view\"></div>\n" +
+    "        <div cr-model-list\n" +
+    "             type=\"{{type}}\"\n" +
+    "             view=\"list.view\"\n" +
+    "             headers=\"list.headers\"\n" +
+    "             autoload=\"false\"></div>\n" +
     "      </div>\n" +
     "      <div class=\"modal-footer\">\n" +
     "        <button ng-click=\"cancel\" class=\"btn btn-default pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
@@ -435,7 +439,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div cr-model-list-modal\n" +
     "       modal-id=\"{{selectModalId}}\"\n" +
     "       type=\"{{schema.$ref}}\"\n" +
-    "       view=\"options.listView\"></div>\n" +
+    "       list=\"options.list\"></div>\n" +
     "</div>\n"
   );
 
@@ -2107,6 +2111,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         view: '=?',
         limit: '=?',
         headers: '=?',
+        autoload: '@',
         options: '=?'
       },
 
@@ -2122,12 +2127,12 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
+        var autoload = scope.hasOwnProperty('autoload') ? scope.autoload === 'true' : true;
         scope.options = scope.options || {};
-
         var resource;
         var schema;
 
-        function initScope() {
+        function reset() {
           scope.isLoading = false;
           scope.prevKeys = [];
           scope.curKey = null;
@@ -2135,10 +2140,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           scope.rows = [];
           scope.showPagination = false;
         }
-        initScope();
+        reset();
+
 
         function load(startkey) {
-
           scope.isLoading = true;
 
           var limit = scope.limit || 20;
@@ -2201,6 +2206,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           });
         }
 
+        //
+        // scope methods
+        //
         scope.select = function(id) {
           scope.$emit('cr:list:select', id);
         };
@@ -2223,35 +2231,35 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           load();
         });
 
-        var unwatch = scope.$watch('type', function() {
-          unwatch();
-          resource = crResources.get(scope.type);
-          resource.schema().then(function(s) {
-            schema = s;
+        //
+        // load schema and fill list
+        //
+        resource = crResources.get(scope.type);
+        resource.schema().then(function(s) {
+          schema = s;
 
-            // auto generate headers when not set
-            if (!scope.headers || scope.headers.length === 0) {
-              scope.headers = Object.keys(schema.properties).filter(function(key) {
-                return !crSchema.isPrivateProperty(key);
-              }).map(function(key) {
-                return { title: crCommon.capitalize(key).split('/')[0], path: key };
-              });
-            }
-            // table column titles
-            scope.titles = scope.headers.map(function(header) {
-              return header.title ||
-                (header.path ? crCommon.capitalize(header.path).split('/')[0] : '');
+          // auto generate headers when not set
+          if (!scope.headers || scope.headers.length === 0) {
+            scope.headers = Object.keys(schema.properties).filter(function(key) {
+              return !crSchema.isPrivateProperty(key);
+            }).map(function(key) {
+              return { title: crCommon.capitalize(key).split('/')[0], path: key };
             });
-
-            load();
+          }
+          // table column titles
+          scope.titles = scope.headers.map(function(header) {
+            return header.title ||
+              (header.path ? crCommon.capitalize(header.path).split('/')[0] : '');
           });
+
+          if (autoload) load();
         });
 
         scope.$watch('view', function(newValue, oldValue) {
           if (newValue === oldValue) return;
           if (!resource) return;
           // reload list on view change
-          initScope();
+          reset();
           load();
         });
       }
@@ -2265,7 +2273,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       scope: {
         type: '@',
         modalId: '@',
-        view: '=?'
+        list: '=?'
       },
 
       replace: true,
@@ -2273,11 +2281,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       link: function(scope, elem, attrs) {
 
-        if (!scope.view) {
-          scope.view = {
-            name: 'all'
-          };
-        }
+        if (!scope.list) scope.list = {};
 
         scope.$on('cr:list:select', function(e, id) {
           elem.modal('hide');
@@ -2688,7 +2692,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
       link: crFieldLink({
-        showLabel: true, preview: 'cr-ref-preview'
+        showLabel: true,
+        preview: 'cr-ref-preview',
+        list: {}
       }, function(scope, elem, attrs) {
 
         scope.editModalId = crCommon.createModalId();
