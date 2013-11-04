@@ -67,7 +67,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div class=\"form-group\">\n" +
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div>\n" +
+    "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "    <div class=\"btn-group\">\n" +
     "      <button class=\"btn btn-default btn-sm dropdown-toggle\"\n" +
     "              data-toggle=\"dropdown\" href=\"#\">\n" +
@@ -121,7 +121,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div class=\"form-group\">\n" +
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
-    "  <div>\n" +
+    "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "    <button class=\"btn btn-default btn-sm\" ng-click=\"addItem(schema.items)\">\n" +
     "      <span class=\"glyphicon glyphicon-plus\"></span>\n" +
     "    </button>\n" +
@@ -1664,7 +1664,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       controller: 'crAnyofArrayCtrl',
 
-      link: crFieldLink({ showLabel: true, indent: true }, function(scope, elem, attrs) {
+      link: crFieldLink({ showLabel: true, indent: false }, function(scope, elem, attrs) {
 
         elem.find('.dropdown-toggle').dropdown();
       })
@@ -1717,7 +1717,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       controller: 'crArrayCtrl',
 
-      link: crFieldLink({ showLabel: true, indent: true }, function(scope, elem, attrs) {
+      link: crFieldLink({ showLabel: true, indent: false }, function(scope, elem, attrs) {
 
         // ngrepeat can only bind to references when it comes to form fields
         // thats why we can only work with items of type object not primitives

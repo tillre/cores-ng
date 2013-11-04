@@ -15,6 +15,11 @@
     text-transform: lowercase;
 }
 
+[cr-image] .thumbnail,
+[cr-image-preview] .thumbnail {
+    margin-bottom: 0;
+}
+
 [cr-model-list-filter] select {
     width: auto;
 }

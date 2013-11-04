@@ -62,11 +62,11 @@ module.exports = J.object({
 
   array: J.array(J.object({
     foo: J.boolean()
-  })).title('Some Array').custom('view'),
+  })).title('Some Array'),
 
   array2: J.array(J.object({
     foo: J.string().custom('view', 'cr-markdown')
-  })).title('Some Array').custom('view', { indent: false }),
+  })).title('Another Array').custom('view', { indent: true }),
 
   arrayRefs: J.array(J.object({
     foo: J.ref('Foo')
