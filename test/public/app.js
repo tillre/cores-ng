@@ -6,11 +6,21 @@
 
     .config(function($routeProvider) {
 
+      var initiated = false;
+      var init = function(crResources) {
+        if (!initated) {
+          return crResources.init();
+          initated = true;
+        }
+      };
+
       $routeProvider.when('/bars', {
-        templateUrl: '/test/public/resource.html', controller: 'BarCtrl'
+        templateUrl: '/test/public/resource.html', controller: 'BarCtrl',
+        resolve: { cores: init }
       });
       $routeProvider.when('/bars/:id', {
-        templateUrl: '/test/public/resource.html', controller: 'BarCtrl'
+        templateUrl: '/test/public/resource.html', controller: 'BarCtrl',
+        resolve: { cores: init }
       });
 
       $routeProvider.otherwise({ redirectTo: '/' });
@@ -18,10 +28,6 @@
 
 
     .controller('AppCtrl', function($scope, crResources) {
-
-      crResources.init().then(function() {
-        console.log('cores initialized');
-      });
     })
 
 

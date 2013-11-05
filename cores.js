@@ -1332,7 +1332,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
   //
-  // crResource
+  // crResources
   //
   module.service('crResources', function($http, $q, $rootScope, crResource) {
 
@@ -1379,11 +1379,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           return $q.reject(makeError(res));
         }
       );
-    };
-
-
-    Resources.prototype.resources = function() {
-      return this._resources;
     };
 
 
