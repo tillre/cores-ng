@@ -48,7 +48,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    </div>\n" +
     "    <div class=\"cr-item-body\"></div>\n" +
     "  </div>\n" +
-    "  <div class=\"cr-item-footer\">\n" +
+    "  <div class=\"cr-array-controls cr-item-footer\">\n" +
     "    <div class=\"btn-group\">\n" +
     "      <button class=\"btn btn-default btn-xs dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">\n" +
     "        <span class=\"glyphicon glyphicon-plus\"></span><span class=\"caret\"/>\n" +
@@ -68,16 +68,18 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
-    "    <div class=\"btn-group\">\n" +
-    "      <button class=\"btn btn-default btn-sm dropdown-toggle\"\n" +
-    "              data-toggle=\"dropdown\" href=\"#\">\n" +
-    "        <span class=\"glyphicon glyphicon-plus\"></span><span class=\"caret\"/>\n" +
-    "      </button>\n" +
-    "      <ul class=\"dropdown-menu\" role=\"menu\">\n" +
-    "        <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
-    "          <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
-    "        </li>\n" +
-    "      </ul>\n" +
+    "    <div class=\"cr-array-controls\">\n" +
+    "      <div class=\"btn-group\">\n" +
+    "        <button class=\"btn btn-default btn-xs dropdown-toggle\"\n" +
+    "                data-toggle=\"dropdown\" href=\"#\">\n" +
+    "          <span class=\"glyphicon glyphicon-plus\"></span><span class=\"caret\"/>\n" +
+    "        </button>\n" +
+    "        <ul class=\"dropdown-menu\" role=\"menu\">\n" +
+    "          <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
+    "            <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
+    "          </li>\n" +
+    "        </ul>\n" +
+    "      </div>\n" +
     "    </div>\n" +
     "\n" +
     "    <ul class=\"list-unstyled\">\n" +
@@ -109,7 +111,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "    </div>\n" +
     "    <div class=\"cr-item-body\"></div>\n" +
     "  </div>\n" +
-    "  <div class=\"cr-item-footer\">\n" +
+    "  <div class=\"cr-array-controls cr-item-footer\">\n" +
     "    <button class=\"btn btn-default btn-xs\" ng-click=\"addItem()\">\n" +
     "      <span class=\"glyphicon glyphicon-plus\"></span>\n" +
     "    </button>\n" +
@@ -122,9 +124,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
     "\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
-    "    <button class=\"btn btn-default btn-sm\" ng-click=\"addItem(schema.items)\">\n" +
-    "      <span class=\"glyphicon glyphicon-plus\"></span>\n" +
-    "    </button>\n" +
+    "    <div class=\"cr-array-controls\">\n" +
+    "      <button class=\"btn btn-default btn-xs\" ng-click=\"addItem(schema.items)\">\n" +
+    "        <span class=\"glyphicon glyphicon-plus\"></span>\n" +
+    "      </button>\n" +
+    "    </div>\n" +
     "    <ul class=\"list-unstyled\">\n" +
     "      <li ng-repeat=\"model in model\">\n" +
     "        <div cr-array-item\n" +
@@ -542,7 +546,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
     $scope.addItem = function(schema, index) {
       var obj = crSchema.createValue(schema, schema.name);
-      if (typeof index === 'undefined' || index >= $scope.model.length) {
+      if (typeof index === 'undefined') {
+        $scope.model.unshift(obj);
+      }
+      else if (index >= $scope.model.length) {
         $scope.model.push(obj);
       }
       else {

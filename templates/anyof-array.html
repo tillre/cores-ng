@@ -2,16 +2,18 @@
   <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
 
   <div ng-class="{ 'cr-indent': options.indent }">
-    <div class="btn-group">
-      <button class="btn btn-default btn-sm dropdown-toggle"
-              data-toggle="dropdown" href="#">
-        <span class="glyphicon glyphicon-plus"></span><span class="caret"/>
-      </button>
-      <ul class="dropdown-menu" role="menu">
-        <li ng-repeat="schema in schema.items.anyOf">
-          <a ng-click="addItem(schema)">{{schema.name}}</a>
-        </li>
-      </ul>
+    <div class="cr-array-controls">
+      <div class="btn-group">
+        <button class="btn btn-default btn-xs dropdown-toggle"
+                data-toggle="dropdown" href="#">
+          <span class="glyphicon glyphicon-plus"></span><span class="caret"/>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          <li ng-repeat="schema in schema.items.anyOf">
+            <a ng-click="addItem(schema)">{{schema.name}}</a>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <ul class="list-unstyled">
