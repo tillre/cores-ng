@@ -414,7 +414,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   );
 
   $templateCache.put("cr-ref-preview.html",
-    "<p>{{ model | crJsonPointer:options.previewPath }}</p>\n"
+    "<p>\n" +
+    "  <span ng-repeat=\"path in options.previewPaths\">{{ model | crJsonPointer:path }}&nbsp;</span>\n" +
+    "</p>\n"
   );
 
   $templateCache.put("cr-ref.html",
@@ -2408,9 +2410,17 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             scope.rows = result.rows.map(function(row) {
               var r = {
                 id: row.id,
-                selected: false,
-                name: crJSONPointer.get(row.doc, scope.options.previewPath)
+                selected: false
               };
+              if (scope.options.previewPath) {
+                r.name = crJSONPointer.get(row.doc, scope.options.previewPath);
+              }
+              else  if (scope.options.previewPaths) {
+                r.name = '';
+                scope.options.previewPaths.forEach(function(path) {
+                  r.name += crJSONPointer.get(row.doc, path) + ' ';
+                });
+              }
               return r;
             });
             // select rows when id is in model
@@ -2747,6 +2757,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var previewLink = function(crResources) {
     return function(scope, elem, attrs) {
 
+      if (scope.previewPath) {
+        scope.previewPaths = [scope.previewPath];
+      }
+
       var update = function(id) {
         if (id) {
           crResources.get(scope.type).load(id).then(function(doc) {
@@ -2844,9 +2858,17 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
             scope.rows = result.rows.map(function(row) {
               var r = {
-                id: row.id,
-                name: crJSONPointer.get(row.doc, scope.options.previewPath)
+                id: row.id
               };
+              if (scope.options.previewPath) {
+                r.name = crJSONPointer.get(row.doc, scope.options.previewPath);
+              }
+              else  if (scope.options.previewPaths) {
+                r.name = '';
+                scope.options.previewPaths.forEach(function(path) {
+                  r.name += crJSONPointer.get(row.doc, path) + ' ';
+                });
+              }
               if (scope.model.id_ && r.id === scope.model.id_) {
                 scope.selectedRow = r;
               }

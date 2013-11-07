@@ -8,9 +8,9 @@
 
       var initiated = false;
       var init = function(crResources) {
-        if (!initated) {
+        if (!initiated) {
+          initiated = true;
           return crResources.init();
-          initated = true;
         }
       };
 

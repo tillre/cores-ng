@@ -23,7 +23,7 @@ module.exports = J.object({
 
   ref: J.ref('Foo')
     .custom('view', {
-      previewPath: '/bar',
+      previewPaths: ['/bar', '/slug'],
       defaults: { '/bar': 'some value' },
       list: {
         headers: [ { path: 'slug' } ],
@@ -35,7 +35,7 @@ module.exports = J.object({
     .custom('view', { preview: 'cr-image-preview' }),
 
   singleSelRef: J.ref('Foo')
-    .custom('view', { type: 'cr-single-select-ref', previewPath: '/bar' }),
+    .custom('view', { type: 'cr-single-select-ref', previewPaths: ['/bar', '/slug'] }),
 
   multiSelRef: J.array(J.ref('Foo'))
     .custom('view', { type: 'cr-multi-select-ref', previewPath: '/bar' }),

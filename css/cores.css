@@ -15,6 +15,11 @@
     text-transform: lowercase;
 }
 
+[cr-ref-preview],
+[cr-image-preview] {
+    margin-bottom: 5px;
+}
+
 [cr-image] .thumbnail,
 [cr-image-preview] .thumbnail {
     margin-bottom: 0;
@@ -26,6 +31,10 @@
 
 [cr-datetime] .input-group {
     margin-bottom: 15px
+}
+
+.form-inline [cr-ref] {
+    display: inline-block;
 }
 
  /* array and anyof array */
