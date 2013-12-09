@@ -50,6 +50,12 @@ module.exports = J.object({
     bar: J.number()
   }).custom('view', { inline: true }),
 
+  columnObject: J.object({
+    foo: J.string(),
+    bar: J.string(),
+    baz: J.array(J.object({ num: J.number() }))
+  }).custom('view', { type: 'cr-column-object', showLabels: true }),
+
   tabObject: J.object({
     tab1: J.string(),
     tab2: J.object({

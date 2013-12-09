@@ -150,6 +150,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
+  $templateCache.put("cr-column-object.html",
+    "<div class=\"form-group\">\n" +
+    "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "  <div ng-class=\"{ 'form-inline': options.inline }\" class=\"properties\"></div>\n" +
+    "</div>\n"
+  );
+
   $templateCache.put("cr-datetime.html",
     "<div class=\"row\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
     "  <label class=\"col-md-12 control-label\" ng-show=\"options.showLabel\">{{name}}</label>\n" +
@@ -1756,6 +1763,114 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       templateUrl: 'cr-boolean.html'
     };
   });
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
+  module.directive('crColumnObject', function(
+    $compile,
+    crBuild,
+    crOptions,
+    crCommon,
+    crSchema
+  ) {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        name: '@',
+        path: '@'
+      },
+
+      templateUrl: 'cr-column-object.html',
+
+      link: function(scope, elem, attrs) {
+        var defaults = {
+          showLabel: true,
+          showLabels : true,
+          indent: false,
+          inline: false
+        };
+        scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
+
+        var isRequired = function (name) {
+          var req = scope.schema.required || [];
+          return req.indexOf(name) !== -1;
+        };
+
+        var numProps = Object.keys(scope.schema.properties).filter(
+          function(key) {
+            return !crSchema.isPrivateProperty(key);
+          }
+        ).length;
+        var cols = Math.round(12 / numProps);
+        if (cols < 2) cols = 2;
+        var colClass = 'col-md-' + cols;
+
+        var tmpl = '<div class="row">';
+        angular.forEach(scope.schema.properties, function(subSchema, key) {
+
+          // ignore some keys
+          if (crSchema.isPrivateProperty(key)) return;
+
+          if (!scope.model.hasOwnProperty(key)) {
+            scope.model[key] = crSchema.createValue(subSchema);
+          }
+
+          tmpl += '<div class="cr-seperate ' + colClass + '">';
+          tmpl += crBuild.buildTemplate(subSchema, scope.model[key],
+                                        'schema.properties.' + key, 'model.' + key,
+                                        (scope.path ? scope.path : '')  + '/' + key,
+                                        { isRequired: isRequired(key),
+                                          showLabel: scope.options.showLabels });
+          tmpl += '</div>';
+        });
+        tmpl += '</div>';
+
+        var link = $compile(tmpl);
+        var content = link(scope);
+        elem.find('.properties').append(content);
+      }
+    };
+  });
+
+})();
+
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
+  module.directive('crControl', function(
+    $compile,
+    crBuild
+  ) {
+    return {
+      scope: {
+        schema: '=',
+        model: '=',
+        path: '@',
+        options: '='
+      },
+
+      link: function(scope, elem, attrs) {
+        console.log('control link', elem[0]);
+        var unwatch = scope.$watch('schema', function(newValue) {
+          if (!newValue) return;
+          unwatch();
+
+          var build = crBuild.buildTemplate(scope.schema, scope.model,
+                                            scope.path, scope.options);
+          var link = $compile(build.template);
+          var content = link(scope);
+          elem.html(build.template);
+        });
+      }
+    };
+  });
+
 })();
 (function() {
 
