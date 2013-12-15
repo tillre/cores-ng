@@ -8,7 +8,11 @@
 }
 
 [cr-object] .form-inline .form-group {
+    margin-top: 10px;
     margin-right: 10px;
+}
+[cr-object] .form-inline input {
+    width: auto;
 }
 
 [cr-column-object] .cr-seperate {
