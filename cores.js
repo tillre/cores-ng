@@ -188,7 +188,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div class=\"row\">\n" +
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"thumbnail\">\n" +
-    "      <img src=\"{{model.file.url}}\">\n" +
+    "      <img src=\"{{ schema.properties.file.view.baseUrl }}{{ model.file.url }}\">\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>"
@@ -201,7 +201,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div class=\"row\">\n" +
     "    <div class=\"col-md-6\">\n" +
     "      <div class=\"thumbnail\">\n" +
-    "        <img class=\"img-rounded\" height=\"140\">\n" +
+    "        <img class=\"img-rounded\" height=\"140\" src=\"{{ imgSrc }}\">\n" +
     "      </div>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-6\">\n" +
@@ -1984,7 +1984,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       templateUrl: 'cr-image.html',
 
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: crFieldLink({
+        baseUrl: '/'
+
+      }, function(scope, elem, attrs) {
 
         var validation = crValidation(scope, 'model.name');
         if (scope.options.isRequired) {
@@ -1995,17 +1998,19 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
         var fileId = crCommon.createFileId();
 
-        var input = elem.find('input[type="file"]');
-        var preview = elem.find('img');
+        var $input = elem.find('input[type="file"]');
+        var $preview = elem.find('img');
+
+        scope.imgSrc = '';
 
         // preview when already saved
         scope.$watch('model.url', function(url) {
-          preview.attr('src', url);
+          scope.imgSrc = url ? scope.options.baseUrl + url : '';
         });
 
-        input.on('change', function(e) {
+        $input.on('change', function(e) {
 
-          var files = input[0].files;
+          var files = $input[0].files;
           if (files.length === 0) {
             // no file selected
             return;
@@ -2016,7 +2021,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           // preview selected image
           var fr = new FileReader();
           fr.onload = function(e) {
-            preview.attr('src', e.target.result);
+            scope.imgSrc = e.target.result;
+            scope.$apply();
           };
           fr.readAsDataURL(file);
 
@@ -2876,9 +2882,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.previewPaths = [scope.previewPath];
       }
 
+      var resource = crResources.get(scope.type);
+      resource.schema().then(function(schema) {
+        scope.schema = schema;
+      });
+
       var update = function(id) {
         if (id) {
-          crResources.get(scope.type).load(id).then(function(doc) {
+          resource.load(id).then(function(doc) {
             scope.model = doc;
           });
         }

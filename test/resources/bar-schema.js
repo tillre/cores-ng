@@ -32,7 +32,7 @@ module.exports = J.object({
     }),
 
   image: J.ref('Image')
-    .custom('view', { preview: 'cr-image-preview' }),
+    .custom('view', { preview: 'cr-image-preview'}),
 
   singleSelRef: J.ref('Foo')
     .custom('view', { type: 'cr-single-select-ref', previewPaths: ['/bar', '/slug'] }),
