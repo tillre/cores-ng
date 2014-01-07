@@ -188,7 +188,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "<div class=\"row\">\n" +
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"thumbnail\">\n" +
-    "      <img src=\"{{ schema.properties.file.view.baseUrl }}{{ model.file.url }}\">\n" +
+    "      <img ng-src=\"{{ schema.properties.file.view.baseUrl }}{{ model.file.url }}\">\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>"
@@ -201,7 +201,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "  <div class=\"row\">\n" +
     "    <div class=\"col-md-6\">\n" +
     "      <div class=\"thumbnail\">\n" +
-    "        <img class=\"img-rounded\" height=\"140\" src=\"{{ imgSrc }}\">\n" +
+    "        <img class=\"img-rounded\" height=\"140\" ng-src=\"{{ imgSrc }}\">\n" +
     "      </div>\n" +
     "    </div>\n" +
     "    <div class=\"col-md-6\">\n" +
