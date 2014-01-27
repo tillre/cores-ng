@@ -13,9 +13,9 @@
   ],
   "dependencies": {
     "jquery": "~2.x.x",
-    "angular": "PatternConsulting/bower-angular#v1.2.0-rc.3",
+    "angular": "~1.2.x",
     "bootstrap": "~3.x.x",
-    "bootstrap-datetimepicker": "https://github.com/Eonasdan/bootstrap-datetimepicker.git#2.1.11",
+    "eonasdan-bootstrap-datetimepicker": "2.1.20",
     "markdown": "~0.5.0"
   }
 }

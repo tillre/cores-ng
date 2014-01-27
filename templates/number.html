@@ -1,5 +1,11 @@
-<div class="form-group" ng-class="{ 'has-error': hasErrors() }">
-  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
-  <input class="form-control" type="number" ng-model="model"/>
-  <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
+<div class="form-group" ng-class="{ 'has-error': modelCtrl.$invalid }">
+  <label class="control-label" ng-show="options.showLabel">{{label}}:</label>
+  <input class="form-control" type="number" ng-model="localModel"/>
+
+  <div ng-show="modelCtrl.$invalid">
+    <p class="help-block" ng-show="modelCtrl.$error.multipleOf">Number should be a multiple of {{ schema.multipleOf }}</p>
+    <p class="help-block" ng-show="modelCtrl.$error.minimum">Number should be smaller or equal to {{ schema.minimum }}</p>
+    <p class="help-block" ng-show="modelCtrl.$error.maximum">Number should be greater or equal to {{ schema.maximum }}</p>
+    <p class="help-block" ng-show="modelCtrl.$error.integer">Number should be an integer</p>
+  </div>
 </div>

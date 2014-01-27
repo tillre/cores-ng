@@ -46,7 +46,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', ['ngtemplates', 'concat']);
 
-  grunt.registerTask('server', ['db:create', 'server:run', 'db:destroy']);
+  grunt.registerTask('serve', ['db:create', 'server:run', 'db:destroy']);
   grunt.registerTask('test', ['db:create', 'server:test', 'karma', 'db:destroy']);
 
   //

@@ -1,20 +1,30 @@
 <div>
-  <div cr-model-form schema="schema" model="model" valid="data.valid" debug="data.debug"></div>
-  <div ng-switch on="data.state">
+  <div cr-model-form schema="schema" model="model" valid="valid"></div>
+
+  <div ng-switch on="state">
     <div ng-switch-when="loading" class="alert alert-info">Loading...</div>
     <div ng-switch-when="saving" class="alert alert-info">Saving...</div>
-    <div ng-switch-when="error" class="alert alert-danger"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>
-    <div ng-switch-when="editing" class="well cr-model-controls">
-      <button ng-click="save()" ng-class="{ disabled: !data.valid }" class="btn btn-primary">Save</button>
-      <button ng-click="destroy()" ng-show="!isNew()" class="btn btn-danger pull-right">Delete</button>
-      <button ng-click="toggleDebug()" class="btn btn-default pull-right">Debug</button>
+    <div ng-switch-when="error" class="alert alert-danger">{{ error.message }}</div>
+  </div>
 
-      <button ng-repeat="button in options.buttons"
-              ng-click="buttonClick($event, button.event)"
-              class="btn btn-default">
-        <span ng-if="button.icon" class="glyphicon glyphicon-{{button.icon}}"></span>
-        {{button.title}}
-      </button>
+  <div class="well cr-model-controls">
+    <button ng-click="save()" ng-class="{ disabled: !valid }" class="btn btn-primary">Save</button>
+    <button ng-click="destroy()" ng-show="!isNew()" class="btn btn-danger pull-right">Delete</button>
+    <button ng-click="toggleDebug()" class="btn btn-default pull-right">Debug</button>
+
+    <button ng-repeat="button in options.buttons"
+            ng-click="buttonClick($event, button.event)"
+            class="btn btn-default">
+      <span ng-if="button.icon" class="glyphicon glyphicon-{{button.icon}}"></span>
+      {{button.title}}
+    </button>
+  </div>
+
+  <div ng-show="debug">
+    <pre>{{ model | json }}</pre>
+    <div ng-show="error" class="alert alert-danger">
+      <pre>{{ error | json }}</pre>
+      <pre>{{ error.stack | json }}</pre>
     </div>
   </div>
 </div>

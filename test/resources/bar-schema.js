@@ -4,115 +4,139 @@ var J = require('jski')();
 module.exports = J.object({
 
   boolean: J.boolean(),
-  number: J.number().minimum(-1.5).maximum(1.5),
-  integer: J.integer().minimum(0).maximum(10).multipleOf(2),
+  number: J.number().minimum(1).maximum(10).multipleOf(2),
+  integer: J.integer().minimum(1).maximum(10).multipleOf(2),
   string: J.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
+
+  object: J.object({
+    string: J.string(),
+    number: J.number()
+  }).required('string'),
 
   none: J.string().custom('view', 'none'),
   readonly: J.string().default('readonly').custom('view', 'cr-readonly'),
 
-  markdown: J.string().custom('view', 'cr-markdown'),
+  markdown: J.string().custom('view', 'cr-markdown').minLength(2).maxLength(10),
 
   slug: J.string()
     .format('slug')
     .custom('view', { type: 'cr-slug', source: ['string'] }),
 
-  date: J.string().custom('view', 'cr-datetime'),
 
-  'enum': J.enum(1, 2, 3),
+}).required('string');
 
-  ref: J.ref('Foo')
-    .custom('view', {
-      previewPaths: ['/bar', '/slug'],
-      defaults: { '/bar': 'some value' },
-      list: {
-        headers: [ { path: 'slug' } ],
-        view: { name: 'bars' }
-      }
-    }),
+// module.exports = J.object({
 
-  image: J.ref('Image')
-    .custom('view', { preview: 'cr-image-preview'}),
+//   boolean: J.boolean(),
+//   number: J.number().minimum(-1.5).maximum(1.5),
+//   integer: J.integer().minimum(0).maximum(10).multipleOf(2),
+//   string: J.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
 
-  singleSelRef: J.ref('Foo')
-    .custom('view', { type: 'cr-single-select-ref', previewPaths: ['/bar', '/slug'] }),
+//   none: J.string().custom('view', 'none'),
+//   readonly: J.string().default('readonly').custom('view', 'cr-readonly'),
 
-  multiSelRef: J.array(J.ref('Foo'))
-    .custom('view', { type: 'cr-multi-select-ref', previewPath: '/bar' }),
+//   markdown: J.string().custom('view', 'cr-markdown'),
 
-  object: J.object({
-    foo: J.string(),
-    bar: J.number()
-  }),
+//   slug: J.string()
+//     .format('slug')
+//     .custom('view', { type: 'cr-slug', source: ['string'] }),
 
-  inlineObject: J.object({
-    foo: J.string(),
-    bar: J.number()
-  }).custom('view', { inline: true }),
+//   date: J.string().custom('view', 'cr-datetime'),
 
-  columnObject: J.object({
-    foo: J.string(),
-    bar: J.string(),
-    baz: J.array(J.object({ num: J.number() }))
-  }).custom('view', { type: 'cr-column-object', showLabels: true }),
+//   'enum': J.enum(1, 2, 3),
 
-  tabObject: J.object({
-    tab1: J.string(),
-    tab2: J.object({
-      foo: J.string(),
-      bar: J.number()
-    }).custom('view', { inline: true })
-  }).custom('view', 'cr-tab-object'),
+//   ref: J.ref('Foo')
+//     .custom('view', {
+//       previewPaths: ['/bar', '/slug'],
+//       defaults: { '/bar': 'some value' },
+//       list: {
+//         headers: [ { path: 'slug' } ],
+//         view: { name: 'bars' }
+//       }
+//     }),
 
-  tabObject2: J.object({
-    tab1: J.string(),
-    tab2: J.string().custom('view', 'cr-markdown')
-  }).custom('view', 'cr-tab-object'),
+//   image: J.ref('Image')
+//     .custom('view', { preview: 'cr-image-preview'}),
 
-  array: J.array(J.object({
-    foo: J.boolean()
-  })).title('Some Array'),
+//   singleSelRef: J.ref('Foo')
+//     .custom('view', { type: 'cr-single-select-ref', previewPaths: ['/bar', '/slug'] }),
 
-  array2: J.array(J.object({
-    foo: J.string().custom('view', 'cr-markdown')
-  })).title('Another Array').custom('view', { indent: true }),
+//   multiSelRef: J.array(J.ref('Foo'))
+//     .custom('view', { type: 'cr-multi-select-ref', previewPath: '/bar' }),
 
-  arrayRefs: J.array(J.object({
-    foo: J.ref('Foo')
-      .custom('view', { previewPath: 'bar' })
-  })),
+//   object: J.object({
+//     foo: J.string(),
+//     bar: J.number()
+//   }),
 
-  arrayRefs2: J.array(
-    J.ref('Foo')
-      .custom('view', { previewPath: 'bar' })
-      .title('Yam')
-  ),
+//   inlineObject: J.object({
+//     foo: J.string(),
+//     bar: J.number()
+//   }).custom('view', { inline: true }),
 
-  anyof: J.array(J.anyOf(
-    J.object({
-      text: J.string(),
-      images: J.array(J.object({ name: J.string() }))
-    }).custom('name', 'textimage'),
+//   columnObject: J.object({
+//     foo: J.string(),
+//     bar: J.string(),
+//     baz: J.array(J.object({ num: J.number() }))
+//   }).custom('view', { type: 'cr-column-object', showLabels: true }),
 
-    J.object({
-      embed: J.string()
-    }).custom('name', 'video'),
+//   tabObject: J.object({
+//     tab1: J.string(),
+//     tab2: J.object({
+//       foo: J.string(),
+//       bar: J.number()
+//     }).custom('view', { inline: true })
+//   }).custom('view', 'cr-tab-object'),
 
-    J.object({
-      text: J.string().custom('view', { type: 'cr-markdown', showBorder: false, showLabel: false })
-    }).custom('name', 'markdown'),
+//   tabObject2: J.object({
+//     tab1: J.string(),
+//     tab2: J.string().custom('view', 'cr-markdown')
+//   }).custom('view', 'cr-tab-object'),
 
-    J.object({
-      images: J.array(J.object({ name: J.string() }))
-    }).custom('name', 'gallery')
-  )),
+//   array: J.array(J.object({
+//     foo: J.boolean()
+//   })).title('Some Array'),
 
-  anyofRefs: J.array(J.anyOf(
-    J.object({ foo: J.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo1'),
-    J.object({ bar: J.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo2')
-  )).custom('view', { item: { indent: false }}),
+//   array2: J.array(J.object({
+//     foo: J.string().custom('view', 'cr-markdown')
+//   })).title('Another Array').custom('view', { indent: true }),
 
-  text: J.string().custom('view', 'cr-text'),
-  password: J.string().minLength(8).custom('view', 'cr-password')
+//   arrayRefs: J.array(J.object({
+//     foo: J.ref('Foo')
+//       .custom('view', { previewPath: 'bar' })
+//   })),
 
-}).required('string', 'number', 'ref', 'enum', 'slug', 'text', 'singleSelRef');
+//   arrayRefs2: J.array(
+//     J.ref('Foo')
+//       .custom('view', { previewPath: 'bar' })
+//       .title('Yam')
+//   ),
+
+//   anyof: J.array(J.anyOf(
+//     J.object({
+//       text: J.string(),
+//       images: J.array(J.object({ name: J.string() }))
+//     }).custom('name', 'textimage'),
+
+//     J.object({
+//       embed: J.string()
+//     }).custom('name', 'video'),
+
+//     J.object({
+//       text: J.string().custom('view', { type: 'cr-markdown', showBorder: false, showLabel: false })
+//     }).custom('name', 'markdown'),
+
+//     J.object({
+//       images: J.array(J.object({ name: J.string() }))
+//     }).custom('name', 'gallery')
+//   )),
+
+//   anyofRefs: J.array(J.anyOf(
+//     J.object({ foo: J.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo1'),
+//     J.object({ bar: J.ref('Foo').custom('view', { previewPath: 'bar' }) }).custom('name', 'foo2')
+//   )).custom('view', { item: { indent: false }}),
+
+//   text: J.string().custom('view', 'cr-text'),
+//   password: J.string().minLength(8).custom('view', 'cr-password')
+
+// }).required('string', 'number', 'ref', 'enum', 'slug', 'text', 'singleSelRef');

@@ -1,4 +1,4 @@
-<div class="form-group" ng-class="{ 'has-error': hasErrors() }">
-  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
-  <span class="form-control" disabled>{{model}}</span>
+<div class="form-group" ng-class="{ 'has-error': modelCtrl.$invalid }">
+  <label class="control-label" ng-show="options.showLabel">{{ label }}:</label>
+  <span class="form-control" disabled>{{ localModel }}</span>
 </div>
