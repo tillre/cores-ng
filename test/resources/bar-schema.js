@@ -79,9 +79,9 @@ module.exports = J.object({
     }).custom('view', { inline: true })
   }).custom('view', { type: 'cr-tab-object' }),
 
-  arrayRefs2: J.array(
+  arrayRefs: J.array(
     J.ref('Foo')
-      .custom('view', { previewPath: 'bar' })
+      .custom('view', { showLabel: true, previewPath: 'bar' })
       .title('Yam')
   ),
 
