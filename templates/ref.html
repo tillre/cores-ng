@@ -1,24 +1,23 @@
 <div>
-  <div class="form-group" ng-class="{ 'has-error': hasErrors() }">
-    <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
+  <label class="control-label" ng-show="options.showLabel">{{ label }}:</label>
 
-    <div ng-show="model.id_" class="cr-preview"></div>
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div ng-show="model.id_" class="cr-preview"></div>
 
-    <div class="cr-ref-controls">
-      <div class="btn-group">
-        <button ng-click="newModel()" class="btn btn-default">New</button>
-        <button ng-show="hasModel()" ng-click="updateModel()" class="btn btn-default">Edit</button>
-        <button ng-click="selectModel()" class="btn btn-default">Select</button>
+      <div class="cr-ref-controls">
+        <div class="btn-group">
+          <button ng-click="newModel()" class="btn btn-default">New</button>
+          <button ng-click="editModel()" ng-show="hasModel()" class="btn btn-default">Edit</button>
+          <button ng-click="selectModel()" class="btn btn-default">Select</button>
+        </div>
       </div>
+      <div ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</div>
     </div>
-    <div ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</div>
+    <div ng-show="showModel" class="panel-footer">
+      <div cr-model-resource type="{{ schema.$ref }}" model-id="modelId" defaults="options.defaults" options="modelOptions"></div>
+    </div>
   </div>
-
-  <div cr-model-modal
-       modal-id="{{editModalId}}"
-       type="{{schema.$ref}}"
-       path="{{path}}"
-       defaults="options.defaults"></div>
 
   <div cr-model-list-modal
        modal-id="{{selectModalId}}"

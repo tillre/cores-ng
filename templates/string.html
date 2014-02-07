@@ -1,10 +1,10 @@
-<div class="form-group" ng-class="{ 'has-error': modelCtrl.$invalid }">
+<div>
   <label class="control-label" ng-show="options.showLabel">{{ label }}:</label>
-  <input class="form-control" type="text" ng-model="localModel"/>
+  <input class="form-control" type="text" ng-model="model"/>
 
-  <div ng-show="modelCtrl.$invalid">
-    <p class="help-block" ng-show="modelCtrl.$error.maxLength">Text is longer than {{ schema.maxLength }}</p>
-    <p class="help-block" ng-show="modelCtrl.$error.minLength">Text is shorter than {{ schema.minLength }}</p>
-    <p class="help-block" ng-show="modelCtrl.$error.pattern">Text does not conform to pattern</p>
+  <div ng-show="dirty && !valid">
+    <p class="help-block" ng-show="errors.maxLength">Text is longer than {{ schema.maxLength }}</p>
+    <p class="help-block" ng-show="errors.minLength">Text is shorter than {{ schema.minLength }}</p>
+    <p class="help-block" ng-show="errors.pattern">Text does not conform to pattern</p>
   </div>
 </div>

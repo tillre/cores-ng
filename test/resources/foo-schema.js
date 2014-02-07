@@ -1,9 +1,9 @@
-var js = require('jski')();
+var J = require('jski')();
 
-module.exports = js.object({
+module.exports = J.object({
 
-  bar: js.string().minLength(3),
-  date: js.string().custom('view', 'cr-datetime'),
-  slug: js.string().custom('view', { type: 'cr-slug', source: 'bar' }).format('slug')
+  bar: J.string().minLength(3),
+  baz: J.number().multipleOf(3),
+  slug: J.string().custom('view', { type: 'cr-slug', source: 'bar' }).format('slug')
 
 }).required('bar');

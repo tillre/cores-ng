@@ -7,6 +7,6 @@ module.exports = J.object({
   file: J.object({
     name: J.string(),
     url: J.string()
-  }).custom('view', { type: 'cr-image', baseUrl: '/test/public/upload/' })
+  }).custom('view', { type: 'cr-image' })
 
 });

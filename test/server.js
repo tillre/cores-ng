@@ -77,7 +77,7 @@ module.exports = function setupServer(callback) {
 
           fs.rename(file.path, destFile, function(err) {
             if (err) return defer.reject(err);
-            doc.file.url = file.name;
+            doc.file.url = '/test/public/upload/' + file.name;
             return defer.resolve(doc);
           });
           return defer.promise;

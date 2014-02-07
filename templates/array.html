@@ -1,19 +1,39 @@
-<div class="form-group">
-  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
+<div>
+  <label class="control-label" ng-show="options.showLabel">{{ label }}:</label>
 
   <div ng-class="{ 'cr-indent': options.indent }">
-    <div class="cr-array-controls">
-      <button class="btn btn-default btn-xs" ng-click="addItem(schema.items)">
-        <span class="glyphicon glyphicon-plus"></span>
+    <div class="cr-array-top-controls btn-group">
+      <button ng-repeat="s in schemas" class="btn btn-sm btn-default" ng-click="addItem(0, s)">
+        <span class="glyphicon glyphicon-plus"></span> {{ s.name }}
       </button>
     </div>
     <ul class="list-unstyled">
-      <li ng-repeat="model in model">
+      <li class="cr-item-group" ng-repeat="item in model">
+
+        <div class="cr-item-controls btn-group">
+          <button class="btn btn-default btn-xs" ng-click="moveUp($index)">
+            <span class="glyphicon glyphicon-arrow-up"></span>
+          </button>
+          <button class="btn btn-default btn-xs" ng-click="moveDown($index)">
+            <span class="glyphicon glyphicon-arrow-down"></span>
+          </button>
+          <button class="btn btn-danger btn-xs" ng-click="remove($index)">
+            <span class="glyphicon glyphicon-minus"></span>
+          </button>
+        </div>
+
         <div cr-array-item
-             schema="schema.items"
-             model="model"
-             path="{{path}}/{{$index}}"
-             options="options.item"></div>
+             model="item"
+             get-schema="getSchema(item.type_)"
+             path="{{ path }}/{{ $index }}">
+        </div>
+
+        <div class="cr-array-bottom-controls btn-group">
+          <button ng-repeat="s in schemas" class="btn btn-sm btn-default" ng-click="addItem($parent.$index, s)">
+            <span class="glyphicon glyphicon-plus"></span> {{ s.name }}
+          </button>
+        </div>
+
       </li>
     </ul>
   </div>

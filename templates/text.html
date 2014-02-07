@@ -1,5 +1,9 @@
-<div class="form-group" ng-class="{ 'has-error': hasErrors() }">
-  <label class="control-label" ng-show="options.showLabel">{{name}}:</label>
+<div>
+  <label class="control-label" ng-show="options.showLabel">{{ label }}:</label>
   <textarea class="form-control" ng-model="model" rows="1"/>
-  <p ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</p>
+
+  <div ng-show="dirty && !valid">
+    <p class="help-block" ng-show="errors.maxLength">Text is longer than {{ schema.maxLength }}</p>
+    <p class="help-block" ng-show="errors.minLength">Text is shorter than {{ schema.minLength }}</p>
+  </div>
 </div>

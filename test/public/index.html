@@ -5,7 +5,7 @@
     <title>CORES-NG</title>
 
     <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="/bower_components/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css">
 
     <link rel="stylesheet" type="text/css" href="/css/cores.css">
   </head>
@@ -19,15 +19,9 @@
                view="view" headers="headers" limit="limit"
                options="listOptions"></div>
           <hr>
-          <div cr-model type="{{ type }}" model-id="modelId" options="modelOptions"></div>
+          <div cr-model-resource type="{{ type }}" model-id="modelId" options="modelOptions"></div>
         </div>
       </div>
-
-      <!-- <div class="row"> -->
-      <!--   <p><a href="#/bars">Bars</a></p> -->
-      <!-- </div> -->
-
-      <!-- <div class="row" ng-view></div> -->
     </div>
 
     <script src="/bower_components/jquery/jquery.js"></script>
@@ -35,7 +29,6 @@
     <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
 
     <script src="/bower_components/moment/moment.js"></script>
-    <!-- <script src="/bower_components/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script> -->
     <script src="/bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
 
     <script src="/bower_components/markdown/lib/markdown.js"></script>
@@ -57,20 +50,20 @@
 
     <script src="/lib/filters/common.js"></script>
 
-    <script src="/lib/controllers/array-ctrl.js"></script>
-    <script src="/lib/controllers/array-item-ctrl.js"></script>
-    <script src="/lib/controllers/anyof-array-ctrl.js"></script>
-    <script src="/lib/controllers/model-ctrl.js"></script>
+    <!-- <script src="/lib/controllers/array-ctrl.js"></script> -->
+    <!-- <script src="/lib/controllers/array-item-ctrl.js"></script> -->
+    <!-- <script src="/lib/controllers/model-ctrl.js"></script> -->
 
     <script src="/lib/directives/control.js"></script>
     <script src="/lib/directives/boolean.js"></script>
     <script src="/lib/directives/number.js"></script>
+    <script src="/lib/directives/integer.js"></script>
     <script src="/lib/directives/string.js"></script>
     <script src="/lib/directives/enum.js"></script>
     <script src="/lib/directives/readonly.js"></script>
 
     <script src="/lib/directives/array.js"></script>
-    <script src="/lib/directives/anyof-array.js"></script>
+    <script src="/lib/directives/array-item.js"></script>
     <script src="/lib/directives/object.js"></script>
     <script src="/lib/directives/tab-object.js"></script>
     <script src="/lib/directives/column-object.js"></script>
@@ -84,9 +77,9 @@
     <script src="/lib/directives/datetime.js"></script>
     <script src="/lib/directives/password.js"></script>
 
-    <script src="/lib/directives/model.js"></script>
+    <script src="/lib/directives/model-resource.js"></script>
     <script src="/lib/directives/model-form.js"></script>
-    <script src="/lib/directives/model-modal.js"></script>
+    <!-- <script src="/lib/directives/model-modal.js"></script> -->
     <script src="/lib/directives/model-list.js"></script>
   </body>
 </html>

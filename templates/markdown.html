@@ -1,8 +1,8 @@
-<div class="form-group" ng-class="{ 'has-error': modelCtrl.$invalid }">
+<div>
   <label class="control-label" ng-show="options.showLabel">{{ label }}:</label>
 
   <div class="cr-editor clearfix" ng-class="{ 'cr-border': options.showBorder }">
-    <textarea class="form-control cr-editor-area" ng-model="localModel" rows="1"></textarea>
+    <textarea class="form-control cr-editor-area" ng-model="model" rows="1"></textarea>
     <div class="cr-editor-preview"></div>
     <div class="btn-group pull-right">
       <button class="btn btn-default btn-sm" ng-click="togglePreview()">
@@ -10,9 +10,9 @@
       </button>
     </div>
 
-    <div ng-show="modelCtrl.$invalid">
-      <p class="help-block" ng-show="modelCtrl.$error.maxLength">Text is longer than {{ schema.maxLength }}</p>
-      <p class="help-block" ng-show="modelCtrl.$error.minLength">Text is shorter than {{ schema.minLength }}</p>
+    <div ng-show="dirty && !valid">
+      <p class="help-block" ng-show="errors.maxLength">Text is longer than {{ schema.maxLength }}</p>
+      <p class="help-block" ng-show="errors.minLength">Text is shorter than {{ schema.minLength }}</p>
     </div>
   </div>
 </div>
