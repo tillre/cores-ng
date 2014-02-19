@@ -64,6 +64,18 @@
     margin-bottom: 15px
 }
 
+[cr-tags] .cr-tag-matches {
+    position: relative;
+}
+[cr-tags] .label {
+    cursor: pointer;
+    font-size: 1em;
+    line-height: 2.3em;
+}
+[cr-tags] .list-inline li {
+    padding-left: 0;
+}
+
 .form-inline [cr-ref] {
     display: inline-block;
 }

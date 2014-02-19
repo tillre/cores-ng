@@ -64,11 +64,15 @@ module.exports = function setupServer(callback) {
       if (payload.isMultipart) {
 
         var numFiles = parseInt(payload.numFiles, 10);
-        // console.log('isMultipart, numFiles', numFiles);
-        // for (var i = 0; i < numFiles; ++i) {
-        //   console.log('file', i, payload['file' + i]);
-        // }
         doc = payload.doc;
+
+        // multipart with fake files when testing
+        if (doc.isTest) {
+          for (var i = 0; i < numFiles; ++i) {
+            doc['file' + i] = JSON.parse(payload['file' + i]);
+          }
+          return Q.resolve(doc);
+        }
 
         if (numFiles > 0) {
           var file = payload['file0'];

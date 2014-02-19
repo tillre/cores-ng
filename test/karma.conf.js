@@ -13,8 +13,8 @@ files = [
   '../bower_components/jquery/jquery.js',
   '../bower_components/angular/angular.js',
   '../bower_components/angular/angular-mocks.js',
-  '../bower_components/bootstrap/js/bootstrap-dropdown.js',
-  '../bower_components/bootstrap/js/bootstrap-modal.js',
+  '../bower_components/bootstrap/js/dropdown.js',
+  '../bower_components/bootstrap/js/modal.js',
 
   '../node_modules/chai/chai.js',
 

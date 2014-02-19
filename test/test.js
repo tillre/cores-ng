@@ -65,68 +65,16 @@ describe('cores', function() {
   describe('crCommon', function() {
 
     it('should get ids', inject(['crCommon'], function(crCommon) {
-      assert(crCommon.getFileId() !== crCommon.getFileId());
-      assert(crCommon.getModalId() !== crCommon.getModalId());
+      assert(crCommon.createFileId() !== crCommon.createFileId());
+      assert(crCommon.createModalId() !== crCommon.createModalId());
     }));
 
     it('should create slug', inject(['crCommon'], function(crCommon) {
-      assert(crCommon.createSlug(' Hällö Würld ') === 'haelloe-wuerld');
+      assert(crCommon.slugify(' Hällö Würld ') === 'haelloe-wuerld');
     }));
 
     it('should capitalize string', inject(['crCommon'], function(crCommon) {
       assert(crCommon.capitalize('hello') === 'Hello');
-    }));
-
-    it('should get obj value by string path', inject(['crCommon'], function(crCommon) {
-      assert(crCommon.parseObjectPath({ a: { b: 123 }}, 'a.b') === 123);
-      assert(crCommon.parseObjectPath({ a: { b: 123 }}, 'a.b.c.d') === undefined);
-    }));
-  });
-
-
-  describe('crValidation', function() {
-
-    var scope = {
-      $emit: function(event, error) { assert(error === ':foo'); },
-      $watch: function() {}
-    };
-
-    it('should set error', inject(['crValidation'], function(crValidation) {
-
-      var validation = crValidation(scope);
-      validation.setError('foo');
-
-      assert(scope.hasErrors());
-      assert(scope.hasError('foo'));
-      assert(scope.getFirstError() === 'foo');
-    }));
-
-    it('should remove error', inject(['crValidation'], function(crValidation) {
-
-      var validation = crValidation(scope);
-      validation.setError('foo');
-      validation.removeError('foo');
-
-      assert(!scope.hasErrors());
-      assert(!scope.hasError('foo'));
-      assert(!scope.getFirstError());
-    }));
-
-    it('should add constraint', inject(['$rootScope', 'crValidation'], true, function($rootScope, crValidation, done) {
-
-      var s = $rootScope.$new();
-      s.model = true;
-      s.$on('error:set', function(e, error) {
-        assert(error === ':test');
-        done();
-      });
-
-      var v = crValidation(s);
-      v.addConstraint('test', function(value) {
-        return value;
-      }, true);
-
-      s.model = false;
     }));
   });
 
@@ -213,31 +161,6 @@ describe('cores', function() {
   });
 
 
-  describe('crBuild', function() {
-
-    var types = [
-      { schema: { type: 'boolean' }, attr: 'cr-boolean' },
-      { schema: { type: 'number' }, attr: 'cr-number' },
-      { schema: { type: 'integer' }, attr: 'cr-number' },
-      { schema: { type: 'string' }, attr: 'cr-string' },
-      { schema: { 'enum': [1, 2] }, attr: 'cr-enum' },
-      { schema: { $ref: 'Foo' }, attr: 'cr-ref' },
-      { schema: { type: 'object' }, attr: 'cr-object' },
-      { schema: { type: 'array' }, attr: 'cr-array' },
-      { schema: { type: 'array', items: { anyOf: [] } }, attr: 'cr-anyof-array' }
-    ];
-
-    types.forEach(function(data) {
-
-      it('should build element ' + data.attr, inject(['crBuild'], function(crBuild) {
-        var tmpl = crBuild(data.schema);
-        var elem = $(tmpl);
-        assert(typeof elem.attr(data.attr) !== 'undefined');
-      }));
-    });
-  });
-
-
   describe('crResources', function() {
 
     it('should init', inject(['crResources'], true, function(crResources, done) {
@@ -286,14 +209,14 @@ describe('cores', function() {
     var fooId = 'foo_' + (new Date().getTime());
 
     var fooDoc = {
-      bar: 'Hello Foo'
+      title: 'Hello Foo', slug: 'hello-foo'
     };
 
     it('should create', inject(['crResource'], function(crResource) {
       fooRes = new crResource('Foo', {
         path: '/foos',
         schemaPath: '/foos/_schema',
-        viewPaths: { bars: '/foos/_views/bars' }
+        viewPaths: { titles: '/foos/_views/titles' }
       }, host);
     }));
 
@@ -393,7 +316,7 @@ describe('cores', function() {
 
 
     it('should call the view', inject(true, function(done) {
-      fooRes.view('bars').then(
+      fooRes.view('titles').then(
         function(res) {
           assert(res.total_rows > 1);
           done();
@@ -404,7 +327,7 @@ describe('cores', function() {
 
 
     it('should call the view with params', inject(true, function(done) {
-      fooRes.view('bars', { limit: 1 }).then(
+      fooRes.view('titles', { limit: 1 }).then(
         function(res) {
           assert(res.total_rows > 1);
           assert(res.rows.length === 1);
@@ -441,13 +364,12 @@ describe('cores', function() {
       var imageDoc = {
         _id: 'multipart_' + (new Date().getTime()),
         title: 'Some image',
-        file: { name: 'test.jpg', url: '' }
+        isTest: true
       };
 
       var file = JSON.stringify({
         name: 'foo.jpg',
-        path: '/upload/foo.jpg',
-        isTest: true
+        path: '/upload/foo.jpg'
       });
 
 
@@ -456,6 +378,7 @@ describe('cores', function() {
         crResources.get('Image').save(imageDoc, file).then(
           function(doc) {
             assert(doc);
+            assert(doc.file0.name === 'foo.jpg');
             done();
           },
           done
@@ -482,16 +405,15 @@ describe('cores', function() {
 
 
       it('should save multiple files', inject(['crResources'], true, function(crResources, done) {
-        var doc = {
-          file0: '',
-          file1: ''
-        };
-        var files = [file, file];
+        imageDoc._id += '_multi_file';
+        var files = [
+          file, file
+        ];
 
-        crResources.get('Files').save(doc, files).then(
+        crResources.get('Image').save(imageDoc, files).then(
           function(doc) {
-            assert(doc.file0 === 'foo.jpg');
-            assert(doc.file1 === 'foo.jpg');
+            assert(doc.file0.name === 'foo.jpg');
+            assert(doc.file1.name === 'foo.jpg');
             done();
           },
           done
@@ -501,284 +423,359 @@ describe('cores', function() {
   });
 
 
-  describe('crModelCtrl', function() {
 
-    var fooDoc = {
-      _id: 'model_' + (new Date().getTime()),
-      bar: 'Hello Model'
-    };
+  describe('crBuild', function() {
 
-    var createCtrl = function($rootScope, $controller, type, id) {
+    var types = [
+      // basic directives
+      { schema: { type: 'boolean' }, testAttr: 'cr-boolean' },
+      { schema: { type: 'number' },  testAttr: 'cr-number' },
+      { schema: { type: 'integer' }, testAttr: 'cr-integer' },
+      { schema: { type: 'string' },  testAttr: 'cr-string' },
+      { schema: { 'enum': [1, 2] },  testAttr: 'cr-enum' },
+      { schema: { $ref: 'Foo' },     testAttr: 'cr-ref' },
+      { schema: { type: 'object' },  testAttr: 'cr-object' },
+      { schema: { type: 'array' },   testAttr: 'cr-array' },
+      { schema: { type: 'array', items: { anyOf: [] } }, testAttr: 'cr-array' },
 
-      var scope = $rootScope.$new();
-      scope.type = type;
-      scope.data = { valid: true };
-      if (id) scope.modelId = id;
+      { schema: { type: 'string', view: { type: 'cr-readonly' } }, testAttr: 'disabled' },
 
-      return { controller: $controller('crModelCtrl', { $scope: scope }), scope: scope };
-    };
+      // extra string directives
+      { schema: { type: 'string', view: { type: 'cr-text' } }, testAttr: 'cr-text' },
+      { schema: { type: 'string', view: { type: 'cr-markdown' } }, testAttr: 'cr-markdown' },
+      { schema: { type: 'string', view: { type: 'cr-date' } }, testAttr: 'cr-date' },
+      { schema: { type: 'string', view: { type: 'cr-slug' } }, testAttr: 'cr-slug' },
+      { schema: { type: 'string', view: { type: 'cr-password' } }, testAttr: 'cr-password' },
 
-    before(inject(['crResources'], true, function(crResources, done) {
-      crResources.get('Foo').save(fooDoc).then(
-        function(doc) { done(); },
-        done
-      );
-    }));
+      // extra ref directive
+      { schema: { $ref: 'Image',
+                  view: { type: 'cr-image' } },
+        testAttr: 'cr-image' },
+      { schema: { $ref: 'Foo',
+                  view: { type: 'cr-single-sel-ref' } },
+        testAttr: 'cr-single-sel-ref' },
+      { schema: { type: 'array', items: { $ref: 'Foo' },
+                  view: { type: 'cr-multi-sel-ref' } },
+        testAttr: 'cr-multi-sel-ref'},
 
-
-    it('should instantiate',
-       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
-
-         var ctrl = createCtrl($rootScope, $controller, 'Foo').controller;
-         assert(ctrl);
-
-         $rootScope.$on('model:ready', function() {
-           done();
-         });
-       }));
-
-
-    it('should instantiate with id',
-       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
-
-         var c = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
-         assert(c.controller);
-
-         var off = $rootScope.$on('model:ready', function() {
-           off();
-           assert(c.scope.model.bar === 'Hello Model');
-           done();
-         });
-       }));
-
-
-    it('should save',
-       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
-
-         var c = createCtrl($rootScope, $controller, 'Foo');
-
-         var off = $rootScope.$on('model:ready', function() {
-           off();
-
-           var model = c.scope.model;
-           model.bar = 'Hello Mate';
-
-           c.scope.save().then(function() {
-             assert(c.scope.model._rev);
-             done();
-           }, done);
-         });
-       }));
-
-    it('should update',
-       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
-
-         var c = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
-
-         var off = $rootScope.$on('model:ready', function() {
-           off();
-
-           var model = c.scope.model;
-           model.bar = 'Hello Update';
-
-           c.scope.$on('model:saved', function() {
-             assert(c.scope.model.bar === 'Hello Update');
-             done();
-           });
-           c.scope.save();
-         });
-       }));
-
-
-    it('should save with files',
-       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
-
-         var c = createCtrl($rootScope, $controller, 'Files');
-
-         var file = JSON.stringify({
-           name: 'foo.jpg',
-           path: '/upload/foo.jpg',
-           isTest: true
-         });
-
-         var off = $rootScope.$on('model:ready', function(e) {
-           off();
-
-           c.scope.$emit('file:set', 'f1', file);
-           c.scope.$emit('file:set', 'f2', file);
-
-           c.scope.$on('model:saved', function() {
-             assert(c.scope.model.file0 === 'foo.jpg');
-             assert(c.scope.model.file1 === 'foo.jpg');
-             done();
-           });
-           c.scope.save();
-         });
-       }));
-
-    it('should destroy',
-       inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
-         var c = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
-         assert(c.controller);
-
-         var off = $rootScope.$on('model:ready', function() {
-           off();
-
-           c.scope.$on('model:destroyed', function() {
-             done();
-           });
-           c.scope.destroy();
-         });
-
-       }));
-  });
-
-
-  describe('directives', function() {
-
-    var tests = [
-
-      // Standard
-
-      {
-        type: 'Boolean',
-        validate: function(schema, elem, done) {
-          assert(elem.find('input[type="checkbox"]').length);
-          done();
-        }
-      },
-      {
-        type: 'Integer',
-        validate: function(schema, elem, done) {
-          assert(elem.find('input[type="number"]').length);
-          done();
-        }
-      },
-      {
-        type: 'Number',
-        validate: function(schema, elem, done) {
-          assert(elem.find('input[type="number"]').length);
-          done();
-        }
-      },
-      {
-        type: 'String',
-        validate: function(schema, elem, done) {
-          assert(schema, elem.find('input[type="text"]').length);
-          done();
-        }
-      },      {
-        type: 'Enum',
-        validate: function(schema, elem, done) {
-          assert(elem.find('select').length);
-          done();
-        }
-      },      {
-        type: 'Object',
-        validate: function(schema, elem, done) {
-          assert(elem.find('.properties').find('input').length ===
-                 Object.keys(schema.properties.foo.properties).length);
-          done();
-        }
-      },      {
-        type: 'Array',
-        validate: function(schema, elem, done) {
-          assert(elem.find('ul').length);
-          done();
-        }
-      },      {
-        type: 'Anyof',
-        validate: function(schema, elem, done) {
-          assert(elem.find('ul').length);
-          done();
-        }
-      }
-
-      // Custom
-
-      // {
-      //   type: 'Image',
-      //   validate: function(schema, elem, done) {
-      //     assert(elem.find('input[type="file"]').length);
-      //     done();
-      //   }
-      // },
-      // {
-      //   type: 'Text',
-      //   validate: function(schema, elem, done) {
-      //     assert(elem.find('textarea').length);
-      //     done();
-      //   }
-      // },
-      // {
-      //   type: 'Password',
-      //   validate: function(schema, elem, done) {
-      //     assert(elem.find('input[type="password"]').length === 2);
-      //     done();
-      //   }
-      // }
-
-      // Complex
-
-      // {
-      //   type: 'Complex',
-      //   validate: function(schema, elem, done) {
-      //     // TODO
-      //     done();
-      //   }
-      // }
+      // extra obj directives
+      { schema: { type: 'object',
+                  properties: { foo: { type: 'string' }, bar: { type: 'number' }},
+                  view: { type: 'cr-inline-object' }},
+        testAttr: 'cr-inline-object' },
+      { schema: { type: 'object',
+                  properties: { foo: { type: 'string' }, bar: { type: 'number' }},
+                  view: { type: 'cr-tab-object' }},
+        testAttr: 'cr-tab-object' }
     ];
 
 
-    tests.forEach(function(test) {
+    types.forEach(function(data) {
+      it('should build element ' + data.testAttr, inject(
+        ['$rootScope', '$timeout', 'crBuild'], true,
+        function($rootScope, $timeout, crBuild, done) {
 
-      it('should create directive ' + test.type, inject(['$compile', '$rootScope', 'crResources', 'crSchema'], true, function($compile, $rootScope, crResources, crSchema, done) {
+          var scope = $rootScope.$new();
+          scope.schema = data.schema;
+          var elem = crBuild.buildControl(scope);
 
-        var self = this;
-        var res = crResources.get(test.type);
-        var schema;
-
-        res.schema().then(
-          function(s) {
-            // get the schema
-            schema = s;
-            return crSchema.createValue(s);
-          }
-        ).then(
-          function(model) {
-            // save a default model
-            return res.save(model);
-          }
-        ).then(
-          function(doc) {
-
-            // create the directive
-            var scope = $rootScope.$new();
-            scope.modelId = doc._id;
-            scope.type = doc.type_;
-
-            var cscope = scope.$new();
-            var elem = angular.element('<div cr-model type="{{type}}" model-id="modelId"/>');
-            $compile(elem)(cscope);
-
-            $('body').append(elem);
-            $('body').append($('<hr>'));
-
-            // TODO Problems with ngswitch in model templates, dunno how to fix....
-
-            // wait for ready event
-            var isReady = false;
-            var off = scope.$on('ready', function(e) {
-
-              e.stopPropagation();
-              assert(!isReady);
-              isReady = true;
-              test.validate(schema, elem, done);
-            });
-          },
-          done
-        );
-      }));
+          // wait for the directive
+          $timeout(function() {
+            try {
+              assert(elem.find('[' + data.testAttr + ']').length === 1);
+            }
+            catch(e) {
+              return done(e);
+            }
+            return done();
+          });
+        }
+      ));
     });
   });
+
+
+
+
+  // describe('crModelCtrl', function() {
+
+  //   var fooDoc = {
+  //     _id: 'model_' + (new Date().getTime()),
+  //     bar: 'Hello Model'
+  //   };
+
+  //   var createCtrl = function($rootScope, $controller, type, id) {
+
+  //     var scope = $rootScope.$new();
+  //     scope.type = type;
+  //     scope.data = { valid: true };
+  //     if (id) scope.modelId = id;
+
+  //     return { controller: $controller('crModelCtrl', { $scope: scope }), scope: scope };
+  //   };
+
+  //   before(inject(['crResources'], true, function(crResources, done) {
+  //     crResources.get('Foo').save(fooDoc).then(
+  //       function(doc) { done(); },
+  //       done
+  //     );
+  //   }));
+
+
+  //   it('should instantiate',
+  //      inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+  //        var ctrl = createCtrl($rootScope, $controller, 'Foo').controller;
+  //        assert(ctrl);
+
+  //        $rootScope.$on('model:ready', function() {
+  //          done();
+  //        });
+  //      }));
+
+
+  //   it('should instantiate with id',
+  //      inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+  //        var c = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
+  //        assert(c.controller);
+
+  //        var off = $rootScope.$on('model:ready', function() {
+  //          off();
+  //          assert(c.scope.model.bar === 'Hello Model');
+  //          done();
+  //        });
+  //      }));
+
+
+  //   it('should save',
+  //      inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+  //        var c = createCtrl($rootScope, $controller, 'Foo');
+
+  //        var off = $rootScope.$on('model:ready', function() {
+  //          off();
+
+  //          var model = c.scope.model;
+  //          model.bar = 'Hello Mate';
+
+  //          c.scope.save().then(function() {
+  //            assert(c.scope.model._rev);
+  //            done();
+  //          }, done);
+  //        });
+  //      }));
+
+  //   it('should update',
+  //      inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+  //        var c = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
+
+  //        var off = $rootScope.$on('model:ready', function() {
+  //          off();
+
+  //          var model = c.scope.model;
+  //          model.bar = 'Hello Update';
+
+  //          c.scope.$on('model:saved', function() {
+  //            assert(c.scope.model.bar === 'Hello Update');
+  //            done();
+  //          });
+  //          c.scope.save();
+  //        });
+  //      }));
+
+
+  //   it('should save with files',
+  //      inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+
+  //        var c = createCtrl($rootScope, $controller, 'Files');
+
+  //        var file = JSON.stringify({
+  //          name: 'foo.jpg',
+  //          path: '/upload/foo.jpg',
+  //          isTest: true
+  //        });
+
+  //        var off = $rootScope.$on('model:ready', function(e) {
+  //          off();
+
+  //          c.scope.$emit('file:set', 'f1', file);
+  //          c.scope.$emit('file:set', 'f2', file);
+
+  //          c.scope.$on('model:saved', function() {
+  //            assert(c.scope.model.file0 === 'foo.jpg');
+  //            assert(c.scope.model.file1 === 'foo.jpg');
+  //            done();
+  //          });
+  //          c.scope.save();
+  //        });
+  //      }));
+
+  //   it('should destroy',
+  //      inject(['$rootScope', '$controller'], true, function($rootScope, $controller, done) {
+  //        var c = createCtrl($rootScope, $controller, 'Foo', fooDoc._id);
+  //        assert(c.controller);
+
+  //        var off = $rootScope.$on('model:ready', function() {
+  //          off();
+
+  //          c.scope.$on('model:destroyed', function() {
+  //            done();
+  //          });
+  //          c.scope.destroy();
+  //        });
+
+  //      }));
+  // });
+
+
+  // describe('directives', function() {
+
+  //   var tests = [
+
+  //     // Standard
+
+  //     {
+  //       type: 'Boolean',
+  //       validate: function(schema, elem, done) {
+  //         assert(elem.find('input[type="checkbox"]').length);
+  //         done();
+  //       }
+  //     },
+  //     {
+  //       type: 'Integer',
+  //       validate: function(schema, elem, done) {
+  //         assert(elem.find('input[type="number"]').length);
+  //         done();
+  //       }
+  //     },
+  //     {
+  //       type: 'Number',
+  //       validate: function(schema, elem, done) {
+  //         assert(elem.find('input[type="number"]').length);
+  //         done();
+  //       }
+  //     },
+  //     {
+  //       type: 'String',
+  //       validate: function(schema, elem, done) {
+  //         assert(schema, elem.find('input[type="text"]').length);
+  //         done();
+  //       }
+  //     },      {
+  //       type: 'Enum',
+  //       validate: function(schema, elem, done) {
+  //         assert(elem.find('select').length);
+  //         done();
+  //       }
+  //     },      {
+  //       type: 'Object',
+  //       validate: function(schema, elem, done) {
+  //         assert(elem.find('.properties').find('input').length ===
+  //                Object.keys(schema.properties.foo.properties).length);
+  //         done();
+  //       }
+  //     },      {
+  //       type: 'Array',
+  //       validate: function(schema, elem, done) {
+  //         assert(elem.find('ul').length);
+  //         done();
+  //       }
+  //     },      {
+  //       type: 'Anyof',
+  //       validate: function(schema, elem, done) {
+  //         assert(elem.find('ul').length);
+  //         done();
+  //       }
+  //     }
+
+  //     // Custom
+
+  //     // {
+  //     //   type: 'Image',
+  //     //   validate: function(schema, elem, done) {
+  //     //     assert(elem.find('input[type="file"]').length);
+  //     //     done();
+  //     //   }
+  //     // },
+  //     // {
+  //     //   type: 'Text',
+  //     //   validate: function(schema, elem, done) {
+  //     //     assert(elem.find('textarea').length);
+  //     //     done();
+  //     //   }
+  //     // },
+  //     // {
+  //     //   type: 'Password',
+  //     //   validate: function(schema, elem, done) {
+  //     //     assert(elem.find('input[type="password"]').length === 2);
+  //     //     done();
+  //     //   }
+  //     // }
+
+  //     // Complex
+
+  //     // {
+  //     //   type: 'Complex',
+  //     //   validate: function(schema, elem, done) {
+  //     //     // TODO
+  //     //     done();
+  //     //   }
+  //     // }
+  //   ];
+
+
+  //   tests.forEach(function(test) {
+
+  //     it('should create directive ' + test.type, inject(['$compile', '$rootScope', 'crResources', 'crSchema'], true, function($compile, $rootScope, crResources, crSchema, done) {
+
+  //       var self = this;
+  //       var res = crResources.get(test.type);
+  //       var schema;
+
+  //       res.schema().then(
+  //         function(s) {
+  //           // get the schema
+  //           schema = s;
+  //           return crSchema.createValue(s);
+  //         }
+  //       ).then(
+  //         function(model) {
+  //           // save a default model
+  //           return res.save(model);
+  //         }
+  //       ).then(
+  //         function(doc) {
+
+  //           // create the directive
+  //           var scope = $rootScope.$new();
+  //           scope.modelId = doc._id;
+  //           scope.type = doc.type_;
+
+  //           var cscope = scope.$new();
+  //           var elem = angular.element('<div cr-model type="{{type}}" model-id="modelId"/>');
+  //           $compile(elem)(cscope);
+
+  //           $('body').append(elem);
+  //           $('body').append($('<hr>'));
+
+  //           // TODO Problems with ngswitch in model templates, dunno how to fix....
+
+  //           // wait for ready event
+  //           var isReady = false;
+  //           var off = scope.$on('ready', function(e) {
+
+  //             e.stopPropagation();
+  //             assert(!isReady);
+  //             isReady = true;
+  //             test.validate(schema, elem, done);
+  //           });
+  //         },
+  //         done
+  //       );
+  //     }));
+  //   });
+  // });
+
 });

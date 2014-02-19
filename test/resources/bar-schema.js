@@ -34,11 +34,11 @@ module.exports = J.object({
 
   ref: J.ref('Foo')
     .custom('view', {
-      previewPaths: ['/bar', '/slug'],
-      defaults: { '/bar': 'some value' },
+      previewPaths: ['/title', '/slug'],
+      defaults: { '/title': 'some value' },
       list: {
         headers: [ { path: 'slug' } ],
-        view: { name: 'bars' }
+        view: { name: 'titles' }
       }
     }),
 
@@ -46,19 +46,19 @@ module.exports = J.object({
     .custom('view', { preview: 'cr-image-preview'}),
 
   singleSelRef: J.ref('Foo')
-    .custom('view', { type: 'cr-single-select-ref', previewPaths: ['/bar', '/slug'] }),
+    .custom('view', { type: 'cr-single-select-ref', previewPaths: ['/title', '/slug'] }),
 
   multiSelRef: J.array(J.ref('Foo'))
-    .custom('view', { type: 'cr-multi-select-ref', previewPath: '/bar' }),
+    .custom('view', { type: 'cr-multi-select-ref', previewPath: '/title' }),
+
+  tags: J.array(J.ref('Foo'))
+    .custom('view', { type: 'cr-tags' }),
 
   date: J.string().custom('view', { type: 'cr-datetime' }),
-
-  markdown: J.string().custom('view', { type: 'cr-markdown' }).minLength(2).maxLength(10),
 
   slug: J.string()
     .format('slug')
     .custom('view', { type: 'cr-slug', source: ['string'] }),
-
 
   inlineObject: J.object({
     foo: J.string(),
@@ -81,7 +81,7 @@ module.exports = J.object({
 
   arrayRefs: J.array(
     J.ref('Foo')
-      .custom('view', { showLabel: true, previewPath: 'bar' })
+      .custom('view', { showLabel: true, previewPath: 'title' })
       .title('Yam')
   ),
 

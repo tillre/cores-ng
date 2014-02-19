@@ -7,9 +7,9 @@
 
       <div class="cr-ref-controls">
         <div class="btn-group">
-          <button ng-click="newModel()" class="btn btn-default">New</button>
-          <button ng-click="editModel()" ng-show="hasModel()" class="btn btn-default">Edit</button>
-          <button ng-click="selectModel()" class="btn btn-default">Select</button>
+          <button ng-click="newModel()" class="btn btn-default" type="button">New</button>
+          <button ng-click="editModel()" ng-show="hasModel()" class="btn btn-default" type="button">Edit</button>
+          <button ng-click="selectModel()" class="btn btn-default" type="button">Select</button>
         </div>
       </div>
       <div ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</div>

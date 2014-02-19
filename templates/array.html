@@ -3,7 +3,7 @@
 
   <div ng-class="{ 'cr-indent': options.indent }">
     <div class="cr-array-top-controls btn-group">
-      <button ng-repeat="s in schemas" class="btn btn-sm btn-default" ng-click="addItem(0, s)">
+      <button ng-repeat="s in schemas" class="btn btn-sm btn-default" ng-click="addItem(0, s)" type="button">
         <span class="glyphicon glyphicon-plus"></span> {{ s.name }}
       </button>
     </div>
@@ -11,13 +11,13 @@
       <li class="cr-item-group" ng-repeat="item in model">
 
         <div class="cr-item-controls btn-group">
-          <button class="btn btn-default btn-xs" ng-click="moveUp($index)">
+          <button class="btn btn-default btn-xs" ng-click="moveUp($index)" type="button">
             <span class="glyphicon glyphicon-arrow-up"></span>
           </button>
-          <button class="btn btn-default btn-xs" ng-click="moveDown($index)">
+          <button class="btn btn-default btn-xs" ng-click="moveDown($index)" type="button">
             <span class="glyphicon glyphicon-arrow-down"></span>
           </button>
-          <button class="btn btn-danger btn-xs" ng-click="remove($index)">
+          <button class="btn btn-danger btn-xs" ng-click="remove($index)" type="button">
             <span class="glyphicon glyphicon-minus"></span>
           </button>
         </div>
@@ -29,7 +29,7 @@
         </div>
 
         <div class="cr-array-bottom-controls btn-group">
-          <button ng-repeat="s in schemas" class="btn btn-sm btn-default" ng-click="addItem($parent.$index, s)">
+          <button ng-repeat="s in schemas" class="btn btn-sm btn-default" ng-click="addItem($parent.$index, s)" type="button">
             <span class="glyphicon glyphicon-plus"></span> {{ s.name }}
           </button>
         </div>

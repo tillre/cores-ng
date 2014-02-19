@@ -2,8 +2,8 @@ var J = require('jski')();
 
 module.exports = J.object({
 
-  bar: J.string().minLength(3),
+  title: J.string().minLength(3),
   baz: J.number().multipleOf(3),
-  slug: J.string().custom('view', { type: 'cr-slug', source: 'bar' }).format('slug')
+  slug: J.string().custom('view', { type: 'cr-slug', source: 'title' }).format('slug')
 
-}).required('bar');
+}).required('title', 'slug');

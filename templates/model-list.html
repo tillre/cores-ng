@@ -13,7 +13,7 @@
         <td ng-repeat="item in row.items" ng-bind-html="item.value"></td>
         <td ng-if="options.buttons && options.buttons.length" class="cr-list-buttons">
           <div class="btn-group">
-            <btn ng-repeat="button in options.buttons"
+            <button ng-repeat="button in options.buttons" type="button"
                  ng-click="buttonClick($event, button.event, row.id)"
                  class="btn btn-default btn-xs">
               <span ng-if="button.icon" class="glyphicon glyphicon-{{button.icon}}"></span>

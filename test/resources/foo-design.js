@@ -1,13 +1,13 @@
 module.exports = {
 
   views: {
-    bars: {
+    titles: {
       map: function(doc) {
         if (doc.type_ === 'Foo') {
-          emit(doc._id, doc.bar);
+          emit(doc._id, doc.title);
         }
       }
     }
   }
-  
+
 };
