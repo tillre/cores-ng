@@ -19,9 +19,9 @@ module.exports = function(grunt) {
         src: 'templates/*.html',
         dest: 'templates/templates.js',
         options: {
-          base: 'templates',
-          prepend: 'cr-',
-          module: 'cores.templates'
+          url: function(url) {
+            return 'cr-' + url.replace('templates/', '');
+          }
         }
       }
     },

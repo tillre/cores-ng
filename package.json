@@ -10,20 +10,18 @@
   "author": "",
   "license": "BSD",
   "devDependencies": {
-    "nano": "~4.1.x",
+    "nano": "~5.x.x",
     "jski": "~0.5.x",
-    "kew": "~0.2.x",
-    "hapi": "~1.x.x",
-    "cores": "~0.5.x",
-    "cores-hapi": "~0.5.x",
-
+    "kew": "~0.3.x",
+    "hapi": "~2.x.x",
+    "cores-hapi": "~0.6.x",
     "grunt": "~0.4.x",
-    "grunt-karma": "~0.4.x",
-    "bower": "~0.8.x",
-    "karma": "~0.9.x",
-    "karma-mocha": "0.0.x",
-    "chai": "~1.6.x",
+    "grunt-karma": "~0.7.x",
+    "karma": "~0.11.x",
+    "karma-mocha": "0.1.x",
+    "chai": "~1.9.x",
     "grunt-contrib-concat": "~0.3.x",
-    "grunt-angular-templates": "~0.3.x"
+    "grunt-angular-templates": "~0.5.x",
+    "karma-chrome-launcher": "~0.1.2"
   }
 }

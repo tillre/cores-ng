@@ -30,136 +30,72 @@
                   'cores.templates']);
 
 })();
-angular.module("cores.templates").run(["$templateCache", function($templateCache) {
+angular.module('cores').run(['$templateCache', function($templateCache) {
+  'use strict';
 
-  $templateCache.put("cr-anyof-array-item.html",
+  $templateCache.put('cr-array.html',
     "<div>\n" +
-    "  <div class=\"cr-anyof-item-group\">\n" +
-    "    <div class=\"cr-item-controls btn-group\">\n" +
-    "      <button class=\"btn btn-default btn-xs\" ng-click=\"moveUp()\">\n" +
-    "        <span class=\"glyphicon glyphicon-arrow-up\"></span>\n" +
-    "      </button>\n" +
-    "      <button class=\"btn btn-default btn-xs\" ng-click=\"moveDown()\">\n" +
-    "        <span class=\"glyphicon glyphicon-arrow-down\"></span>\n" +
-    "      </button>\n" +
-    "      <button class=\"btn btn-danger btn-xs\" ng-click=\"remove()\">\n" +
-    "        <span class=\"glyphicon glyphicon-minus\"></span>\n" +
-    "      </button>\n" +
-    "    </div>\n" +
-    "    <div class=\"cr-item-body\"></div>\n" +
-    "  </div>\n" +
-    "  <div class=\"cr-array-controls cr-item-footer\">\n" +
-    "    <div class=\"btn-group\">\n" +
-    "      <button class=\"btn btn-default btn-xs dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">\n" +
-    "        <span class=\"glyphicon glyphicon-plus\"></span><span class=\"caret\"/>\n" +
-    "      </button>\n" +
-    "      <ul class=\"dropdown-menu\" role=\"menu\">\n" +
-    "        <li ng-repeat=\"schema in schemas\">\n" +
-    "          <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
-    "        </li>\n" +
-    "      </ul>\n" +
-    "    </div>\n" +
-    "  </div>\n" +
-    "</div>\n"
-  );
-
-  $templateCache.put("cr-anyof-array.html",
-    "<div class=\"form-group\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
-    "    <div class=\"cr-array-controls\">\n" +
-    "      <div class=\"btn-group\">\n" +
-    "        <button class=\"btn btn-default btn-xs dropdown-toggle\"\n" +
-    "                data-toggle=\"dropdown\" href=\"#\">\n" +
-    "          <span class=\"glyphicon glyphicon-plus\"></span><span class=\"caret\"/>\n" +
-    "        </button>\n" +
-    "        <ul class=\"dropdown-menu\" role=\"menu\">\n" +
-    "          <li ng-repeat=\"schema in schema.items.anyOf\">\n" +
-    "            <a ng-click=\"addItem(schema)\">{{schema.name}}</a>\n" +
-    "          </li>\n" +
-    "        </ul>\n" +
-    "      </div>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <ul class=\"list-unstyled\">\n" +
-    "      <li ng-repeat=\"model in model\">\n" +
-    "        <div cr-anyof-item\n" +
-    "             model=\"model\"\n" +
-    "             path=\"{{path}}[ {{$index}} ]\"\n" +
-    "             schemas=\"schema.items.anyOf\"\n" +
-    "             options=\"options.item\"></div>\n" +
-    "      </li>\n" +
-    "    </ul>\n" +
-    "  </div>\n" +
-    "</div>\n"
-  );
-
-  $templateCache.put("cr-array-item.html",
-    "<div>\n" +
-    "  <div class=\"cr-array-item-group\">\n" +
-    "    <div class=\"cr-item-controls btn-group\">\n" +
-    "      <button class=\"btn btn-default btn-xs\" ng-click=\"moveUp()\">\n" +
-    "        <span class=\"glyphicon glyphicon-arrow-up\"></span>\n" +
-    "      </button>\n" +
-    "      <button class=\"btn btn-default btn-xs\" ng-click=\"moveDown()\">\n" +
-    "        <span class=\"glyphicon glyphicon-arrow-down\"></span>\n" +
-    "      </button>\n" +
-    "      <button class=\"btn btn-danger btn-xs\" ng-click=\"remove()\">\n" +
-    "        <span class=\"glyphicon glyphicon-minus\"></span>\n" +
-    "      </button>\n" +
-    "    </div>\n" +
-    "    <div class=\"cr-item-body\"></div>\n" +
-    "  </div>\n" +
-    "  <div class=\"cr-array-controls cr-item-footer\">\n" +
-    "    <button class=\"btn btn-default btn-xs\" ng-click=\"addItem()\">\n" +
-    "      <span class=\"glyphicon glyphicon-plus\"></span>\n" +
-    "    </button>\n" +
-    "  </div>\n" +
-    "</div>\n"
-  );
-
-  $templateCache.put("cr-array.html",
-    "<div class=\"form-group\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "\n" +
-    "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
-    "    <div class=\"cr-array-controls\">\n" +
-    "      <button class=\"btn btn-default btn-xs\" ng-click=\"addItem(schema.items)\">\n" +
-    "        <span class=\"glyphicon glyphicon-plus\"></span>\n" +
+    "    <div class=\"cr-array-top-controls btn-group\">\n" +
+    "      <button ng-repeat=\"s in schemas\" class=\"btn btn-sm btn-default\" ng-click=\"addItem(0, s)\" type=\"button\">\n" +
+    "        <span class=\"glyphicon glyphicon-plus\"></span> {{ s.name }}\n" +
     "      </button>\n" +
     "    </div>\n" +
     "    <ul class=\"list-unstyled\">\n" +
-    "      <li ng-repeat=\"model in model\">\n" +
+    "      <li class=\"cr-item-group\" ng-repeat=\"item in model\">\n" +
+    "\n" +
+    "        <div class=\"cr-item-controls btn-group\">\n" +
+    "          <button class=\"btn btn-default btn-xs\" ng-click=\"moveUp($index)\" type=\"button\">\n" +
+    "            <span class=\"glyphicon glyphicon-arrow-up\"></span>\n" +
+    "          </button>\n" +
+    "          <button class=\"btn btn-default btn-xs\" ng-click=\"moveDown($index)\" type=\"button\">\n" +
+    "            <span class=\"glyphicon glyphicon-arrow-down\"></span>\n" +
+    "          </button>\n" +
+    "          <button class=\"btn btn-danger btn-xs\" ng-click=\"remove($index)\" type=\"button\">\n" +
+    "            <span class=\"glyphicon glyphicon-minus\"></span>\n" +
+    "          </button>\n" +
+    "        </div>\n" +
+    "\n" +
     "        <div cr-array-item\n" +
-    "             schema=\"schema.items\"\n" +
-    "             model=\"model\"\n" +
-    "             path=\"{{path}}/{{$index}}\"\n" +
-    "             options=\"options.item\"></div>\n" +
+    "             model=\"item\"\n" +
+    "             get-schema=\"getSchema(item.type_)\"\n" +
+    "             path=\"{{ path }}/{{ $index }}\">\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"cr-array-bottom-controls btn-group\">\n" +
+    "          <button ng-repeat=\"s in schemas\" class=\"btn btn-sm btn-default\" ng-click=\"addItem($parent.$index, s)\" type=\"button\">\n" +
+    "            <span class=\"glyphicon glyphicon-plus\"></span> {{ s.name }}\n" +
+    "          </button>\n" +
+    "        </div>\n" +
+    "\n" +
     "      </li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-boolean.html",
+
+  $templateCache.put('cr-boolean.html',
     "<div class=\"checkbox\">\n" +
     "  <label class=\"control-label\">\n" +
-    "    <input type=\"checkbox\" ng-model=\"model\"> {{name}}\n" +
+    "    <input type=\"checkbox\" ng-model=\"model\"> {{label}}\n" +
     "  </label>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-column-object.html",
-    "<div class=\"form-group\">\n" +
-    "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "  <div ng-class=\"{ 'form-inline': options.inline }\" class=\"properties\"></div>\n" +
-    "</div>\n"
+
+  $templateCache.put('cr-control.html',
+    "<div class=\"form-group\"\n" +
+    "     ng-class=\"{ 'has-error': (dirty && !valid) || (required && !dirty) }\">\n" +
+    "</div>"
   );
 
-  $templateCache.put("cr-datetime.html",
-    "<div class=\"row\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"col-md-12 control-label\" ng-show=\"options.showLabel\">{{name}}</label>\n" +
+
+  $templateCache.put('cr-datetime.html',
+    "<div class=\"row\">\n" +
+    "  <label class=\"col-md-12 control-label\" ng-show=\"options.showLabel\">{{ label }}</label>\n" +
     "\n" +
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"input-group date\">\n" +
@@ -177,26 +113,29 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
-  $templateCache.put("cr-enum.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+
+  $templateCache.put('cr-enum.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "  <select class=\"form-control\" ng-model=\"model\" ng-options=\"e for e in schema.enum\"></select>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-image-preview.html",
+
+  $templateCache.put('cr-image-preview.html',
     "<div class=\"row\">\n" +
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"thumbnail\">\n" +
-    "      <img ng-src=\"{{ schema.properties.file.view.baseUrl }}{{ model.file.url }}\">\n" +
+    "      <img ng-src=\"{{ baseUrl }}{{ model.file.url }}\">\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>"
   );
 
-  $templateCache.put("cr-image.html",
-    "<div class=\"form-group\">\n" +
-    "  <label class=\"control-label\">{{name}}</label>\n" +
+
+  $templateCache.put('cr-image.html',
+    "<div>\n" +
+    "  <label class=\"control-label\">{{ label }}</label>\n" +
     "\n" +
     "  <div class=\"row\">\n" +
     "    <div class=\"col-md-6\">\n" +
@@ -213,38 +152,45 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
-  $templateCache.put("cr-markdown.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+
+  $templateCache.put('cr-markdown.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "\n" +
     "  <div class=\"cr-editor clearfix\" ng-class=\"{ 'cr-border': options.showBorder }\">\n" +
     "    <textarea class=\"form-control cr-editor-area\" ng-model=\"model\" rows=\"1\"></textarea>\n" +
     "    <div class=\"cr-editor-preview\"></div>\n" +
     "    <div class=\"btn-group pull-right\">\n" +
-    "      <button class=\"btn btn-default btn-sm\" ng-click=\"togglePreview()\">\n" +
+    "      <button class=\"btn btn-default btn-sm\" ng-click=\"togglePreview()\" type=\"button\">\n" +
     "        {{ isPreview ? \"Edit\" : \"Preview\" }}\n" +
     "      </button>\n" +
     "    </div>\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "\n" +
+    "    <div ng-show=\"dirty && !valid\">\n" +
+    "      <p class=\"help-block\" ng-show=\"errors.maxLength\">Text is longer than {{ schema.maxLength }}</p>\n" +
+    "      <p class=\"help-block\" ng-show=\"errors.minLength\">Text is shorter than {{ schema.minLength }}</p>\n" +
+    "    </div>\n" +
     "  </div>\n" +
     "</div>"
   );
 
-  $templateCache.put("cr-model-form.html",
+
+  $templateCache.put('cr-model-form.html',
     "<div>\n" +
     "  <form name=\"modelForm\"></form>\n" +
-    "  <div ng-show=\"!valid\" class=\"alert alert-danger\">The form has errors</div>\n" +
-    "  <div ng-show=\"debug\" class=\"cr-debug\">\n" +
-    "    <h4>Debug</h4>\n" +
-    "    <h5>Model</h5>\n" +
+    "  <div ng-show=\"debug\">\n" +
+    "    <h4>Model</h4>\n" +
     "    <pre>{{ model | json }}</pre>\n" +
-    "    <h5>Errors</h5>\n" +
-    "    <ul><li ng-repeat=\"(name, active) in errors\">{{name}}: {{active}}</li></ul>\n" +
+    "    <h4>Validation:</h3>\n" +
+    "    <ul>\n" +
+    "      <li ng-repeat=\"(valid, name) in errors\">{{ name }} {{ valid }}</li>\n" +
+    "    </ul>\n" +
     "  </div>\n" +
-    "</div>\n"
+    "</div>"
   );
 
-  $templateCache.put("cr-model-list-filter.html",
+
+  $templateCache.put('cr-model-list-filter.html',
     "<form class=\"form-inline\">\n" +
     "  <div class=\"form-group\">\n" +
     "    <label>Filter:</label>\n" +
@@ -255,7 +201,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>"
   );
 
-  $templateCache.put("cr-model-list-modal.html",
+
+  $templateCache.put('cr-model-list-modal.html',
     "<div id=\"{{modalId}}\" class=\"modal fade\" tabindex=\"-1\">\n" +
     "  <div class=\"modal-dialog\">\n" +
     "    <div class=\"modal-content\">\n" +
@@ -278,7 +225,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
-  $templateCache.put("cr-model-list.html",
+
+  $templateCache.put('cr-model-list.html',
     "<div>\n" +
     "  <table class=\"table table-hover\">\n" +
     "    <thead>\n" +
@@ -294,7 +242,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "        <td ng-repeat=\"item in row.items\" ng-bind-html=\"item.value\"></td>\n" +
     "        <td ng-if=\"options.buttons && options.buttons.length\" class=\"cr-list-buttons\">\n" +
     "          <div class=\"btn-group\">\n" +
-    "            <btn ng-repeat=\"button in options.buttons\"\n" +
+    "            <button ng-repeat=\"button in options.buttons\" type=\"button\"\n" +
     "                 ng-click=\"buttonClick($event, button.event, row.id)\"\n" +
     "                 class=\"btn btn-default btn-xs\">\n" +
     "              <span ng-if=\"button.icon\" class=\"glyphicon glyphicon-{{button.icon}}\"></span>\n" +
@@ -314,65 +262,73 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>"
   );
 
-  $templateCache.put("cr-model-modal.html",
-    "<div id=\"{{modalId}}\" class=\"modal fade\" tabindex=\"-1\">\n" +
-    "  <div class=\"modal-dialog\">\n" +
-    "    <div class=\"modal-content\">\n" +
-    "      <div class=\"modal-header\">\n" +
-    "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n" +
-    "        <h4 class=\"modal-title\">{{type}}</h4>\n" +
-    "      </div>\n" +
-    "      <div class=\"modal-body\">\n" +
-    "        <div cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\"></div>\n" +
-    "        <div ng-switch on=\"data.state\">\n" +
-    "          <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
-    "          <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
-    "          <div ng-switch-when=\"error\" class=\"alert alert-danger\"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>\n" +
+
+  $templateCache.put('cr-model-resource.html',
+    "<div>\n" +
+    "  <div id=\"delete-modal\" class=\"modal fade\" tabindex=\"-1\">\n" +
+    "    <div class=\"modal-dialog\">\n" +
+    "      <div class=\"modal-content\">\n" +
+    "        <div class=\"modal-header\">\n" +
+    "          <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n" +
+    "          <h4 class=\"modal-title\">Confirm deletion</h4>\n" +
+    "        </div>\n" +
+    "        <div class=\"modal-body\">\n" +
+    "          <p>Really delete?</p>\n" +
+    "        </div>\n" +
+    "        <div class=\"modal-footer\">\n" +
+    "          <button class=\"btn btn-default pull-left\" data-dismiss=\"modal\" type=\"button\">Cancel</button> -->\n" +
+    "          <button class=\"btn btn-danger\" ng-click=\"destroy()\" type=\"button\">Delete</button>\n" +
     "        </div>\n" +
     "      </div>\n" +
-    "      <div class=\"modal-footer\" ng-show=\"data.state == 'editing'\">\n" +
-    "        <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary pull-left\">Save</button>\n" +
-    "        <button ng-click=\"cancel()\" class=\"btn btn-default pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
-    "        <button ng-click=\"toggleDebug()\" class=\"btn btn-default\">Debug</button>\n" +
-    "        <button ng-repeat=\"button in data.buttons\" class=\"btn btn-default\" ng-click=\"buttonClick(button.event)\">{{button.name}}</button>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <div cr-model-form schema=\"schema\" model=\"model\" valid=\"valid\" debug=\"debug\"></div>\n" +
+    "\n" +
+    "  <div ng-switch on=\"state\">\n" +
+    "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
+    "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
+    "    <div ng-switch-when=\"error\" class=\"alert alert-danger\">\n" +
+    "      {{ error.message }}\n" +
+    "      <ul>\n" +
+    "        <li ng-repeat=\"e in unhandledErrors\">{{ e }}</li>\n" +
+    "      </ul>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "\n" +
+    "\n" +
+    "  <div class=\"cr-model-controls\">\n" +
+    "    <div class=\"btn-toolbar\">\n" +
+    "      <div class=\"btn-group\">\n" +
+    "        <button ng-click=\"save()\" ng-class=\"{ disabled: !valid }\" class=\"btn btn-primary\" type=\"button\">Save</button>\n" +
+    "      </div>\n" +
+    "\n" +
+    "      <button ng-click=\"toggleDebug()\" class=\"btn btn-default pull-right\" type=\"button\">Debug</button>\n" +
+    "      <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\" type=\"button\">Delete</button>\n" +
+    "\n" +
+    "      <div class=\"btn-group\">\n" +
+    "        <button ng-repeat=\"button in options.buttons\"\n" +
+    "                ng-click=\"buttonClick($event, button.event)\"\n" +
+    "                class=\"btn btn-default\" type=\"button\">\n" +
+    "          <span ng-if=\"button.icon\" class=\"glyphicon glyphicon-{{button.icon}}\"></span>\n" +
+    "          {{button.title}}\n" +
+    "        </button>\n" +
     "      </div>\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-model.html",
-    "<div>\n" +
-    "  <div cr-model-form schema=\"schema\" model=\"model\" valid=\"data.valid\" debug=\"data.debug\"></div>\n" +
-    "  <div ng-switch on=\"data.state\">\n" +
-    "    <div ng-switch-when=\"loading\" class=\"alert alert-info\">Loading...</div>\n" +
-    "    <div ng-switch-when=\"saving\" class=\"alert alert-info\">Saving...</div>\n" +
-    "    <div ng-switch-when=\"error\" class=\"alert alert-danger\"><h4>ERROR</h4><pre>{{data.error|json}}</pre><pre>{{data.error.stack}}</div>\n" +
-    "    <div ng-switch-when=\"editing\" class=\"well cr-model-controls\">\n" +
-    "      <button ng-click=\"save()\" ng-class=\"{ disabled: !data.valid }\" class=\"btn btn-primary\">Save</button>\n" +
-    "      <button ng-click=\"destroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\">Delete</button>\n" +
-    "      <button ng-click=\"toggleDebug()\" class=\"btn btn-default pull-right\">Debug</button>\n" +
-    "\n" +
-    "      <button ng-repeat=\"button in options.buttons\"\n" +
-    "              ng-click=\"buttonClick($event, button.event)\"\n" +
-    "              class=\"btn btn-default\">\n" +
-    "        <span ng-if=\"button.icon\" class=\"glyphicon glyphicon-{{button.icon}}\"></span>\n" +
-    "        {{button.title}}\n" +
-    "      </button>\n" +
-    "    </div>\n" +
-    "  </div>\n" +
-    "</div>\n"
-  );
 
-  $templateCache.put("cr-multi-select-ref.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+  $templateCache.put('cr-multi-select-ref.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
     "    <ul class=\"list-unstyled\">\n" +
     "      <li class=\"checkbox\" ng-repeat=\"row in rows\">\n" +
     "        <label class=\"control-label\">\n" +
-    "          <input type=\"checkbox\" ng-model=\"row.selected\"/> {{row.name}}\n" +
+    "          <input type=\"checkbox\" ng-model=\"row.selected\"/> {{ row.name }}\n" +
     "        </label>\n" +
     "      </li>\n" +
     "    </ul>\n" +
@@ -382,24 +338,33 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
-  $templateCache.put("cr-number.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+
+  $templateCache.put('cr-number.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "  <input class=\"form-control\" type=\"number\" ng-model=\"model\"/>\n" +
-    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "\n" +
+    "  <div ng-show=\"dirty && !valid\">\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.multipleOf\">Number should be a multiple of {{ schema.multipleOf }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.minimum\">Number should be smaller or equal to {{ schema.minimum }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.maximum\">Number should be greater or equal to {{ schema.maximum }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.integer\">Number should be an integer</p>\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-object.html",
-    "<div class=\"form-group\">\n" +
-    "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+
+  $templateCache.put('cr-object.html',
+    "<div>\n" +
+    "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent, 'form-inline': options.inline }\" class=\"properties\"></div>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-password.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+
+  $templateCache.put('cr-password.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "\n" +
     "  <div class=\"row\">\n" +
     "    <div class=\"col-md-6\">\n" +
@@ -409,45 +374,52 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "      <input class=\"form-control\" type=\"password\" ng-model=\"pass2\"/>\n" +
     "    </div>\n" +
     "  </div>\n" +
-    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "\n" +
+    "  <div ng-show=\"dirty && !valid\">\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.maxLength\">Text is longer than {{ schema.maxLength }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.minLength\">Text is shorter than {{ schema.minLength }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.match\">Passwords do not match</p>\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-readonly.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "  <span class=\"form-control\" disabled>{{model}}</span>\n" +
+
+  $templateCache.put('cr-readonly.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
+    "  <span class=\"form-control\" disabled>{{ model }}</span>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-ref-preview.html",
+
+  $templateCache.put('cr-ref-preview.html',
     "<p>\n" +
     "  <span ng-repeat=\"path in options.previewPaths\">{{ model | crJsonPointer:path }}&nbsp;</span>\n" +
     "</p>\n"
   );
 
-  $templateCache.put("cr-ref.html",
+
+  $templateCache.put('cr-ref.html',
     "<div>\n" +
-    "  <div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "    <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "\n" +
-    "    <div ng-show=\"model.id_\" class=\"cr-preview\"></div>\n" +
+    "  <div class=\"panel panel-default\">\n" +
+    "    <div class=\"panel-body\">\n" +
+    "      <div ng-show=\"model.id_\" class=\"cr-preview\"></div>\n" +
     "\n" +
-    "    <div class=\"cr-ref-controls\">\n" +
-    "      <div class=\"btn-group\">\n" +
-    "        <button ng-click=\"newModel()\" class=\"btn btn-default\">New</button>\n" +
-    "        <button ng-show=\"hasModel()\" ng-click=\"updateModel()\" class=\"btn btn-default\">Edit</button>\n" +
-    "        <button ng-click=\"selectModel()\" class=\"btn btn-default\">Select</button>\n" +
+    "      <div class=\"cr-ref-controls\">\n" +
+    "        <div class=\"btn-group\">\n" +
+    "          <button ng-click=\"newModel()\" class=\"btn btn-default\" type=\"button\">New</button>\n" +
+    "          <button ng-click=\"editModel()\" ng-show=\"hasModel()\" class=\"btn btn-default\" type=\"button\">Edit</button>\n" +
+    "          <button ng-click=\"selectModel()\" class=\"btn btn-default\" type=\"button\">Select</button>\n" +
+    "        </div>\n" +
     "      </div>\n" +
+    "      <div ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</div>\n" +
     "    </div>\n" +
-    "    <div ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</div>\n" +
+    "    <div ng-show=\"showModel\" class=\"panel-footer\">\n" +
+    "      <div cr-model-resource type=\"{{ schema.$ref }}\" model-id=\"modelId\" defaults=\"options.defaults\" options=\"modelOptions\"></div>\n" +
+    "    </div>\n" +
     "  </div>\n" +
-    "\n" +
-    "  <div cr-model-modal\n" +
-    "       modal-id=\"{{editModalId}}\"\n" +
-    "       type=\"{{schema.$ref}}\"\n" +
-    "       path=\"{{path}}\"\n" +
-    "       defaults=\"options.defaults\"></div>\n" +
     "\n" +
     "  <div cr-model-list-modal\n" +
     "       modal-id=\"{{selectModalId}}\"\n" +
@@ -456,9 +428,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
-  $templateCache.put("cr-single-select-ref.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+
+  $templateCache.put('cr-single-select-ref.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "\n" +
     "  <select class=\"form-control\" ng-model=\"selectedRow\" ng-options=\"r.name for r in rows\">\n" +
     "    <option value=\"\">-- choose --</option>\n" +
@@ -467,39 +440,94 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     "</div>\n"
   );
 
-  $templateCache.put("cr-slug.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+
+  $templateCache.put('cr-slug.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "  <div class=\"input-group\">\n" +
     "    <span class=\"input-group-btn\">\n" +
-    "      <button ng-click=\"generate()\" class=\"btn btn-default\">Generate</button>\n" +
+    "      <button ng-click=\"generate()\" class=\"btn btn-default\" type=\"button\">Generate</button>\n" +
     "    </span>\n" +
     "    <input class=\"form-control\" type=\"text\" ng-model=\"model\"/>\n" +
     "  </div>\n" +
-    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "\n" +
+    "  <div ng-show=\"dirty && !valid\">\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.maxLength\">Slug is longer than {{ schema.maxLength }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.minLength\">Slug is shorter than {{ schema.minLength }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.format\">Slug does not match format</p>\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-string.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+
+  $templateCache.put('cr-string.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "  <input class=\"form-control\" type=\"text\" ng-model=\"model\"/>\n" +
-    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "\n" +
+    "  <div ng-show=\"dirty && !valid\">\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.maxLength\">Text is longer than {{ schema.maxLength }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.minLength\">Text is shorter than {{ schema.minLength }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.pattern\">Text does not conform to pattern</p>\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
-  $templateCache.put("cr-tab-object.html",
-    "<div class=\"form-group\">\n" +
-    "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
-    "  <div ng-class=\"{ 'form-inline': options.inline }\" class=\"properties\"></div>\n" +
-    "</div>\n"
+
+  $templateCache.put('cr-tags.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
+    "\n" +
+    "  <div class=\"row\">\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "\n" +
+    "      <div class=\"input-group\">\n" +
+    "        <input class=\"form-control\" type=\"text\" ng-model=\"currentTag\"/>\n" +
+    "        <span class=\"input-group-btn\">\n" +
+    "          <button ng-click=\"createTag()\" class=\"btn btn-default\" type=\"button\">Create</button>\n" +
+    "        </span>\n" +
+    "      </div>\n" +
+    "      <div class=\"cr-tag-matches\">\n" +
+    "        <ul class=\"dropdown-menu\" role=\"menu\">\n" +
+    "          <li ng-repeat=\"match in matches\" ng-class=\"{ active: activeListIndex === $index }\">\n" +
+    "            <a ng-click=\"selectMatch(match)\">{{ match.doc.title }}</a>\n" +
+    "          </li>\n" +
+    "        </ul>\n" +
+    "      </div>\n" +
+    "\n" +
+    "    </div>\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "\n" +
+    "      <div>\n" +
+    "        <ul class=\"list-inline\">\n" +
+    "          <li ng-repeat=\"tag in model\" ng-click=\"removeTag($index)\">\n" +
+    "            <span class=\"label label-primary\">{{ getTagTitle(tag.id_) }}  <span class=\"glyphicon glyphicon-remove\"></span> </span>\n" +
+    "          </li>\n" +
+    "        </ul>\n" +
+    "      </div>\n" +
+    "\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <div class=\"row\">\n" +
+    "    <div class=\"col-md-12\">\n" +
+    "      <div ng-show=\"error\" class=\"alert alert-danger\">{{ error.message }}</div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "\n" +
+    "</div>"
   );
 
-  $templateCache.put("cr-text.html",
-    "<div class=\"form-group\" ng-class=\"{ 'has-error': hasErrors() }\">\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{name}}:</label>\n" +
+
+  $templateCache.put('cr-text.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "  <textarea class=\"form-control\" ng-model=\"model\" rows=\"1\"/>\n" +
-    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
+    "\n" +
+    "  <div ng-show=\"dirty && !valid\">\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.maxLength\">Text is longer than {{ schema.maxLength }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.minLength\">Text is shorter than {{ schema.minLength }}</p>\n" +
+    "  </div>\n" +
     "</div>"
   );
 
@@ -520,410 +548,128 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 })();
 (function() {
 
-  var module = angular.module('cores.controllers');
-
-
-  module.controller('crAnyofArrayCtrl', function($injector, $controller, $scope, crSchema) {
-
-    // inherit from ArrayCtrl
-    $controller('crArrayCtrl', { $scope: $scope });
-
-    angular.forEach($scope.schema.items.anyOf, function(anySchema, i) {
-      if (!anySchema.name) throw new Error('AnyOf schema has to have a name');
-    });
-
-    // called by the anyof-item controller
-
-    this.getSchema = function(type) {
-      var schema;
-      angular.forEach($scope.schema.items.anyOf, function(anySchema) {
-        if (anySchema.name === type) {
-          schema = anySchema;
-        }
-      });
-      if (!schema) throw new Error('No schema for type found: ' + type);
-      return schema;
-    };
-  });
-})();
-(function() {
-
-  var module = angular.module('cores.controllers');
-
-
-  module.controller('crArrayCtrl', function($scope, crSchema) {
-
-    $scope.addItem = function(schema, index) {
-      var obj = crSchema.createValue(schema, schema.name);
-      if (typeof index === 'undefined') {
-        $scope.model.unshift(obj);
-      }
-      else if (index >= $scope.model.length) {
-        $scope.model.push(obj);
-      }
-      else {
-        $scope.model.splice(index, 0, obj);
-      }
-    };
-
-    $scope.$on('cr:remove:item', function(e, index) {
-      e.stopPropagation();
-      $scope.model.splice(index, 1);
-    });
-
-    $scope.$on('cr:add:item', function(e, schema, index) {
-      e.stopPropagation();
-      $scope.addItem(schema, index + 1);
-    });
-
-    $scope.$on('cr:moveUp:item', function(e, index) {
-      e.stopPropagation();
-      if (index === 0) return;
-      $scope.model.splice(index - 1, 0, $scope.model.splice(index, 1)[0]);
-    });
-
-    $scope.$on('cr:moveDown:item', function(e, index) {
-      e.stopPropagation();
-      if (index >= $scope.model.length) return;
-      $scope.model.splice(index + 1, 0, $scope.model.splice(index, 1)[0]);
-    });
-  });
-})();
-(function() {
-
-  var module = angular.module('cores.controllers');
-
-
-  module.controller('crArrayItemCtrl', function($scope) {
-
-    $scope.moveUp = function() {
-      $scope.$emit('cr:moveUp:item', $scope.$parent.$index);
-    };
-
-    $scope.moveDown = function() {
-      $scope.$emit('cr:moveDown:item', $scope.$parent.$index);
-    };
-
-    $scope.remove = function() {
-      $scope.$emit('cr:remove:item', $scope.$parent.$index);
-    };
-
-    $scope.addItem = function(schema) {
-      schema = schema || $scope.schema;
-      $scope.$emit('cr:add:item', schema, $scope.$parent.$index);
-    };
-  });
-})();
-(function() {
-
-  var module = angular.module('cores.controllers');
-
-
-  module.controller('crModelCtrl', function(
-    $scope,
-    $q,
-    crJSONPointer,
-    crResources,
-    crSchema,
-    crCommon
-  ) {
-
-    var STATE_EDITING = 'editing';
-    var STATE_LOADING = 'loading';
-    var STATE_SAVING = 'saving';
-    var STATE_ERROR = 'error';
-
-    $scope.options = $scope.options || {};
-
-    var self = this;
-    var data = $scope.data = {
-      valid: true,
-      state: STATE_EDITING,
-      debug: false,
-      files: {}
-    };
-
-    // add/update/remove files from the model
-
-    $scope.$on('cr:file:set', function(e, id, file) {
-      e.stopPropagation();
-      data.files[id] = file;
-    });
-
-    $scope.$on('cr:file:remove', function(e, id) {
-      e.stopPropagation();
-      delete data.files[id];
-    });
-
-    // button methods
-
-    $scope.save = function() {
-      $scope.$emit('cr:model:save');
-      return self.save();
-    };
-
-    $scope.cancel = function() {
-      $scope.$emit('cr:model:cancel');
-    };
-
-    $scope.destroy = function() {
-      $scope.$emit('cr:model:destroy');
-      return self.destroy();
-    };
-
-    $scope.toggleDebug = function() {
-      $scope.data.debug = !$scope.data.debug;
-    };
-
-    $scope.isNew = function() {
-      if (!$scope.model) return true;
-      return !$scope.model._rev;
-    };
-
-    $scope.buttonClick = function(e, eventName) {
-      e.stopPropagation();
-      $scope.$emit(eventName, $scope.model);
-    };
-
-    //
-    // methods
-    //
-
-    this.load = function(id) {
-      data.state = STATE_LOADING;
-      return this._resource.load(id).then(function(doc) {
-        self.setModel(doc);
-        data.state = STATE_EDITING;
-
-      }, function(err) {
-        data.state = STATE_ERROR;
-        data.error = err;
-      });
-    };
-
-
-    this.save = function() {
-      var def = $q.defer();
-
-      if (!$scope.data.valid) {
-        def.reject(new Error('Model is not valid'));
-        return def.promise;
-      }
-      data.state = STATE_SAVING;
-
-      var fs = Object.keys(data.files).map(function(k) { return data.files[k]; });
-
-      this._resource.save($scope.model, fs).then(function(doc) {
-
-        self.setModel(doc);
-        $scope.modelId = doc._id;
-        data.state = STATE_EDITING;
-        $scope.$emit('cr:model:saved', $scope.model);
-        def.resolve(doc);
-
-      }, function(err) {
-        var rootErrors = [];
-        if (err.errors && angular.isArray(err.errors)) {
-          // error has form field errors
-          data.state = STATE_EDITING;
-          err.errors.forEach(function(v) {
-            if (!v.path) {
-              rootErrors.push({
-                code: v.code,
-                message: v.message
-              });
-            }
-            else {
-              $scope.$broadcast('cr:set:customError', v.path, v.code, v.message);
-            }
-          });
-        }
-        else {
-          rootErrors.push({
-            code: err.code,
-            message: err.message
-          });
-        }
-        if (rootErrors.length) {
-          data.state = STATE_ERROR;
-          data.error = rootErrors;
-        }
-        def.reject(err);
-      });
-      return def.promise;
-    };
-
-
-    this.destroy = function() {
-      return this._resource.destroy($scope.model).then(
-        function() {
-          self.setModel();
-          $scope.$emit('cr:model:destroyed');
-        }
-      );
-    };
-
-
-    this.setModel = function(model) {
-      if (!model) {
-        // create default model
-        model = crSchema.createValue($scope.schema);
-        // set custom default values
-        if ($scope.defaults) {
-          Object.keys($scope.defaults).forEach(function(key) {
-            var value = $scope.defaults[key];
-            crJSONPointer.set(model, key, value);
-          });
-        }
-      }
-      // reset files dict when model changes
-      data.files = {};
-
-      $scope.model = model;
-    };
-
-
-    //
-    // init
-    //
-    data.state = STATE_LOADING;
-    self._resource = crResources.get($scope.type);
-
-    // load schema
-    self._resource.schema().then(function(schema) {
-
-      // load or create default model
-      $scope.schema = schema;
-      var id = $scope.modelId;
-
-      if (!id) {
-        self.setModel();
-        data.state = STATE_EDITING;
-      }
-      else {
-        return self.load(id);
-      }
-    }).then(function() {
-
-      // watch for modelId changes to load/clear the model
-      $scope.$watch('modelId', function(newId, oldId) {
-
-        if (newId !== oldId) {
-          if (newId) {
-            // load model with new id
-            self.load(newId);
-          }
-          else if (oldId) {
-            // newId was set to null, create default value
-            self.setModel();
-          }
-        }
-      });
-    });
-  });
-
-})();
-
-(function() {
-
   var module = angular.module('cores.services');
 
 
-  module.factory('crBuild', function($compile, crCommon, crOptions, crSchema) {
+  module.factory('crBuild', function($compile, crCommon, crSchema, crJSONPointer) {
 
-    //
-    // get the title from the schema or alternativly from the path
-    //
-    function getModelName(schema, modelPath) {
-
-      if (schema.title) {
-        return schema.title;
-      }
-      if (schema.name) {
-        return crCommon.capitalize(schema.name);
-      }
-      var items = modelPath.split('.');
-      return crCommon.capitalize(items[items.length - 1]);
-    }
-
-
-    //
-    // Create a template for a schema with optional view configuration
-    //
-    function buildTemplate(schema, model, schemaPath, modelPath, absPath, options) {
-
-      schemaPath = schemaPath || 'schema';
-      modelPath = modelPath || 'model';
-      absPath = absPath || '';
-      options = options || {};
-
-      var viewType = schema.type;
-      var viewName = getModelName(schema, modelPath);
+    function getType(schema) {
+      var type = schema.type;
 
       // infer some types
       if (!schema.type) {
-        if (schema.properties) viewType = 'object';
-        if (schema.items) viewType = 'array';
+        if (schema.properties) type = 'object';
+        if (schema.items) type = 'array';
       }
 
       // handle extended types
       if (schema.hasOwnProperty('enum')) {
-        viewType = 'enum';
+        type = 'enum';
       }
       else if (schema.hasOwnProperty('$ref')) {
-        viewType = 'ref';
-      }
-      else if (viewType === 'array' &&
-               schema.hasOwnProperty('items') &&
-               schema.items.anyOf) {
-        viewType = 'anyof-array';
-      }
-
-      // use number directive for integers
-      if (viewType === 'integer') {
-        viewType = 'number';
-        options.isInteger = true;
+        type = 'ref';
       }
 
       // add namespace prefix for default views
-      viewType = 'cr-' + viewType;
+      type = 'cr-' + type;
 
-      if (schema.hasOwnProperty('view')) {
-        // custom view type and options
-        if (angular.isObject(schema.view)) {
-          viewType = schema.view.type || viewType;
-          viewName = schema.view.name || viewName;
-
-          // add specific view properties as options
-          angular.forEach(schema.view, function(value, key) {
-            if (key !== 'type' && key !== 'name') {
-              options[key] = value;
-            }
-          });
+      if (schema.view) {
+        if (!angular.isObject(schema.view)) {
+          throw new Error('schema.view has to be an object ' + JSON.stringify(schema.view));
         }
-        else if (angular.isString(schema.view)) {
-          viewType = schema.view;
-        }
-        else throw new Error('View has to be of type object or string');
+        // custom type
+        type = schema.view.type || type;
       }
 
-      return  '<div ' + viewType +
-        ' name="' + viewName + '"' +
-        ' schema="' + schemaPath + '"' +
-        ' model="' + modelPath + '"' +
-        ' path="' + absPath + '"' +
-        ' options="' + crOptions.stringify(options) + '"' +
-        '/>';
+      return type;
+    }
+
+
+    function getLabel(schema, path) {
+
+      var label = schema.type;
+
+      if (schema.title) {
+        label = schema.title;
+      }
+      else if (schema.name) {
+        label = crCommon.capitalize(schema.name);
+      }
+      else if (path) {
+        var parts = path.split('/');
+        label = crCommon.capitalize(parts[parts.length - 1]);
+      }
+
+      if (schema.hasOwnProperty('view') && angular.isObject(schema.view)) {
+        label = schema.view.name || label;
+      }
+      return label;
+    }
+
+
+    function buildControl(scope, schemaPath, modelPath, absPath, required) {
+      var tmpl = '<div cr-control'
+            + ' model="' + (modelPath || 'model') + '"'
+            + ' schema="' + (schemaPath || 'schema') + '"'
+            + ' path="' + (absPath || '') + '"';
+      if (required) {
+        tmpl += ' required';
+      }
+      tmpl += '></div>';
+      return $compile(tmpl)(scope);
+    }
+
+
+    function buildType(scope, schema) {
+      var tmpl = '<div ' + getType(schema) + '></div>';
+      return $compile(tmpl)(scope);
+    }
+
+
+    function buildProperties(scope, schema, model, path) {
+
+      function isRequired(name) {
+        var req = schema.required || [];
+        return req.indexOf(name) !== -1;
+      };
+
+      return Object.keys(schema.properties).filter(function(key) {
+        // ignore some keys
+        return !crSchema.isPrivateProperty(key);
+
+      }).map(function(key) {
+        // create a control for each object property
+        var subSchema = schema.properties[key];
+        var absPath = (path ? path : '') + '/' + key;
+
+        if (!model.hasOwnProperty(key)) {
+          model[key] = crSchema.createValue(subSchema);
+        }
+        return {
+          schema: subSchema,
+          path: absPath,
+          elem:  buildControl(scope,
+                              'schema.properties.' + key,
+                              'model.' + key,
+                              absPath,
+                              isRequired(key))
+        };
+      });
     }
 
 
     return {
-      buildTemplate: buildTemplate,
-      getModelTitle: getModelName
+      getType: getType,
+      getLabel: getLabel,
+
+      buildControl: buildControl,
+      buildType: buildType,
+      buildProperties: buildProperties
     };
   });
 
 })();
+
 (function() {
 
   var module = angular.module('cores.services');
@@ -937,12 +683,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   // Create a new modal id
   var createModalId = (function(id) {
     return function() { return 'modal-' + ++id; };
-  })(0);
-
-
-  // Create a new object id
-  var createObjectId = (function(id) {
-    return function() { return 'object-' + ++id; };
   })(0);
 
 
@@ -981,50 +721,14 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   };
 
 
-  var merge = function(a, b) {
-    for (var x in b) {
-      a[x] = b[x];
-    }
-    return a;
-  };
-
-
   module.service('crCommon', function($q) {
 
     return {
       createFileId: createFileId,
       createModalId: createModalId,
-      createObjectId: createObjectId,
 
       slugify: slugify,
-      capitalize: capitalize,
-
-      merge: merge
-    };
-  });
-
-})();
-(function() {
-
-  var module = angular.module('cores.services');
-
-  //
-  // wraps link functions for generic stuff
-  //
-  module.factory('crFieldLink', function(crCommon, crOptions) {
-
-    return function(/*[defaults], linkFn*/) {
-
-      var defaults = arguments.length === 2 ? arguments[0] : {
-          showLabel: true
-      };
-      var linkFn = arguments[arguments.length - 1];
-
-      return function(scope, elem, attrs) {
-        scope.options = crCommon.merge(angular.copy(defaults),
-                                       crOptions.parse(attrs.options));
-        linkFn(scope, elem, attrs);
-      };
+      capitalize: capitalize
     };
   });
 
@@ -1075,6 +779,25 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   }
 
 
+  function toObjectNotation(path) {
+    var parts = path.split('/');
+    var onot = '';
+
+    parts.forEach(function(p) {
+      if (p === '') return;
+      if (isNaN(p)) {
+        // property
+        onot += (onot.length > 0 ? '.' : '') + p;
+      }
+      else {
+        // array index
+        onot += '[' + parseInt(p, 10) + ']';
+      }
+    });
+    return onot;
+  }
+
+
   //
   // json pointer get/set service
   //
@@ -1082,31 +805,8 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
     return {
       get: jsonPointerGet,
-      set: jsonPointerSet
-    };
-  });
-
-})();
-(function() {
-
-  var module = angular.module('cores.services');
-
-  //
-  // attr options service
-  //
-  module.service('crOptions', function() {
-
-    return {
-
-      stringify: function(options) {
-        options = options || {};
-        return escape(JSON.stringify(options));
-      },
-
-      parse: function(options) {
-        if (!options) return {};
-        return JSON.parse(unescape(options));
-      }
+      set: jsonPointerSet,
+      toObjectNotation: toObjectNotation
     };
   });
 
@@ -1144,7 +844,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   //
   module.factory('crResource', function($http, $q, $rootScope) {
 
-    var Resource = function(type, config, host) {
+    var Resource = function(type, config, apiUrl) {
 
       this.type = type;
 
@@ -1155,13 +855,13 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         config
       );
 
-      if (host) {
-        this.path = host + this.path;
-        this.schemaPath = host + this.schemaPath;
+      if (apiUrl) {
+        this.path = apiUrl + this.path;
+        this.schemaPath = apiUrl + this.schemaPath;
 
         var self = this;
         angular.forEach(this.viewPaths, function(path, name) {
-          self.viewPaths[name] = host + path;
+          self.viewPaths[name] = apiUrl + path;
         });
       }
     };
@@ -1195,7 +895,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           params = id;
         }
       }
-      var config = { params: params || {} };
+      var config = { params: params };
 
       return $http.get(path, config).then(
         function(res) { return res.data; },
@@ -1349,23 +1049,22 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     var Resources = function() {
 
       this._resources = {};
-      this._path = '';
+      this._apiUrl = '';
     };
 
 
     Resources.prototype.init = function(options) {
 
       options = options || {};
-      this._host = options.host || '';
-      this._path = this._host + (options.path || '');
+      this._apiUrl = options.url || '';
 
       var self = this;
 
-      return $http.get(this._path + '/_index').then(
+      return $http.get(this._apiUrl + '/_index').then(
 
         function(res) {
           angular.forEach(res.data, function(config, key) {
-            self._resources[key] = new crResource(key, config, self._host);
+            self._resources[key] = new crResource(key, config, self._apiUrl);
           });
           return self._resources;
         },
@@ -1380,7 +1079,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
       count = count || 1;
 
-      return $http.get(this._path + '/_uuids?count=' + count).then(
+      return $http.get(this._apiUrl + '/_uuids?count=' + count).then(
         function(res) {
           return res.data.uuids;
         },
@@ -1520,174 +1219,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 })();
 (function() {
 
-  var module = angular.module('cores.services');
-
-
-  module.factory('crValidation', function() {
-
-    return function(scope, watchExpr) {
-
-      watchExpr = watchExpr || 'model';
-
-      // clientside errors
-      var errors = {};
-      // serverside errors
-      var customErrors = {};
-
-      var constraints = [];
-
-
-      scope.hasErrors = function() {
-        return Object.keys(errors).length > 0 || Object.keys(customErrors).length > 0;
-      };
-
-
-      scope.hasError = function(name) {
-        return !!(errors[name] || customErrors[name]);
-      };
-
-
-      scope.getFirstError = function() {
-        for (var x in errors) {
-          if (errors[x]) return errors[x];
-        }
-        for (var y in customErrors) {
-          if (customErrors[y]) return customErrors[y];
-        }
-      };
-
-
-      var setError = function(name, message) {
-        errors[name] = message;
-        scope.$emit('cr:set:error', scope.path + ':' + name);
-      };
-
-
-      var removeError = function(name) {
-        if (errors.hasOwnProperty(name)) {
-          delete errors[name];
-          scope.$emit('cr:remove:error', scope.path + ':' + name);
-        }
-      };
-
-
-      var setCustomError = function(name, message) {
-        customErrors[name] = message;
-        scope.$emit('cr:set:error', scope.path + ':' + name);
-      };
-
-
-      var removeCustomError = function(name) {
-        if (customErrors.hasOwnProperty(name)) {
-          delete customErrors[name];
-          scope.$emit('cr:remove:error', scope.path + ':' + name);
-        };
-      };
-
-
-      var clearCustomErrors = function() {
-        angular.forEach(customErrors, function(error, name) {
-          removeCustomError(name);
-        });
-      };
-
-
-      var addConstraint = function(name, message, condition, isCustomConstraint) {
-        // only check constraints that are defined in the schema
-        if (!isCustomConstraint &&
-            !scope.schema.hasOwnProperty(name)) return;
-
-        constraints.push(function(value) {
-          condition(value) ? removeError(name) : setError(name, message);
-        });
-      };
-
-
-      scope.$on('cr:set:customError', function(e, path, code, message) {
-        if (path === scope.path) {
-          setCustomError(code, message);
-          return true;
-        }
-      });
-
-
-      scope.$watch(watchExpr, function(newValue, oldValue, scope) {
-        constraints.forEach(function(c) {
-          c(newValue);
-        });
-        clearCustomErrors();
-      });
-
-
-      return {
-        setError: setError,
-        removeError: removeError,
-        addConstraint: addConstraint
-      };
-    };
-  });
-})();
-(function() {
-
-  var module = angular.module('cores.directives');
-
-
-  module.directive('crAnyofItem', function($compile, crCommon, crBuild) {
-    return {
-      require: '^crAnyofArray',
-      scope: {
-        model: '=',
-        name: '@',
-        path: '@',
-        schemas: '=',
-        options: '=?'
-      },
-
-      replace: true,
-      templateUrl: 'cr-anyof-array-item.html',
-
-      controller: 'crArrayItemCtrl',
-
-      link: function(scope, elem, attrs, anyof) {
-
-        // get the schema from the anyof-array
-        scope.schema = anyof.getSchema(scope.model.type_);
-        scope.array = anyof;
-
-        var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-                                         scope.path, { indent: false });
-        var link = $compile(tmpl);
-        var e = link(scope);
-        elem.find('.cr-item-body').html(e);
-        elem.find('.dropdown-toggle').dropdown();
-      }
-    };
-  });
-
-
-  module.directive('crAnyofArray', function($compile, crCommon, crFieldLink) {
-    return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
-      replace: true,
-      templateUrl: 'cr-anyof-array.html',
-
-      controller: 'crAnyofArrayCtrl',
-
-      link: crFieldLink({ showLabel: true, indent: false }, function(scope, elem, attrs) {
-
-        elem.find('.dropdown-toggle').dropdown();
-      })
-    };
-  });
-})();
-(function() {
-
   var module = angular.module('cores.directives');
 
 
@@ -1695,53 +1226,98 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
     return {
       scope: {
         model: '=',
-        schema: '=',
-        path: '@',
-        options: '=?'
+        getSchema: '&',
+        path: '@'
       },
-
-      replace: true,
-      templateUrl: 'cr-array-item.html',
-
-      controller: 'crArrayItemCtrl',
 
       link: function(scope, elem, attrs) {
 
-        var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model', scope.path,
-                                         { showLabel: false, indent: false });
+        scope.schema = scope.getSchema();
 
-        var link = $compile(tmpl);
-        var e = link(scope);
-        elem.find('.cr-item-body').html(e);
+        var control = crBuild.buildControl(scope, 'schema', 'model', scope.path);
+        elem.html(control);
       }
     };
   });
 
+})();
+(function() {
 
-  module.directive('crArray', function(crCommon, crSchema, crFieldLink) {
+  var module = angular.module('cores.directives');
+
+
+  module.directive('crArray', function(crSchema) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
       replace: true,
       templateUrl: 'cr-array.html',
 
-      controller: 'crArrayCtrl',
+      link: function(scope, elem, attrs) {
 
-      link: crFieldLink({ showLabel: true, indent: false }, function(scope, elem, attrs) {
+        scope.schemas = {};
 
-        // ngrepeat can only bind to references when it comes to form fields
-        // thats why we can only work with items of type object not primitives
-        // this may change in a feature release
-        if (!crSchema.isObjectSchema(scope.schema.items) &&
-            !crSchema.isRefSchema(scope.schema.items)) {
-          throw new Error('Array items schema is not of type object: ' + JSON.stringify(scope.schema.items));
+        if (scope.schema.items.hasOwnProperty('anyOf')) {
+          // anyof array
+          scope.schema.items.anyOf.forEach(function(s) {
+            if (!s.name) throw new Error('AnyOf schema has to have a name ' + JSON.stringify(s));
+            scope.schemas[s.name] = s;
+          });
         }
-      })
+        else if (scope.schema.items) {
+          // standard array
+          scope.schemas.item = scope.schema.items;
+        }
+
+
+        // hide label and dont indent items
+        angular.forEach(scope.schemas, function(s) {
+          s.view = s.view || {};
+          if (!s.view.hasOwnProperty('showLabel')) {
+            s.view.showLabel = false;
+          }
+          if (!s.view.hasOwnProperty('indent')) {
+            s.view.indent = false;
+          }
+        });
+
+
+        scope.moveUp = function(index) {
+          if (index === 0) return;
+          scope.model.splice(index - 1, 0, scope.model.splice(index, 1)[0]);
+        };
+
+        scope.moveDown = function(index) {
+          if (index >= scope.model.length) return;
+          scope.model.splice(index + 1, 0, scope.model.splice(index, 1)[0]);
+        };
+
+        scope.remove = function(index) {
+          scope.model.splice(index, 1);
+        };
+
+        scope.addItem = function(index, schema) {
+          var obj = crSchema.createValue(schema, schema.name);
+          if (index >= scope.model.length) {
+            scope.model.push(obj);
+          }
+          else {
+            scope.model.splice(index, 0, obj);
+          }
+        };
+
+        scope.getSchema = function(type) {
+          type = type || 'item';
+          var schema = scope.schemas[type];
+
+          // ngrepeat can only bind to references when it comes to form fields
+          // thats why we can only work with items of type object not primitives
+          // this may change in a feature release
+          if (!crSchema.isObjectSchema(schema) && !crSchema.isRefSchema(schema)) {
+            throw new Error('Array items schema is not of type object: ' + JSON.stringify(schema));
+          }
+          return schema;
+        };
+
+      }
     };
   });
 })();
@@ -1752,13 +1328,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   module.directive('crBoolean', function() {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-boolean.html'
     };
@@ -1770,103 +1340,106 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
   module.directive('crColumnObject', function(
-    $compile,
-    crBuild,
-    crOptions,
-    crCommon,
-    crSchema
-  ) {
-    return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
-      templateUrl: 'cr-column-object.html',
-
-      link: function(scope, elem, attrs) {
-        var defaults = {
-          showLabel: true,
-          showLabels : true,
-          indent: false,
-          inline: false
-        };
-        scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
-
-        var isRequired = function (name) {
-          var req = scope.schema.required || [];
-          return req.indexOf(name) !== -1;
-        };
-
-        var numProps = Object.keys(scope.schema.properties).filter(
-          function(key) {
-            return !crSchema.isPrivateProperty(key);
-          }
-        ).length;
-        var cols = Math.round(12 / numProps);
-        if (cols < 2) cols = 2;
-        var colClass = 'col-md-' + cols;
-
-        var tmpl = '<div class="row">';
-        angular.forEach(scope.schema.properties, function(subSchema, key) {
-
-          // ignore some keys
-          if (crSchema.isPrivateProperty(key)) return;
-
-          if (!scope.model.hasOwnProperty(key)) {
-            scope.model[key] = crSchema.createValue(subSchema);
-          }
-
-          tmpl += '<div class="cr-seperate ' + colClass + '">';
-          tmpl += crBuild.buildTemplate(subSchema, scope.model[key],
-                                        'schema.properties.' + key, 'model.' + key,
-                                        (scope.path ? scope.path : '')  + '/' + key,
-                                        { isRequired: isRequired(key),
-                                          showLabel: scope.options.showLabels });
-          tmpl += '</div>';
-        });
-        tmpl += '</div>';
-
-        var link = $compile(tmpl);
-        var content = link(scope);
-        elem.find('.properties').append(content);
-      }
-    };
-  });
-
-})();
-
-(function() {
-
-  var module = angular.module('cores.directives');
-
-
-  module.directive('crControl', function(
-    $compile,
     crBuild
   ) {
     return {
-      scope: {
-        schema: '=',
-        model: '=',
-        path: '@',
-        options: '='
-      },
+      replace: true,
+      templateUrl: 'cr-object.html',
 
       link: function(scope, elem, attrs) {
-        console.log('control link', elem[0]);
-        var unwatch = scope.$watch('schema', function(newValue) {
-          if (!newValue) return;
-          unwatch();
+        scope.options = angular.extend({
+          showLabel: true,
+          indent: true,
+          inline: false
+        }, scope.schema.view);
 
-          var build = crBuild.buildTemplate(scope.schema, scope.model,
-                                            scope.path, scope.options);
-          var link = $compile(build.template);
-          var content = link(scope);
-          elem.html(build.template);
+        var props = crBuild.buildProperties(scope, scope.schema, scope.model, scope.path);
+
+        var cols = Math.round(12 / props.length);
+        if (cols < 2) cols = 2;
+        var colClass = 'col-md-' + cols;
+
+        var columns = [];
+        for (var i = 0; i < props.length; ++i) {
+          columns.push($('<div class="cr-seperate ' + colClass + '"></div>').html(props[i].elem));
+        }
+        var row = $('<div class="row"></div>').html(columns);
+        elem.find('.properties').append(row);
+      }
+    };
+  });
+
+})();
+
+(function() {
+
+  var module = angular.module('cores.directives');
+
+  module.directive('crControl', function(crBuild) {
+    return {
+      require: 'crControl',
+      scope: {
+        model: '=',
+        schema: '=',
+        path: '@'
+      },
+      replace: true,
+      templateUrl: 'cr-control.html',
+
+      controller: function($scope) {
+        var self = this;
+        var validators = {};
+
+        $scope.errors = {};
+        $scope.valid = true;
+        $scope.dirty = false;
+
+        this.addValidator = function(name, fn) {
+          validators[name] = fn;
+        };
+
+        this.setValidity = function(code, valid) {
+          $scope.errors[code] = valid;
+        };
+
+        this.validate = function() {
+          $scope.valid = true;
+          angular.forEach(validators, function(validator, code) {
+            var valid = validator($scope.model);
+            if (!valid) {
+              $scope.valid = false;
+            }
+            $scope.errors[code] = !valid;
+            $scope.$emit('cr:model:setValidity', $scope.path + ':' + code, valid);
+          });
+        };
+
+        $scope.$watch('model', function(newValue, oldValue) {
+          if (newValue !== oldValue) {
+            $scope.dirty = true;
+          }
+          self.validate();
         });
+      },
+
+
+      link: function(scope, elem, attrs, ctrl) {
+
+        scope.required = attrs.hasOwnProperty('required');
+        scope.label = crBuild.getLabel(scope.schema, scope.path);
+
+        scope.options = angular.extend({
+          showLabel: true
+        }, scope.schema.view);
+
+        scope.$on('cr:model:error', function(e, path, code, message) {
+          if (path === scope.path) {
+            e.handled = true;
+            ctrl.setValidity(code, false);
+          }
+        });
+
+        elem.html(crBuild.buildType(scope, scope.schema));
       }
     };
   });
@@ -1877,25 +1450,19 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crDatetime', function(crFieldLink, crValidation) {
+  module.directive('crDatetime', function() {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-datetime.html',
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: function(scope, elem, attrs, crCtrl) {
 
-        var validation = crValidation(scope);
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return !!value && value !== '';
-          }, true);
+        // validation
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value;
+          });
         }
 
         // the date
@@ -1913,6 +1480,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         dtDate.data('DateTimePicker').setDate(date);
         dtDate.on('change.dp', function(e) {
           e.stopPropagation();
+          if (!e.date) return;
 
           date.setFullYear(e.date.year());
           date.setMonth(e.date.month());
@@ -1920,6 +1488,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
           scope.model = date.toISOString();
           scope.$apply();
+          crCtrl.validate();
         });
 
         // timepicker
@@ -1932,14 +1501,16 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         dtTime.data('DateTimePicker').setDate(date);
         dtTime.on('change.dp', function(e) {
           e.stopPropagation();
+          if  (!e.date) return;
 
           date.setHours(e.date.hours());
           date.setMinutes(e.date.minutes());
 
           scope.model = date.toISOString();
           scope.$apply();
+          crCtrl.validate();
         });
-      })
+      }
     };
   });
 })();
@@ -1948,20 +1519,11 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crEnum', function(crFieldLink) {
+  module.directive('crEnum', function() {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
-      templateUrl: 'cr-enum.html',
-
-      link: crFieldLink(function(scope, elem, attrs) {
-      })
+      templateUrl: 'cr-enum.html'
     };
   });
 
@@ -1971,71 +1533,123 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crImage', function($compile, crCommon, crFieldLink, crValidation) {
+  module.directive('crImage', function(crCommon) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-image.html',
 
-
-      link: crFieldLink({
-        baseUrl: '/'
-
-      }, function(scope, elem, attrs) {
-
-        var validation = crValidation(scope, 'model.name');
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return !!scope.model.name && scope.model.name !== '';
-          }, true);
-        }
+      link: function(scope, elem, attrs, crCtrl) {
 
         var fileId = crCommon.createFileId();
 
-        var $input = elem.find('input[type="file"]');
-        var $preview = elem.find('img');
+        // validation
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return value && value.name;
+          });
+        }
 
         scope.imgSrc = '';
 
         // preview when already saved
-        scope.$watch('model.url', function(url) {
-          scope.imgSrc = url ? scope.options.baseUrl + url : '';
+        scope.$watch('model.url', function(value) {
+          scope.imgSrc = value
+            ? (scope.options.baseUrl || '') + value
+            : '';
         });
 
-        $input.on('change', function(e) {
 
-          var files = $input[0].files;
-          if (files.length === 0) {
+        elem.find('input[type="file"]').on('change', function(e) {
+          if (this.files.length === 0) {
             // no file selected
             return;
           }
 
-          var file = files[0];
+          var file = this.files[0];
 
           // preview selected image
-          var fr = new FileReader();
-          fr.onload = function(e) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
             scope.imgSrc = e.target.result;
             scope.$apply();
           };
-          fr.readAsDataURL(file);
+          reader.readAsDataURL(file);
 
           scope.model.name = file.name;
 
           // notify model about file
           scope.$emit('cr:file:set', fileId, file);
-          scope.$apply();
+          scope.$digest();
+          crCtrl.validate();
         });
-      })
+      }
     };
   });
 
+
+  //
+  // preview
+  //
+
+  module.directive('crImagePreview', function(crResources) {
+    return {
+      scope: {
+        model: '=',
+        schema: '=',
+        options: '='
+      },
+
+      replace: true,
+      templateUrl: 'cr-image-preview.html',
+
+      link: function(scope, elem, attr) {
+        scope.baseUrl = '';
+        // try to get the baseUrl from the referenced schemas file property's view object
+        crResources.get(scope.schema.$ref).schema().then(function(imageSchema) {
+          scope.baseUrl = imageSchema.properties.file.view.baseUrl || '';
+        });
+      }
+    };
+  });
+
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
+  module.directive('crInteger', function() {
+    return {
+      require: '^crControl',
+      replace: true,
+      templateUrl: 'cr-number.html',
+
+      link: function(scope, elem, attrs, crCtrl) {
+
+        if (scope.schema.hasOwnProperty('multipleOf')) {
+          crCtrl.addValidator('multipleOf', function(value) {
+            return (value % scope.schema.multipleOf) === 0;
+          });
+        }
+        if (scope.schema.hasOwnProperty('maximum')) {
+          crCtrl.addValidator('maximum', function(value) {
+            return value <= scope.schema.maximum;
+          });
+        }
+        if (scope.schema.hasOwnProperty('minimum')) {
+          crCtrl.addValidator('minimum', function(value) {
+            return value >= scope.schema.minimum;
+          });
+        }
+        if (scope.options.isInteger) {
+          crCtrl.addValidator('integer', function(value) {
+            return Math.floor(value) === value;
+          });
+        }
+      }
+    };
+  });
 })();
 (function() {
 
@@ -2043,47 +1657,30 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
   module.directive('crMarkdown', function(
-    crCommon,
-    crFieldLink,
-    crValidation,
     crTextareaAutosize
   ) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-markdown.html',
 
-      link: crFieldLink({
-        showLabel: true,
-        showBorder: true
-      }, function(scope, elem, attrs) {
+      link: function(scope, elem, attrs, crCtrl) {
 
-        var validation = crValidation(scope);
-        validation.addConstraint(
-          'maxLength',
-          'Text is longer than ' + scope.schema.maxLength,
-          function(value) {
+        scope.options = angular.extend({
+          showBorder: true
+        }, scope.options);
+
+        if (scope.schema.hasOwnProperty('maxLength')) {
+          crCtrl.addValidator('maxLength', function(value) {
             return value.length <= scope.schema.maxLength;
           });
-
-        validation.addConstraint(
-          'minLength',
-          'Text is shorter than ' + scope.schema.minLength,
-          function(value) {
+        }
+        if (scope.schema.hasOwnProperty('minLength')) {
+          crCtrl.addValidator('minLength', function(value) {
             return value.length >= scope.schema.minLength;
           });
-
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return !!value && value !== '';
-          }, true);
         }
+
 
         var $area = elem.find('.cr-editor-area');
         var $preview = elem.find('.cr-editor-preview');
@@ -2114,7 +1711,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.$on('cr:tab:shown', function(e) {
           updateSize();
         });
-      })
+      }
     };
   });
 
@@ -2124,63 +1721,77 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crModelForm', function($compile, crBuild, crSchema, crCommon) {
+  module.directive('crModelForm', function(crBuild, crSchema) {
     return {
       scope: {
-        model: '=',
         schema: '=',
-        valid: '=',
-        debug: '='
+        model: '=?',
+        valid: '=?',
+        debug: '=?'
       },
 
       replace: true,
       templateUrl: 'cr-model-form.html',
 
-      controller: function($scope) {
-
-        $scope.valid = true;
-        $scope.errors = {};
-
-        $scope.$on('cr:set:error', function(e, id) {
-          e.stopPropagation();
-          $scope.errors[id] = true;
-          $scope.valid = false;
-        });
-
-        $scope.$on('cr:remove:error', function(e, id) {
-          e.stopPropagation();
-          delete $scope.errors[id];
-          $scope.valid = Object.keys($scope.errors).length === 0;
-        });
-      },
-
-      link: function(scope, elem) {
+      link: function(scope, elem, attrs) {
 
         var childScope;
 
-        scope.$watch('model', function() {
-          if (!scope.schema) return;
-          scope.valid = true;
-          scope.errors = {};
-
-          if (!crSchema.isObjectSchema(scope.schema)) {
-            throw new Error('Top level schema has to be an object');
-          }
-
+        function build() {
           // cleanup dom and scope
           if (childScope) {
             elem.find('form').empty();
             childScope.$destroy();
           }
-          // create markup
-          var tmpl = crBuild.buildTemplate(scope.schema, scope.model, 'schema', 'model',
-                                           '', { showLabel: false, indent: false });
-
-          // compile and link with new scope
           childScope = scope.$new();
-          var link = $compile(tmpl);
-          var content = link(childScope);
-          elem.find('form').html(content);
+          var control = crBuild.buildControl(childScope);
+          elem.find('form').html(control);
+        }
+
+
+        scope.$watch('schema', function(newValue, oldValue) {
+          if (!newValue) {
+            return;
+          }
+          if (!crSchema.isObjectSchema(newValue)) {
+            throw new Error('Top level schema has to be an object ' + JSON.stringify(newValue));
+          }
+          scope.schema.view = angular.extend({
+            indent: false,
+            showLabel: false
+          }, scope.schema.view);
+
+          if (!scope.model) {
+            // create default model
+            scope.model = crSchema.createValue(newValue);
+            build();
+          }
+        });
+
+
+        scope.$watch('model', function(newValue) {
+          if (!scope.schema) {
+            return;
+          }
+          if (!newValue) {
+            scope.model = crSchema.createValue(scope.schema);
+          }
+          build();
+        });
+
+
+        scope.errors = {};
+        scope.valid = true;
+
+        scope.$on('cr:model:setValidity', function(e, code, valid) {
+          e.stopPropagation();
+          scope.errors[code] = !valid;
+          scope.valid = true;
+          angular.forEach(scope.errors, function(error, key) {
+            if (error) {
+              scope.valid = false;
+            }
+          });
         });
       }
     };
@@ -2326,7 +1937,6 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             scope.isLoading = false;
 
           }, function(err) {
-            console.log('ERROR', err);
             throw err;
           });
         }
@@ -2356,36 +1966,44 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           load();
         });
 
+
         //
         // load schema and fill list
         //
-        resource = crResources.get(scope.type);
-        resource.schema().then(function(s) {
-          schema = s;
-
-          // auto generate headers when not set
-          if (!scope.headers || scope.headers.length === 0) {
-            scope.headers = Object.keys(schema.properties).filter(function(key) {
-              return !crSchema.isPrivateProperty(key);
-            }).map(function(key) {
-              return { title: crCommon.capitalize(key).split('/')[0], path: key };
-            });
+        scope.$watch('type', function(newType) {
+          if (!newType) {
+            return;
           }
-          // table column titles
-          scope.titles = scope.headers.map(function(header) {
-            return header.title ||
-              (header.path ? crCommon.capitalize(header.path).split('/')[0] : '');
+          scope.type = newType;
+
+          resource = crResources.get(scope.type);
+          resource.schema().then(function(s) {
+            schema = s;
+
+            // auto generate headers when not set
+            if (!scope.headers || scope.headers.length === 0) {
+              scope.headers = Object.keys(schema.properties).filter(function(key) {
+                return !crSchema.isPrivateProperty(key);
+              }).map(function(key) {
+                return { title: crCommon.capitalize(key).split('/')[0], path: key };
+              });
+            }
+            // table column titles
+            scope.titles = scope.headers.map(function(header) {
+              return header.title ||
+                (header.path ? crCommon.capitalize(header.path).split('/')[0] : '');
+            });
+
+            if (autoload) load();
           });
 
-          if (autoload) load();
-        });
-
-        scope.$watch('view', function(newValue, oldValue) {
-          if (newValue === oldValue) return;
-          if (!resource) return;
-          // reload list on view change
-          reset();
-          load();
+          scope.$watch('view', function(newValue, oldValue) {
+            if (newValue === oldValue) return;
+            if (!resource) return;
+            // reload list on view change
+            reset();
+            load();
+          });
         });
       }
     };
@@ -2433,47 +2051,9 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crModelModal', function() {
-    return {
-      scope: {
-        type: '@',
-        path: '@',
-        modalId: '@',
-        defaults: '=?',
-        options: '=?'
-      },
-
-      replace: true,
-      templateUrl: 'cr-model-modal.html',
-
-      controller: 'crModelCtrl',
-
-
-      link: function(scope, elem, attrs) {
-
-        scope.$on('cr:model:saved', function() {
-          // close on save
-          elem.modal('hide');
-        });
-
-        scope.$on('cr:showModal:model', function(e, modalId, modelId) {
-          if (modalId === scope.modalId) {
-            e.preventDefault();
-            scope.modelId = modelId;
-            elem.modal('show');
-          }
-        });
-      }
-    };
-  });
-})();
-
-(function() {
-
-  var module = angular.module('cores.directives');
-
-
-  module.directive('crModel', function() {
+  module.directive('crModelResource', function(
+    $q, crSchema, crResources, crJSONPointer
+  ) {
     return {
       scope: {
         type: '@',
@@ -2484,9 +2064,182 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
       },
 
       replace: true,
-      templateUrl: 'cr-model.html',
+      templateUrl: 'cr-model-resource.html',
 
-      controller: 'crModelCtrl'
+
+      link: function(scope, elem, attrs) {
+
+        var STATE_EDITING = 'editing';
+        var STATE_LOADING = 'loading';
+        var STATE_SAVING = 'saving';
+        var STATE_ERROR = 'error';
+
+        scope.options = scope.options || {};
+        scope.valid = true;
+        scope.state = STATE_EDITING;
+        scope.debug = false;
+        scope.error = null;
+        scope.unhandledErrors = [];
+
+        var resource;
+        var files = {};
+
+        scope.$on('cr:file:set', function(e, id, file) {
+          e.stopPropagation();
+          files[id] = file;
+        });
+
+        scope.$on('cr:file:remove', function(e, id) {
+          e.stopPropagation();
+          delete files[id];
+        });
+
+
+        function setModel(model) {
+          if (!model) {
+            // create default model
+            model = crSchema.createValue(scope.schema);
+            // set custom default values
+            if (scope.defaults) {
+              angular.forEach(scope.defaults, function(value, key) {
+                crJSONPointer.set(model, key, value);
+              });
+            }
+          }
+          // reset files dict when model changes
+          files = {};
+          scope.model = model;
+        };
+
+
+        function load(id) {
+          scope.state = STATE_LOADING;
+          return resource.load(id).then(function(doc) {
+            setModel(doc);
+            scope.state = STATE_EDITING;
+
+          }, function(err) {
+            scope.state = STATE_ERROR;
+            scope.error = err;
+          });
+        };
+
+
+        scope.save = function() {
+          scope.$emit('cr:model:save');
+          var def = $q.defer();
+
+          if (!scope.valid) {
+            def.reject(new Error('Model is not valid'));
+            return def.promise;
+          }
+          scope.state = STATE_SAVING;
+
+          var fs = Object.keys(files).map(function(k) { return files[k]; });
+
+          resource.save(scope.model, fs).then(function(doc) {
+
+            setModel(doc);
+            scope.modelId = doc._id;
+            scope.state = STATE_EDITING;
+            scope.$emit('cr:model:saved', scope.model);
+            def.resolve(doc);
+
+          }, function(err) {
+            scope.unhandledErrors = [];
+            if (err.errors && angular.isArray(err.errors)) {
+              // validation errors
+              err.errors.forEach(function(ve) {
+                var event = scope.$broadcast('cr:model:error', '/model' + ve.path, ve.code, ve.message);
+                if (!event.handled) {
+                  console.log('event handled');
+                  scope.unhandledErrors.push(ve.message + ' - ' + ve.path);
+                }
+              });
+            }
+            scope.state = STATE_ERROR;
+            scope.error = err;
+            def.reject(err);
+          });
+          return def.promise;
+        };
+
+
+        scope.askDestroy = function() {
+          elem.find('#delete-modal').modal('show');
+        };
+
+
+        scope.destroy = function() {
+          scope.$emit('cr:model:destroy');
+
+          return resource.destroy(scope.model).then(
+            function() {
+              setModel();
+              scope.$emit('cr:model:destroyed');
+            }
+          );
+        };
+
+
+        scope.toggleDebug = function() {
+          scope.debug = !scope.debug;
+        };
+
+
+        scope.isNew = function() {
+          if (!scope.model) return true;
+          return !scope.model._rev;
+        };
+
+
+        scope.buttonClick = function(e, eventName) {
+          e.stopPropagation();
+          scope.$emit(eventName, scope.model);
+        };
+
+
+        //
+        // update when type is set
+        //
+        scope.$watch('type', function(newType) {
+          if (!newType) {
+            return;
+          }
+          scope.type = newType;
+          scope.state = STATE_LOADING;
+
+          resource = crResources.get(scope.type);
+
+          // load schema
+          resource.schema().then(function(schema) {
+
+            // load or create default model
+            scope.schema = schema;
+            var id = scope.modelId;
+
+            if (!id) {
+              setModel();
+              scope.state = STATE_EDITING;
+            }
+            else {
+              return load(id);
+            }
+          }).then(function() {
+
+            // watch for modelId changes to load/clear the model
+            scope.$watch('modelId', function(value) {
+              if (value) {
+                load(value);
+              }
+              else {
+                setModel();
+              }
+            });
+          });
+        });
+
+      }
     };
   });
 })();
@@ -2497,61 +2250,47 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
   module.directive('crMultiSelectRef', function(
-    crFieldLink,
     crResources,
-    crCommon,
     crJSONPointer
   ) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-multi-select-ref.html',
 
-      link: crFieldLink({
-        showLabel: true, indent: true
-      }, function(scope, elem, attrs) {
+      link: function(scope, elem, attr, crCtrl) {
 
         scope.rows = [];
 
-        // load docs
-        var unwatch = scope.$watch('schema.items.$ref', function(newValue) {
-          if (!scope.schema.items.$ref) return;
-          unwatch();
-
-          crResources.get(scope.schema.items.$ref).view(
-            'all', { include_docs: true }
-          ).then(function(result) {
-            // create rows
-            scope.rows = result.rows.map(function(row) {
-              var r = {
-                id: row.id,
-                selected: false
-              };
-              if (scope.options.previewPath) {
-                r.name = crJSONPointer.get(row.doc, scope.options.previewPath);
-              }
-              else  if (scope.options.previewPaths) {
-                r.name = '';
-                scope.options.previewPaths.forEach(function(path) {
-                  r.name += crJSONPointer.get(row.doc, path) + ' ';
-                });
-              }
-              return r;
-            });
-            // select rows when id is in model
-            scope.model.forEach(function(ref) {
-              scope.rows.forEach(function(row) {
-                if (row.id == ref.id_) { row.selected = true; }
+        // load models
+        crResources.get(scope.schema.items.$ref).view(
+          'all', { include_docs: true }
+        ).then(function(result) {
+          // create rows
+          scope.rows = result.rows.map(function(row) {
+            var r = {
+              id: row.id,
+              selected: false
+            };
+            if (scope.options.previewPath) {
+              r.name = crJSONPointer.get(row.doc, scope.options.previewPath);
+            }
+            else if (scope.options.previewPaths) {
+              r.name = '';
+              scope.options.previewPaths.forEach(function(path) {
+                r.name += crJSONPointer.get(row.doc, path) + ' ';
               });
+            }
+            return r;
+          });
+          // select rows when id is in model
+          scope.model.forEach(function(ref) {
+            scope.rows.forEach(function(row) {
+              if (row.id == ref.id_) { row.selected = true; }
             });
           });
         });
+
 
         // watch for selection changes
         scope.$watch('rows', function(newValue, oldValue) {
@@ -2563,7 +2302,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             return { id_: row.id };
           });
         }, true);
-      })
+      }
     };
   });
 })();
@@ -2572,62 +2311,35 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crNumber', function(crFieldLink, crValidation) {
+  module.directive('crNumber', function() {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-number.html',
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: function(scope, elem, attrs, crCtrl) {
 
-        var validation = crValidation(scope);
-
-        if (scope.options.isInteger) {
-          validation.addConstraint(
-            'integer',
-            'Value is not an integer',
-            function(value) {
-              return Math.floor(value) === value;
-            }, true);
-        }
-        else {
-          elem.find('input[type="number"]').attr('step', 'any');
-        }
-
-        validation.addConstraint(
-          'multipleOf',
-          'Value is not a multiple of ' + scope.schema.multipleOf,
-          function(value) {
+        if (scope.schema.hasOwnProperty('multipleOf')) {
+          crCtrl.addValidator('multipleOf', function(value) {
             return (value % scope.schema.multipleOf) === 0;
           });
-
-        validation.addConstraint(
-          'minimum',
-          'Value is less than ' + scope.schema.minimum,
-          function(value) {
-            return value >= scope.schema.minimum;
-          });
-
-        validation.addConstraint(
-          'maximum',
-          'Value is greater than ' + scope.schema.maximum,
-          function(value) {
+        }
+        if (scope.schema.hasOwnProperty('maximum')) {
+          crCtrl.addValidator('maximum', function(value) {
             return value <= scope.schema.maximum;
           });
-
-
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return angular.isNumber(value);
-          }, true);
         }
-      })
+        if (scope.schema.hasOwnProperty('minimum')) {
+          crCtrl.addValidator('minimum', function(value) {
+            return value >= scope.schema.minimum;
+          });
+        }
+        if (scope.options.isInteger) {
+          crCtrl.addValidator('integer', function(value) {
+            return Math.floor(value) === value;
+          });
+        }
+      }
     };
   });
 })();
@@ -2637,54 +2349,23 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
   module.directive('crObject', function(
-    $compile,
-    crBuild,
-    crOptions,
-    crCommon,
-    crSchema
+    crBuild
   ) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      replace: true,
       templateUrl: 'cr-object.html',
 
       link: function(scope, elem, attrs) {
-        var defaults = {
+        scope.options = angular.extend({
           showLabel: true,
           indent: true,
           inline: false
-        };
-        scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
+        }, scope.schema.view);
 
-        var isRequired = function (name) {
-          var req = scope.schema.required || [];
-          return req.indexOf(name) !== -1;
-        };
-
-        var tmpl = '';
-        angular.forEach(scope.schema.properties, function(subSchema, key) {
-
-          // ignore some keys
-          if (crSchema.isPrivateProperty(key)) return;
-
-          if (!scope.model.hasOwnProperty(key)) {
-            scope.model[key] = crSchema.createValue(subSchema);
-          }
-
-          tmpl += crBuild.buildTemplate(subSchema, scope.model[key],
-                                        'schema.properties.' + key, 'model.' + key,
-                                        (scope.path ? scope.path : '')  + '/' + key,
-                                        { isRequired: isRequired(key) });
-        });
-        // compile and link template
-        var link = $compile(tmpl);
-        var content = link(scope);
-        elem.find('.properties').append(content);
+        var props = crBuild.buildProperties(scope, scope.schema, scope.model, scope.path);
+        elem.find('.properties').html(
+          props.map(function(p) { return p.elem; })
+        );
       }
     };
   });
@@ -2694,45 +2375,33 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.directives');
 
-  module.directive('crPassword', function(crFieldLink, crValidation) {
+  module.directive('crPassword', function() {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-password.html',
 
-      link: crFieldLink(function(scope, elem, attrs) {
-
-        var validation = crValidation(scope);
-
-        validation.addConstraint(
-          'maxLength',
-          'Password is longer than ' + scope.schema.maxLength,
-          function(value) {
-            return value.length <= scope.schema.maxLength;
-          });
-
-        validation.addConstraint(
-          'minLength',
-          'Password is shorter than ' + scope.schema.minLength,
-          function(value) {
-            return value.length >= scope.schema.minLength;
-          });
-
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return value && value !== '';
-          }, true);
-        }
+      link: function(scope, elem, attrs, crCtrl) {
 
         scope.pass1 = '';
         scope.pass2 = '';
         var oldPass = scope.model;
+
+        crCtrl.addValidator('match', function() {
+          return scope.pass1 === scope.pass2;
+        });
+
+        if (scope.schema.hasOwnProperty('maxLength')) {
+          crCtrl.addValidator('maxLength', function(value) {
+            return value.length <= scope.schema.maxLength;
+          });
+        }
+        if (scope.schema.hasOwnProperty('minLength')) {
+          crCtrl.addValidator('minLength', function(value) {
+            return value.length >= scope.schema.minLength;
+          });
+        }
+
 
         var compareValue = function(v1, v2) {
           // only set model when passwords are equal and not empty
@@ -2743,22 +2412,29 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             else {
               scope.model = oldPass;
             }
-            validation.removeError('match');
           }
           else {
             scope.model = oldPass;
-            validation.setError('match', 'Passwords do not match');
+            crCtrl.validate();
           }
         };
 
-        scope.$watch('pass1', function(newValue) {
-          compareValue(newValue, scope.pass2);
+        scope.$watch('pass1', function(value) {
+          if (value) {
+            scope.dirty = true;
+          }
+          compareValue(value, scope.pass2);
+          crCtrl.validate();
         });
 
-        scope.$watch('pass2', function(newValue) {
-          compareValue(newValue, scope.pass1);
+        scope.$watch('pass2', function(value) {
+          if (value) {
+            scope.dirty = true;
+          }
+          compareValue(value, scope.pass1);
+          crCtrl.validate();
         });
-      })
+      }
     };
   });
 
@@ -2768,20 +2444,10 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crReadonly', function(crFieldLink) {
+  module.directive('crReadonly', function() {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
       replace: true,
-      templateUrl: 'cr-readonly.html',
-
-      link: crFieldLink(function(scope, elem, attrs) {
-      })
+      templateUrl: 'cr-readonly.html'
     };
   });
 })();
@@ -2792,54 +2458,39 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   module.directive('crRef', function(
     $compile,
-    $timeout,
-    crCommon,
-    crFieldLink,
-    crValidation
+    crResources,
+    crCommon
   ) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-ref.html',
 
-      controller: function($scope) {
+      link: function(scope, elem, attrs, crCtrl) {
 
-        $scope.$on('cr:model:saved', function(e, model) {
-          e.stopPropagation();
-          $scope.model.id_ = model._id;
-          $scope.$broadcast('cr:update:preview');
-        });
+        scope.options = angular.extend({
+          showLabel: true,
+          indent: true,
+          preview: 'cr-ref-preview',
+          list: {}
+        }, scope.schema.view);
 
-        $scope.$on('cr:list:select', function(e, id) {
-          e.stopPropagation();
-          $scope.model.id_ = id;
-          $scope.$broadcast('cr:update:preview');
-        });
-      },
-
-
-      link: crFieldLink({
-        showLabel: true,
-        preview: 'cr-ref-preview',
-        list: {}
-      }, function(scope, elem, attrs) {
-
-        scope.editModalId = crCommon.createModalId();
+        scope.modelId = scope.model.id_;
+        scope.reset = false;
         scope.selectModalId = crCommon.createModalId();
-
-        // scope methods
-        scope.newModel = function() {
-          scope.$broadcast('cr:showModal:model', scope.editModalId, null);
+        scope.showModel = false;
+        scope.modelOptions = {
+          buttons: [{ title: 'Close', event: 'cr:ref:close' }]
         };
 
-        scope.updateModel = function() {
-          scope.$broadcast('cr:showModal:model', scope.editModalId, scope.model.id_);
+        scope.newModel = function() {
+          scope.modelId = null;
+          scope.showModel = true;
+        };
+
+        scope.editModel = function() {
+          scope.modelId = scope.model.id_;
+          scope.showModel = true;
         };
 
         scope.selectModel = function() {
@@ -2850,93 +2501,83 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           return !!scope.model.id_;
         };
 
+
+        scope.$on('cr:model:saved', function(e, model) {
+          e.stopPropagation();
+          scope.showModel = false;
+          scope.model.id_ = model._id;
+          crCtrl.validate();
+          update();
+        });
+
+
+        scope.$on('cr:list:select', function(e, id) {
+          e.stopPropagation();
+          scope.showModel = false;
+          scope.modelId = scope.model.id_ = id;
+          crCtrl.validate();
+          update();
+        });
+
+
+        scope.$on('cr:ref:close', function(e) {
+          e.stopPropagation();
+          scope.showModel = false;
+        });
+
+
         // validation
-        var validation = crValidation(scope, 'model.id_');
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return !!scope.model.id_;
-          }, true);
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return value && value.id_;
+          });
         }
 
-        // create preview
-        var tmpl = '<div ' + scope.options.preview +
-              ' type="{{schema.$ref}}"' +
-              ' id="model.id_"' +
-              ' options="options">' +
-              '</div>';
+        function update() {
+          if (scope.model.id_) {
+            var resource = crResources.get(scope.schema.$ref);
+            resource.load(scope.model.id_).then(function(doc) {
+              scope.previewModel = doc;
+            });
+          }
+        }
+        update();
 
-        var link = $compile(tmpl);
-        var content = link(scope);
+        // create preview directive
+        var tmpl = '<div ' + scope.options.preview
+              + ' model="previewModel"'
+              + ' schema="schema"'
+              + ' options="options">'
+              + '</div>';
+
+        var content = $compile(tmpl)(scope);
         elem.find('.cr-preview').html(content);
-      })
+      }
     };
   });
 
 
+  //
+  // preview
+  //
 
-
-  var previewLink = function(crResources) {
-    return function(scope, elem, attrs) {
-
-      if (scope.previewPath) {
-        scope.previewPaths = [scope.previewPath];
-      }
-
-      var resource = crResources.get(scope.type);
-      resource.schema().then(function(schema) {
-        scope.schema = schema;
-      });
-
-      var update = function(id) {
-        if (id) {
-          resource.load(id).then(function(doc) {
-            scope.model = doc;
-          });
-        }
-      };
-
-      scope.$watch('id', function(newValue, oldValue) {
-        if (newValue !== oldValue) {
-          update(newValue);
-        }
-      });
-
-      scope.$on('cr:update:preview', function(e) {
-        update(scope.id);
-      });
-      update(scope.id);
-    };
-  };
-
-
-  module.directive('crRefPreview', function(crResources) {
+  module.directive('crRefPreview', function() {
     return {
       scope: {
-        type: '@',
-        id: '=',
+        model: '=',
+        schema: '=',
         options: '='
       },
 
       replace: true,
       templateUrl: 'cr-ref-preview.html',
 
-      link: previewLink(crResources)
-    };
-  });
-
-
-  module.directive('crImagePreview', function(crResources) {
-    return {
-      scope: {
-        type: '@',
-        id: '=',
-        options: '='
-      },
-
-      replace: true,
-      templateUrl: 'cr-image-preview.html',
-
-      link: previewLink(crResources)
+      link: function(scope, elem, attrs) {
+        // get the preview text from model properties pointed to by the preview paths
+        if (scope.options.previewPath) {
+          scope.options.previewPaths = [scope.options.previewPath];
+        }
+      }
     };
   });
 })();
@@ -2946,60 +2587,47 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
   module.directive('crSingleSelectRef', function(
-    crFieldLink,
-    crValidation,
     crResources,
-    crCommon,
     crJSONPointer
   ) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-single-select-ref.html',
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: function(scope, elem, attrs, crCtrl) {
+
+        // validation
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value;
+          });
+        }
 
         scope.rows = [];
 
-        // validation
-        var validation = crValidation(scope, 'model.id_');
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return !!scope.model.id_;
-          }, true);
-        }
-
-        // load docs
-        var unwatch = scope.$watch('schema.$ref', function() {
-          if (!scope.schema.$ref) return;
-          unwatch();
-
-          crResources.get(scope.schema.$ref).view('all', { include_docs: true }).then(function(result) {
-
-            scope.rows = result.rows.map(function(row) {
-              var r = {
-                id: row.id
-              };
-              if (scope.options.previewPath) {
-                r.name = crJSONPointer.get(row.doc, scope.options.previewPath);
-              }
-              else  if (scope.options.previewPaths) {
-                r.name = '';
-                scope.options.previewPaths.forEach(function(path) {
-                  r.name += crJSONPointer.get(row.doc, path) + ' ';
-                });
-              }
-              if (scope.model.id_ && r.id === scope.model.id_) {
-                scope.selectedRow = r;
-              }
-              return r;
-            });
+        // load models
+        crResources.get(scope.schema.$ref).view(
+          'all', { include_docs: true }
+        ).then(function(result) {
+          // create rows
+          scope.rows = result.rows.map(function(row) {
+            var r = {
+              id: row.id
+            };
+            if (scope.options.previewPath) {
+              r.name = crJSONPointer.get(row.doc, scope.options.previewPath);
+            }
+            else if (scope.options.previewPaths) {
+              r.name = '';
+              scope.options.previewPaths.forEach(function(path) {
+                r.name += crJSONPointer.get(row.doc, path) + ' ';
+              });
+            }
+            if (scope.model.id_ && r.id === scope.model.id_) {
+              scope.selectedRow = r;
+            }
+            return r;
           });
         });
 
@@ -3013,7 +2641,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
             scope.model.id_ = newValue.id;
           }
         });
-      })
+      }
     };
   });
 })();
@@ -3022,49 +2650,24 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
-  module.directive('crSlug', function(crCommon, crFieldLink, crValidation) {
+  module.directive('crSlug', function(crCommon) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-slug.html',
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: function(scope, elem, attrs, crCtrl) {
 
-        var validation = crValidation(scope);
-
-        validation.addConstraint(
-          'maxLength',
-          'Slug is longer than ' + scope.schema.maxLength,
-          function(value) {
+        if (scope.schema.hasOwnProperty('maxLength')) {
+          crCtrl.addValidator('maxLength', function(value) {
             return value.length <= scope.schema.maxLength;
           });
-
-        validation.addConstraint(
-          'minLength',
-          'Slug is shorter than ' + scope.schema.minLength,
-          function(value) {
+        }
+        if (scope.schema.hasOwnProperty('minLength')) {
+          crCtrl.addValidator('minLength', function(value) {
             return value.length >= scope.schema.minLength;
           });
-
-        validation.addConstraint(
-          'pattern',
-          'Slug does not match the pattern',
-          function(value) {
-            return new RegExp(scope.schema.pattern).test(value);
-          });
-
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return !!value && value !== '';
-          }, true);
         }
-
 
         scope.generate = function() {
           var sources = [];
@@ -3083,7 +2686,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
           });
           scope.model = crCommon.slugify(val);
         };
-      })
+      }
     };
   });
 
@@ -3093,49 +2696,30 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
   var module = angular.module('cores.directives');
 
-  module.directive('crString', function(crFieldLink, crValidation) {
+  module.directive('crString', function() {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-string.html',
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: function(scope, elem, attrs, crCtrl) {
 
-        var validation = crValidation(scope);
-
-        validation.addConstraint(
-          'maxLength',
-          'Text is longer than ' + scope.schema.maxLength,
-          function(value) {
+        if (scope.schema.hasOwnProperty('maxLength')) {
+          crCtrl.addValidator('maxLength', function(value) {
             return value.length <= scope.schema.maxLength;
           });
-
-        validation.addConstraint(
-          'minLength',
-          'Text is shorter than ' + scope.schema.minLength,
-          function(value) {
+        }
+        if (scope.schema.hasOwnProperty('minLength')) {
+          crCtrl.addValidator('minLength', function(value) {
             return value.length >= scope.schema.minLength;
           });
-
-        validation.addConstraint(
-          'pattern',
-          'Text does not match the pattern',
-          function(value) {
+        }
+        if (scope.schema.hasOwnProperty('pattern')) {
+          crCtrl.addValidator('pattern', function(value) {
             return new RegExp(scope.schema.pattern).test(value);
           });
-
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return !!value && value !== '';
-          }, true);
         }
-      })
+      }
     };
   });
 })();
@@ -3145,72 +2729,44 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
 
 
   module.directive('crTabObject', function(
-    $compile,
     crBuild,
-    crOptions,
-    crCommon,
-    crSchema
+    crCommon
   ) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
-      templateUrl: 'cr-tab-object.html',
+      replace: true,
+      templateUrl: 'cr-object.html',
 
       link: function(scope, elem, attrs) {
-        var defaults = {
+
+        scope.options = angular.extend({
           showLabel: true,
-          indent: false,
+          indent: true,
           inline: false
-        };
-        scope.options = crCommon.merge(defaults, crOptions.parse(attrs.options));
+        }, scope.schema.view);
 
-        var objId = crCommon.createObjectId();
+        var props = crBuild.buildProperties(scope, scope.schema, scope.model, scope.path);
 
-        var isRequired = function (name) {
-          var req = scope.schema.required || [];
-          return req.indexOf(name) !== -1;
-        };
+        var navWrapper = $('<ul class="nav nav-tabs"></ul>');
+        var contentWrapper = $('<div class="tab-content"></div>');
+        var navElems = '';
+        var contentElems = [];
 
-        var navTmpl = '<ul class="nav nav-tabs">';
-        var contentTmpl = '<div class="tab-content">';
-        var isFirst = true;
-        angular.forEach(scope.schema.properties, function(subSchema, key) {
+        props.forEach(function(prop, i) {
+          var id = 'tab' + prop.path.replace(/\//g, '-');
 
-          // ignore some keys
-          if (crSchema.isPrivateProperty(key)) return;
+          navElems += '<li' + (i === 0 ? ' class="active"' : '') + '>' +
+            '<a href="#' + id + '">' + crBuild.getLabel(prop.schema, prop.path) + '</a></li>';
 
-          if (!scope.model.hasOwnProperty(key)) {
-            scope.model[key] = crSchema.createValue(subSchema);
-          }
-          var id = key + '-' + objId;
-
-          navTmpl += '<li' + (isFirst ? ' class="active"' : '') + '>' +
-            '<a href="#' + id + '">' + crBuild.getModelTitle(subSchema, key) + '</a></li>';
-
-          contentTmpl += '<div' +
-            ' ng-class="{ \'cr-indent\': options.indent }"' +
-            ' class="tab-pane' + (isFirst ? ' active' : '') + '"' +
-            ' id="' + id + '">';
-
-          contentTmpl += crBuild.buildTemplate(subSchema, scope.model[key],
-                                               'schema.properties.' + key, 'model.' + key,
-                                               (scope.path ? scope.path : '')  + '/' + key,
-                                               { isRequired: isRequired(key), showLabel: false });
-          contentTmpl += '</div>';
-          isFirst = false;
+          contentElems.push($('<div' +
+                              + ' ng-class="{ \'cr-indent\': options.indent }"'
+                              + ' class="tab-pane' + (i === 0 ? ' active' : '') + '"'
+                              + ' id="' + id + '"></div>'
+                             ).html(prop.elem));
         });
-        navTmpl += '</ul>';
-        contentTmpl += '</div>';
+        navWrapper.html(navElems);
+        contentWrapper.html(contentElems);
 
-        // compile and link template
-        var link = $compile(navTmpl + contentTmpl);
-        var content = link(scope);
-        elem.find('.properties').append(content);
+        elem.find('.properties').append([navWrapper, contentWrapper]);
 
         elem.find('.nav-tabs a').on('click', function(e) {
           e.preventDefault();
@@ -3230,52 +2786,229 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
   var module = angular.module('cores.directives');
 
 
+  module.directive('crTags', function(
+    crResources,
+    crCommon
+  ) {
+    return {
+      require: '^crControl',
+      replace: true,
+      templateUrl: 'cr-tags.html',
+
+      link: function(scope, elem, attrs, crCtrl) {
+
+        // validation
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value;
+          });
+        }
+
+        var allTags = [];
+        var allTagsById = {};
+        var resource = crResources.get(scope.schema.items.$ref);
+
+        // load all tags
+        resource.view('all', { include_docs: true }).then(function(result) {
+
+          allTags = result.rows.map(function(row) {
+            var doc = row.doc;
+
+            // populate tags on model
+            // scope.model.forEach(function(t) {
+            //   if (t.id_ === doc._id) {
+            //     angular.extend(t, doc);
+            //   }
+            // });
+
+            allTagsById[doc._id] = doc;
+
+            // return tag for lookup
+            return {
+              doc: doc,
+              key: createKey(doc.title)
+            };
+          });
+        });
+
+
+        var tagInput = elem.find('input');
+        var dropdown = elem.find('.dropdown-menu');
+
+        scope.matches = [];
+        scope.activeListIndex = 0;
+        scope.currentTag = '';
+
+        scope.$watch('currentTag', function(value) {
+          if (!allTags) return;
+          checkMatch(value);
+        });
+
+
+        function createKey(str) {
+          return str.toLowerCase().replace(/ +?/g, '');
+        }
+
+        function match(str) {
+          var re = new RegExp('^' + createKey(str));
+          return allTags.filter(function(t) {
+            return t.key.match(re);
+          });
+        }
+
+        function checkMatch(value) {
+          if (!value) {
+            closeDropdown();
+            return;
+          }
+          scope.matches = match(value);
+          if (scope.matches.length) {
+            if (scope.matches.length < scope.activeListIndex - 1) {
+              scope.activeListIndex = scope.matches.length - 1;
+            }
+            openDropdown();
+          }
+          else {
+            closeDropdown();
+          }
+        }
+
+        function addTag(doc) {
+          var exists = scope.model.some(function(t) {
+            if (t._id === doc._id) {
+              return true;
+            }
+            return false;
+          });
+          if (exists) return false;
+          scope.model.push({ id_: doc._id });
+          return true;
+        }
+
+        function createTag(name) {
+          var doc = {
+            title: name,
+            slug: crCommon.slugify(name)
+          };
+
+          resource.save(doc).then(function(doc) {
+            console.log('save success', doc);
+            scope.currentTag = '';
+            if (addTag(doc)) {
+              allTags.push({
+                doc: doc,
+                key: createKey(doc.title)
+              });
+              allTagsById[doc._id] = doc;
+            }
+
+          }, function(err) {
+            console.log('save error', err);
+            scope.error = err;
+          });
+        }
+
+        function removeTag(index) {
+          scope.model.splice(index, 1);
+        }
+
+        function openDropdown() {
+          scope.activeListIndex = 0;
+          dropdown.css('display', 'block');
+        }
+
+        function closeDropdown() {
+          dropdown.css('display', 'none');
+        }
+
+
+
+        scope.selectMatch = function(match) {
+          closeDropdown();
+          scope.currentTag = '';
+          tagInput.val('');
+          tagInput.focus();
+          addTag(match.doc);
+        };
+
+        scope.createTag = function() {
+          createTag(scope.currentTag);
+        };
+
+        scope.removeTag = function(index) {
+          removeTag(index);
+        };
+
+        scope.getTagTitle = function(id) {
+          return allTagsById[id].title;
+        };
+
+        tagInput.on('focus', function(e) {
+          checkMatch(scope.currentTag);
+        });
+
+        tagInput.on('keyup', function(e) {
+          var ENTER = 13;
+          var TAB = 9;
+          var UP = 38;
+          var DOWN = 40;
+
+          switch(e.keyCode) {
+          case ENTER:
+          case TAB:
+            e.preventDefault();
+            var l = scope.matches.length;
+            if (l > 0 && scope.activeListIndex < l) {
+              scope.selectMatch(scope.matches[scope.activeListIndex]);
+              scope.$apply();
+            }
+            break;
+
+          case UP:
+            e.preventDefault();
+            if (scope.activeListIndex > 0) {
+              scope.activeListIndex--;
+              scope.$apply();
+            }
+            break;
+
+          case DOWN:
+            e.preventDefault();
+            if (scope.activeListIndex < scope.matches.length - 1) {
+              scope.activeListIndex++;
+              scope.$apply();
+            }
+            break;
+          }
+        });
+      }
+    };
+  });
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
   module.directive('crText', function(
-    crCommon,
-    crFieldLink,
-    crValidation,
     crTextareaAutosize
   ) {
     return {
-      scope: {
-        model: '=',
-        schema: '=',
-        name: '@',
-        path: '@'
-      },
-
+      require: '^crControl',
       replace: true,
       templateUrl: 'cr-text.html',
 
-      link: crFieldLink(function(scope, elem, attrs) {
+      link: function(scope, elem, attrs, crCtrl) {
 
-        var validation = crValidation(scope);
-
-        validation.addConstraint(
-          'maxLength',
-          'Text is longer than ' + scope.schema.maxLength,
-          function(value) {
+        if (scope.schema.hasOwnProperty('maxLength')) {
+          crCtrl.addValidator('maxLength', function(value) {
             return value.length <= scope.schema.maxLength;
           });
-
-        validation.addConstraint(
-          'minLength',
-          'Text is shorter than ' + scope.schema.minLength,
-          function(value) {
+        }
+        if (scope.schema.hasOwnProperty('minLength')) {
+          crCtrl.addValidator('minLength', function(value) {
             return value.length >= scope.schema.minLength;
           });
-
-        validation.addConstraint(
-          'pattern',
-          'Text does not match the pattern',
-          function(value) {
-            return new RegExp(scope.schema.pattern).test(value);
-          });
-
-        if (scope.options.isRequired) {
-          validation.addConstraint('required', 'Required', function(value) {
-            return !!value && value !== '';
-          }, true);
         }
 
         var updateSize = crTextareaAutosize(elem.find('textarea'));
@@ -3291,7 +3024,7 @@ angular.module("cores.templates").run(["$templateCache", function($templateCache
         scope.$on('cr:tab:shown', function(e) {
           updateSize();
         });
-      })
+      }
     };
   });
 })();

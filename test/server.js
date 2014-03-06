@@ -1,31 +1,29 @@
-var path = require('path');
-var fs = require('fs');
+var Path = require('path');
+var Fs = require('fs');
 var Q = require('kew');
-var hapi = require('hapi');
-var cores = require('cores');
+var Hapi = require('hapi');
 
 
 module.exports = function setupServer(callback) {
 
-  var server = new hapi.Server('127.0.0.1', 3333, {
-    cors: {
-      origin: ['*'],
-      headers: ['X-Requested-With', 'Content-Type']
-    },
+  var server = new Hapi.Server('127.0.0.1', 3333, {
+    cors: true,
     payload: {
-      maxBytes: 10 * 1024 * 1024 // 10MB
+      maxBytes: 10 * 1024 * 1024
     }
   });
 
-  server.app.cores = cores('http://localhost:5984/test-cores-ng');
-
-  server.app.cores.load(__dirname + '/resources').then(function() {
-    return Q.bindPromise(server.pack.require, server.pack)('cores-hapi', {
-      cores: server.app.cores
-    });
+  Q.bindPromise(server.pack.require, server.pack)('cores-hapi', {
+    dbUrl: 'http://localhost:5984/test-cores-ng',
+    resourceDir: __dirname + '/resources',
+    api: true,
+    debug: true,
+    syncDesign: true,
+    context: {
+      imagesUrl: '/test/public/upload/'
+    }
 
   }).then(function() {
-
     // logging
     server.on('response', function(req) {
       console.log(req.raw.res.statusCode, req.method.toUpperCase(), req.path);
@@ -52,7 +50,7 @@ module.exports = function setupServer(callback) {
     // app data
     var app = server.pack.app = {
       upload: {
-        dir: path.join(__dirname, '/public/upload'),
+        dir: Path.join(__dirname, '/public/upload'),
         url: '/test/public/upload/'
       }
     };
@@ -75,32 +73,33 @@ module.exports = function setupServer(callback) {
         }
 
         if (numFiles > 0) {
-          var file = payload['file0'];
-          var destFile = app.upload.dir + '/' + file.name;
+          var buffer = payload['file0'];
+          var destFile = app.upload.dir + '/' + doc.file.name;
           var defer = Q.defer();
 
-          fs.rename(file.path, destFile, function(err) {
+          Fs.writeFile(destFile, buffer, function(err) {
             if (err) return defer.reject(err);
-            doc.file.url = '/test/public/upload/' + file.name;
+            doc.file.url = doc.file.name;
             return defer.resolve(doc);
           });
+
           return defer.promise;
         }
       }
       return Q.resolve(doc);
     };
 
-    server.plugins['cores-hapi'].setHandler('create', 'Image', function(payload) {
+    server.plugins['cores-hapi'].pre.create('Image', function(payload) {
       return imageHandler(payload);
     });
 
-    server.plugins['cores-hapi'].setHandler('update', 'Image', function(payload) {
+    server.plugins['cores-hapi'].pre.update('Image', function(payload) {
       return imageHandler(payload);
     });
 
     // create upload dir
     var defer = Q.defer();
-    fs.mkdir(app.upload.dir, function(err) {
+    Fs.mkdir(app.upload.dir, function(err) {
       if (err && err.code !== 'EEXIST') return defer.reject(err);
       server.start(function(err) {
         if (err) return defer.reject(err);

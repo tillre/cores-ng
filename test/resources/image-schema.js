@@ -1,12 +1,15 @@
 var J = require('jski')();
 
-module.exports = J.object({
+module.exports = function(context) {
 
-  title: J.string(),
+  return J.object({
 
-  file: J.object({
-    name: J.string(),
-    url: J.string()
-  }).custom('view', { type: 'cr-image' })
+    title: J.string(),
 
-});
+    file: J.object({
+      name: J.string(),
+      url: J.string()
+    }).custom('view', { type: 'cr-image', baseUrl: context.imagesUrl })
+
+  });
+};
