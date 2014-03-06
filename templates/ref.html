@@ -12,7 +12,6 @@
           <button ng-click="selectModel()" class="btn btn-default" type="button">Select</button>
         </div>
       </div>
-      <div ng-show="hasErrors()" class="help-block">{{ getFirstError() }}</div>
     </div>
     <div ng-show="showModel" class="panel-footer">
       <div cr-model-resource type="{{ schema.$ref }}" model-id="modelId" defaults="options.defaults" options="modelOptions"></div>

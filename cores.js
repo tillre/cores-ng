@@ -332,8 +332,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "        </label>\n" +
     "      </li>\n" +
     "    </ul>\n" +
-    "\n" +
-    "    <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "  </div>\n" +
     "</div>\n"
   );
@@ -414,7 +412,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "          <button ng-click=\"selectModel()\" class=\"btn btn-default\" type=\"button\">Select</button>\n" +
     "        </div>\n" +
     "      </div>\n" +
-    "      <div ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</div>\n" +
     "    </div>\n" +
     "    <div ng-show=\"showModel\" class=\"panel-footer\">\n" +
     "      <div cr-model-resource type=\"{{ schema.$ref }}\" model-id=\"modelId\" defaults=\"options.defaults\" options=\"modelOptions\"></div>\n" +
@@ -436,7 +433,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "  <select class=\"form-control\" ng-model=\"selectedRow\" ng-options=\"r.name for r in rows\">\n" +
     "    <option value=\"\">-- choose --</option>\n" +
     "  </select>\n" +
-    "  <p ng-show=\"hasErrors()\" class=\"help-block\">{{ getFirstError() }}</p>\n" +
     "</div>\n"
   );
 
