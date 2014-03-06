@@ -10,7 +10,7 @@
           <p>Really delete?</p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Cancel</button> -->
+          <button class="btn btn-default pull-left" data-dismiss="modal" type="button">Cancel</button>
           <button class="btn btn-danger" ng-click="destroy()" type="button">Delete</button>
         </div>
       </div>
@@ -38,7 +38,7 @@
       </div>
 
       <button ng-click="toggleDebug()" class="btn btn-default pull-right" type="button">Debug</button>
-      <button ng-click="destroy()" ng-show="!isNew()" class="btn btn-danger pull-right" type="button">Delete</button>
+      <button ng-click="askDestroy()" ng-show="!isNew()" class="btn btn-danger pull-right" type="button">Delete</button>
 
       <div class="btn-group">
         <button ng-repeat="button in options.buttons"
