@@ -61,7 +61,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "        <div cr-array-item\n" +
     "             model=\"item\"\n" +
     "             get-schema=\"getSchema(item.type_)\"\n" +
-    "             path=\"{{ path }}/{{ $index }}\">\n" +
+    "             path=\"{{ path }}.{{ $index }}\">\n" +
     "        </div>\n" +
     "\n" +
     "        <div class=\"cr-array-bottom-controls btn-group\">\n" +
@@ -582,7 +582,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
     function getLabel(schema, path) {
-
+      return path;
       var label = schema.type;
 
       if (schema.title) {
@@ -592,7 +592,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         label = crCommon.capitalize(schema.name);
       }
       else if (path) {
-        var parts = path.split('/');
+        var parts = path.split('.');
         label = crCommon.capitalize(parts[parts.length - 1]);
       }
 
@@ -636,7 +636,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       }).map(function(key) {
         // create a control for each object property
         var subSchema = schema.properties[key];
-        var absPath = (path ? path : '') + '/' + key;
+        var absPath = (path ? path + '.' : '') + key;
 
         if (!model.hasOwnProperty(key)) {
           model[key] = crSchema.createValue(subSchema);
