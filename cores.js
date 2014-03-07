@@ -582,7 +582,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
     function getLabel(schema, path) {
-      return path;
       var label = schema.type;
 
       if (schema.title) {
