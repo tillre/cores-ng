@@ -297,7 +297,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "  </div>\n" +
     "\n" +
     "\n" +
-    "  <div class=\"cr-model-controls\">\n" +
+    "  <div class=\"cr-model-controls well well-sm\">\n" +
     "    <div class=\"btn-toolbar\">\n" +
     "      <div class=\"btn-group\">\n" +
     "        <button ng-click=\"save()\" ng-class=\"{ disabled: !valid }\" class=\"btn btn-primary\" type=\"button\">Save</button>\n" +

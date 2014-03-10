@@ -21,6 +21,42 @@ module.exports = function setupServer(callback) {
     }
   };
 
+
+  // image resource handlers
+  function imageHandler(payload) {
+    var doc = payload;
+
+    if (payload.isMultipart) {
+
+      var numFiles = parseInt(payload.numFiles, 10);
+      doc = payload.doc;
+
+      // multipart with fake files when testing
+      if (doc.isTest) {
+        for (var i = 0; i < numFiles; ++i) {
+          doc['file' + i] = JSON.parse(payload['file' + i]);
+        }
+        return Q.resolve(doc);
+      }
+
+      if (numFiles > 0) {
+        var buffer = payload['file0'];
+        var destFile = app.upload.dir + '/' + doc.file.name;
+        var defer = Q.defer();
+
+        Fs.writeFile(destFile, buffer, function(err) {
+          if (err) return defer.reject(err);
+          doc.file.url = doc.file.name;
+          return defer.resolve(doc);
+        });
+
+        return defer.promise;
+      }
+    }
+    return Q.resolve(doc);
+  };
+
+
   Q.bindPromise(server.pack.require, server.pack)('cores-hapi', {
     dbUrl: 'http://localhost:5984/test-cores-ng',
     debug: true
@@ -48,40 +84,6 @@ module.exports = function setupServer(callback) {
         handler: { directory: { path: '.', listing: true }}
       }
     ]);
-
-    // image resource handlers
-    function imageHandler(payload) {
-      var doc = payload;
-
-      if (payload.isMultipart) {
-
-        var numFiles = parseInt(payload.numFiles, 10);
-        doc = payload.doc;
-
-        // multipart with fake files when testing
-        if (doc.isTest) {
-          for (var i = 0; i < numFiles; ++i) {
-            doc['file' + i] = JSON.parse(payload['file' + i]);
-          }
-          return Q.resolve(doc);
-        }
-
-        if (numFiles > 0) {
-          var buffer = payload['file0'];
-          var destFile = app.upload.dir + '/' + doc.file.name;
-          var defer = Q.defer();
-
-          Fs.writeFile(destFile, buffer, function(err) {
-            if (err) return defer.reject(err);
-            doc.file.url = doc.file.name;
-            return defer.resolve(doc);
-          });
-
-          return defer.promise;
-        }
-      }
-      return Q.resolve(doc);
-    };
 
     return server.plugins['cores-hapi'].cores.load(
       __dirname + '/resources',

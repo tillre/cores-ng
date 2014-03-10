@@ -209,14 +209,14 @@ describe('cores', function() {
     var fooId = 'foo_' + (new Date().getTime());
 
     var fooDoc = {
-      title: 'Hello Foo', slug: 'hello-foo'
+      name: 'Hello Foo', slug: 'hello-foo'
     };
 
     it('should create', inject(['crResource'], function(crResource) {
       fooRes = new crResource('Foo', {
         path: '/foos',
         schemaPath: '/foos/_schema',
-        viewPaths: { titles: '/foos/_views/titles' }
+        viewPaths: { names: '/foos/_views/names' }
       }, apiUrl);
     }));
 
@@ -316,7 +316,7 @@ describe('cores', function() {
 
 
     it('should call the view', inject(true, function(done) {
-      fooRes.view('titles').then(
+      fooRes.view('names').then(
         function(res) {
           assert(res.total_rows > 1);
           done();
@@ -327,7 +327,7 @@ describe('cores', function() {
 
 
     it('should call the view with params', inject(true, function(done) {
-      fooRes.view('titles', { limit: 1 }).then(
+      fooRes.view('names', { limit: 1 }).then(
         function(res) {
           assert(res.total_rows > 1);
           assert(res.rows.length === 1);

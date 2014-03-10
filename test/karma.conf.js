@@ -21,7 +21,7 @@ module.exports = function(config) {
       // MOCHA,
       // MOCHA_ADAPTER,
 
-      '../bower_components/jquery/jquery.js',
+      '../bower_components/jquery/dist/jquery.js',
       '../bower_components/angular/angular.js',
       '../bower_components/angular/angular-mocks.js',
       '../bower_components/bootstrap/js/dropdown.js',
