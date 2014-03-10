@@ -34,11 +34,11 @@ module.exports = J.object({
 
   ref: J.ref('Foo')
     .custom('view', {
-      previewPaths: ['/title', '/slug'],
-      defaults: { '/title': 'some value' },
+      previewPaths: ['/name', '/slug'],
+      defaults: { '/name': 'some value' },
       list: {
         headers: [ { path: 'slug' } ],
-        view: { name: 'titles' }
+        view: { name: 'names' }
       }
     }),
 
@@ -46,10 +46,10 @@ module.exports = J.object({
     .custom('view', { preview: 'cr-image-preview'}),
 
   singleSelRef: J.ref('Foo')
-    .custom('view', { type: 'cr-single-select-ref', previewPaths: ['/title', '/slug'] }),
+    .custom('view', { type: 'cr-single-select-ref', previewPaths: ['/name', '/slug'] }),
 
   multiSelRef: J.array(J.ref('Foo'))
-    .custom('view', { type: 'cr-multi-select-ref', previewPath: '/title' }),
+    .custom('view', { type: 'cr-multi-select-ref', previewPath: '/name' }),
 
   tags: J.array(J.ref('Foo'))
     .custom('view', { type: 'cr-tags' }),
@@ -81,7 +81,7 @@ module.exports = J.object({
 
   arrayRefs: J.array(
     J.ref('Foo')
-      .custom('view', { showLabel: true, previewPath: 'title' })
+      .custom('view', { showLabel: true, previewPath: 'name' })
       .title('Yam')
   ),
 

@@ -486,7 +486,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "      <div class=\"cr-tag-matches\">\n" +
     "        <ul class=\"dropdown-menu\" role=\"menu\">\n" +
     "          <li ng-repeat=\"match in matches\" ng-class=\"{ active: activeListIndex === $index }\">\n" +
-    "            <a ng-click=\"selectMatch(match)\">{{ match.doc.title }}</a>\n" +
+    "            <a ng-click=\"selectMatch(match)\">{{ match.doc.name }}</a>\n" +
     "          </li>\n" +
     "        </ul>\n" +
     "      </div>\n" +
@@ -497,7 +497,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "      <div>\n" +
     "        <ul class=\"list-inline\">\n" +
     "          <li ng-repeat=\"tag in model\" ng-click=\"removeTag($index)\">\n" +
-    "            <span class=\"label label-primary\">{{ getTagTitle(tag.id_) }}  <span class=\"glyphicon glyphicon-remove\"></span> </span>\n" +
+    "            <span class=\"label label-primary\">{{ getTagName(tag.id_) }}  <span class=\"glyphicon glyphicon-remove\"></span> </span>\n" +
     "          </li>\n" +
     "        </ul>\n" +
     "      </div>\n" +
@@ -2809,19 +2809,12 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           allTags = result.rows.map(function(row) {
             var doc = row.doc;
 
-            // populate tags on model
-            // scope.model.forEach(function(t) {
-            //   if (t.id_ === doc._id) {
-            //     angular.extend(t, doc);
-            //   }
-            // });
-
             allTagsById[doc._id] = doc;
 
             // return tag for lookup
             return {
               doc: doc,
-              key: createKey(doc.title)
+              key: createKey(doc.name)
             };
           });
         });
@@ -2870,7 +2863,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
         function addTag(doc) {
           var exists = scope.model.some(function(t) {
-            if (t._id === doc._id) {
+            if (t.id_ === doc._id) {
               return true;
             }
             return false;
@@ -2882,7 +2875,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
         function createTag(name) {
           var doc = {
-            title: name,
+            name: name,
             slug: crCommon.slugify(name)
           };
 
@@ -2892,7 +2885,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
             if (addTag(doc)) {
               allTags.push({
                 doc: doc,
-                key: createKey(doc.title)
+                key: createKey(doc.name)
               });
               allTagsById[doc._id] = doc;
             }
@@ -2934,8 +2927,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           removeTag(index);
         };
 
-        scope.getTagTitle = function(id) {
-          return allTagsById[id].title;
+        scope.getTagName = function(id) {
+          return allTagsById[id].name;
         };
 
         tagInput.on('focus', function(e) {

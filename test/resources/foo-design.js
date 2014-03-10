@@ -1,10 +1,10 @@
 module.exports = {
 
   views: {
-    titles: {
+    names: {
       map: function(doc) {
         if (doc.type_ === 'Foo') {
-          emit(doc._id, doc.title);
+          emit(doc._id, doc.name);
         }
       }
     }
