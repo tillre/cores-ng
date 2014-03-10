@@ -13,15 +13,17 @@ module.exports = function setupServer(callback) {
     }
   });
 
+  // app data
+  var app = server.pack.app = {
+    upload: {
+      dir: Path.join(__dirname, '/public/upload'),
+      url: '/test/public/upload/'
+    }
+  };
+
   Q.bindPromise(server.pack.require, server.pack)('cores-hapi', {
     dbUrl: 'http://localhost:5984/test-cores-ng',
-    resourceDir: __dirname + '/resources',
-    api: true,
-    debug: true,
-    syncDesign: true,
-    context: {
-      imagesUrl: '/test/public/upload/'
-    }
+    debug: true
 
   }).then(function() {
     // logging
@@ -46,14 +48,6 @@ module.exports = function setupServer(callback) {
         handler: { directory: { path: '.', listing: true }}
       }
     ]);
-
-    // app data
-    var app = server.pack.app = {
-      upload: {
-        dir: Path.join(__dirname, '/public/upload'),
-        url: '/test/public/upload/'
-      }
-    };
 
     // image resource handlers
     function imageHandler(payload) {
@@ -89,11 +83,23 @@ module.exports = function setupServer(callback) {
       return Q.resolve(doc);
     };
 
-    server.plugins['cores-hapi'].pre.create('Image', function(payload) {
+    return server.plugins['cores-hapi'].cores.load(
+      __dirname + '/resources',
+      { imagesUrl: '/test/public/upload' },
+      true
+    );
+
+  }).then(function() {
+
+    var coresHapi = server.plugins['cores-hapi'];
+
+    coresHapi.createApi();
+
+    coresHapi.pre.create('Image', function(payload) {
       return imageHandler(payload);
     });
 
-    server.plugins['cores-hapi'].pre.update('Image', function(payload) {
+    coresHapi.pre.update('Image', function(payload) {
       return imageHandler(payload);
     });
 

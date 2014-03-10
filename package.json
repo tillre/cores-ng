@@ -14,7 +14,7 @@
     "jski": "~0.5.x",
     "kew": "~0.3.x",
     "hapi": "~2.x.x",
-    "cores-hapi": "~0.6.x",
+    "cores-hapi": "~0.8.x",
     "grunt": "~0.4.x",
     "grunt-karma": "~0.7.x",
     "karma": "~0.11.x",
