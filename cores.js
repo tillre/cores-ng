@@ -2747,7 +2747,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         var contentElems = [];
 
         props.forEach(function(prop, i) {
-          var id = 'tab' + prop.path.replace(/\//g, '-');
+          var id = 'tab' + prop.path.replace(/\./g, '-');
 
           navElems += '<li' + (i === 0 ? ' class="active"' : '') + '>' +
             '<a href="#' + id + '">' + crBuild.getLabel(prop.schema, prop.path) + '</a></li>';
