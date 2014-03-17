@@ -146,13 +146,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('cr-image-preview.html',
-    "<div class=\"row\">\n" +
-    "  <div class=\"col-md-3\">\n" +
-    "    <div class=\"thumbnail\">\n" +
-    "      <img ng-src=\"{{ baseUrl }}{{ model.file.url }}\">\n" +
-    "    </div>\n" +
-    "  </div>\n" +
-    "</div>"
+    "<div class=\"thumbnail\">\n" +
+    "  <img ng-src=\"{{ baseUrl }}{{ model.file.url }}\">\n" +
+    "</div>\n"
   );
 
 
