@@ -58,14 +58,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   );
 
 
-  $templateCache.put('cr-array-item.html',
-    "<div ng-class=\"{ 'has-label': showName }\">\n" +
-    "  <label class=\"item-label\">{{ schema.name }}</label>\n" +
-    "  <div class=\"content\"></div>\n" +
-    "</div>"
-  );
-
-
   $templateCache.put('cr-array.html',
     "<div>\n" +
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
@@ -1354,6 +1346,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         };
 
         scope.$on('cr:array:addItem', function(e, index, schema) {
+          e.stopPropagation();
+
           var obj = crSchema.createValue(schema, schema.name);
           if (index >= scope.model.length) {
             scope.model.push(obj);
