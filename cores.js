@@ -33,42 +33,73 @@
 angular.module('cores').run(['$templateCache', function($templateCache) {
   'use strict';
 
+  $templateCache.put('cr-array-controls.html',
+    "<div ng-switch=\"numSchemas\">\n" +
+    "\n" +
+    "  <div ng-switch-when=\"1\" class=\"cr-array-top-controls btn-group\">\n" +
+    "    <button ng-click=\"addItem()\" class=\"btn btn-default btn-xs\" type=\"button\">\n" +
+    "      <span class=\"glyphicon glyphicon-plus\"></span>\n" +
+    "    </button>\n" +
+    "  </div>\n" +
+    "\n" +
+    "  <div ng-switch-default class=\"btn-group\">\n" +
+    "    <button class=\"btn btn-default btn-xs dropdown-toggle\"\n" +
+    "            data-toggle=\"dropdown\" href=\"#\">\n" +
+    "      <span class=\"glyphicon glyphicon-plus\"></span><span class=\"caret\"/>\n" +
+    "    </button>\n" +
+    "    <ul class=\"dropdown-menu\" role=\"menu\">\n" +
+    "      <li ng-repeat=\"schema in schemas\">\n" +
+    "        <a ng-click=\"addItem(schema)\">{{ schema.name }}</a>\n" +
+    "      </li>\n" +
+    "    </ul>\n" +
+    "  </div>\n" +
+    "\n" +
+    "</div>\n"
+  );
+
+
+  $templateCache.put('cr-array-item.html',
+    "<div ng-class=\"{ 'has-label': showName }\">\n" +
+    "  <label class=\"item-label\">{{ schema.name }}</label>\n" +
+    "  <div class=\"content\"></div>\n" +
+    "</div>"
+  );
+
+
   $templateCache.put('cr-array.html',
     "<div>\n" +
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent }\">\n" +
-    "    <div class=\"cr-array-top-controls btn-group\">\n" +
-    "      <button ng-repeat=\"s in schemas\" class=\"btn btn-sm btn-default\" ng-click=\"addItem(0, s)\" type=\"button\">\n" +
-    "        <span class=\"glyphicon glyphicon-plus\"></span> {{ s.name }}\n" +
-    "      </button>\n" +
-    "    </div>\n" +
+    "\n" +
+    "    <div cr-array-controls index=\"0\" schemas=\"schemas\"></div>\n" +
+    "\n" +
     "    <ul class=\"list-unstyled\">\n" +
-    "      <li class=\"cr-item-group\" ng-repeat=\"item in model\">\n" +
+    "      <li ng-repeat=\"item in model\" class=\"cr-item-group\">\n" +
     "\n" +
-    "        <div class=\"cr-item-controls btn-group\">\n" +
-    "          <button class=\"btn btn-default btn-xs\" ng-click=\"moveUp($index)\" type=\"button\">\n" +
-    "            <span class=\"glyphicon glyphicon-arrow-up\"></span>\n" +
-    "          </button>\n" +
-    "          <button class=\"btn btn-default btn-xs\" ng-click=\"moveDown($index)\" type=\"button\">\n" +
-    "            <span class=\"glyphicon glyphicon-arrow-down\"></span>\n" +
-    "          </button>\n" +
-    "          <button class=\"btn btn-danger btn-xs\" ng-click=\"remove($index)\" type=\"button\">\n" +
-    "            <span class=\"glyphicon glyphicon-minus\"></span>\n" +
-    "          </button>\n" +
+    "        <div class=\"cr-item-wrapper\" ng-class=\"{ 'has-label': showSchemaName }\">\n" +
+    "          <div class=\"cr-item-controls btn-group\">\n" +
+    "            <button class=\"btn btn-default btn-xs\" ng-click=\"moveUp($index)\" type=\"button\">\n" +
+    "              <span class=\"glyphicon glyphicon-arrow-up\"></span>\n" +
+    "            </button>\n" +
+    "            <button class=\"btn btn-default btn-xs\" ng-click=\"moveDown($index)\" type=\"button\">\n" +
+    "              <span class=\"glyphicon glyphicon-arrow-down\"></span>\n" +
+    "            </button>\n" +
+    "            <button class=\"btn btn-danger btn-xs\" ng-click=\"remove($index)\" type=\"button\">\n" +
+    "              <span class=\"glyphicon glyphicon-minus\"></span>\n" +
+    "            </button>\n" +
+    "          </div>\n" +
+    "\n" +
+    "          <label class=\"cr-item-label\">{{ item.type_ }}</label>\n" +
+    "\n" +
+    "          <div cr-array-item\n" +
+    "               model=\"item\"\n" +
+    "               get-schema=\"getSchema(item.type_)\"\n" +
+    "               path=\"{{ path }}.{{ $index }}\">\n" +
+    "          </div>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div cr-array-item\n" +
-    "             model=\"item\"\n" +
-    "             get-schema=\"getSchema(item.type_)\"\n" +
-    "             path=\"{{ path }}.{{ $index }}\">\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"cr-array-bottom-controls btn-group\">\n" +
-    "          <button ng-repeat=\"s in schemas\" class=\"btn btn-sm btn-default\" ng-click=\"addItem($parent.$index, s)\" type=\"button\">\n" +
-    "            <span class=\"glyphicon glyphicon-plus\"></span> {{ s.name }}\n" +
-    "          </button>\n" +
-    "        </div>\n" +
+    "        <div cr-array-controls index=\"$index + 1\" schemas=\"schemas\"></div>\n" +
     "\n" +
     "      </li>\n" +
     "    </ul>\n" +
@@ -355,7 +386,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   $templateCache.put('cr-object.html',
     "<div>\n" +
     "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
-    "  <div ng-class=\"{ 'cr-indent': options.indent, 'form-inline': options.inline }\" class=\"properties\"></div>\n" +
+    "  <div ng-class=\"{ 'cr-indent': options.indent, 'form-inline': options.inline }\"\n" +
+    "       class=\"properties\"></div>\n" +
     "</div>\n"
   );
 
@@ -1222,7 +1254,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       scope: {
         model: '=',
         getSchema: '&',
-        path: '@'
+        path: '@',
+        showName: '='
       },
 
       link: function(scope, elem, attrs) {
@@ -1241,6 +1274,36 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   var module = angular.module('cores.directives');
 
 
+  module.directive('crArrayControls', function() {
+    return {
+      replace: true,
+      templateUrl: 'cr-array-controls.html',
+
+      scope: {
+        index: '&',
+        schemas: '='
+      },
+
+      link: function(scope, elem, attrs) {
+
+        var names = Object.keys(scope.schemas);
+        scope.numSchemas = names.length;
+
+        if (scope.numSchemas === 1) {
+          scope.addItem = function() {
+            scope.$emit('cr:array:addItem', scope.index(), scope.schemas[names[0]]);
+          };
+        }
+        else {
+          scope.addItem = function(schema) {
+            scope.$emit('cr:array:addItem', scope.index(), schema);
+          };
+        }
+      }
+    };
+  });
+
+
   module.directive('crArray', function(crSchema) {
     return {
       replace: true,
@@ -1249,6 +1312,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       link: function(scope, elem, attrs) {
 
         scope.schemas = {};
+        scope.showSchemaName = false;
 
         if (scope.schema.items.hasOwnProperty('anyOf')) {
           // anyof array
@@ -1256,12 +1320,12 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
             if (!s.name) throw new Error('AnyOf schema has to have a name ' + JSON.stringify(s));
             scope.schemas[s.name] = s;
           });
+          scope.showSchemaName = true;
         }
         else if (scope.schema.items) {
           // standard array
           scope.schemas.item = scope.schema.items;
         }
-
 
         // hide label and dont indent items
         angular.forEach(scope.schemas, function(s) {
@@ -1289,7 +1353,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           scope.model.splice(index, 1);
         };
 
-        scope.addItem = function(index, schema) {
+        scope.$on('cr:array:addItem', function(e, index, schema) {
           var obj = crSchema.createValue(schema, schema.name);
           if (index >= scope.model.length) {
             scope.model.push(obj);
@@ -1297,7 +1361,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           else {
             scope.model.splice(index, 0, obj);
           }
-        };
+        });
 
         scope.getSchema = function(type) {
           type = type || 'item';
@@ -1305,7 +1369,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
           // ngrepeat can only bind to references when it comes to form fields
           // thats why we can only work with items of type object not primitives
-          // this may change in a feature release
           if (!crSchema.isObjectSchema(schema) && !crSchema.isRefSchema(schema)) {
             throw new Error('Array items schema is not of type object: ' + JSON.stringify(schema));
           }
@@ -1600,6 +1663,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
       link: function(scope, elem, attr) {
         scope.baseUrl = '';
+
         // try to get the baseUrl from the referenced schemas file property's view object
         crResources.get(scope.schema.$ref).schema().then(function(imageSchema) {
           scope.baseUrl = imageSchema.properties.file.view.baseUrl || '';
