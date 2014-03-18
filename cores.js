@@ -1002,6 +1002,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       });
 
       xhr.open(req.method, req.url);
+
+      // inherit default http headers from angulars http service
+      var headers = $http.defaults.headers.common;
+      angular.forEach(headers, function(value, key) {
+        xhr.setRequestHeader(key, value);
+      });
+
       xhr.send(req.data);
 
       return def.promise;
