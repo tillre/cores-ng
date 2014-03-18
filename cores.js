@@ -296,7 +296,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "        </div>\n" +
     "        <div class=\"modal-footer\">\n" +
     "          <button class=\"btn btn-default pull-left\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
-    "          <button class=\"btn btn-danger\" ng-click=\"destroy()\" type=\"button\">Delete</button>\n" +
+    "          <button class=\"btn btn-danger\" ng-click=\"destroy()\" data-dismiss=\"modal\" type=\"button\">Delete</button>\n" +
     "        </div>\n" +
     "      </div>\n" +
     "    </div>\n" +
