@@ -323,7 +323,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "      </div>\n" +
     "\n" +
     "      <button ng-click=\"toggleDebug()\" class=\"btn btn-default pull-right\" type=\"button\">Debug</button>\n" +
-    "      <button ng-click=\"askDestroy()\" ng-show=\"!isNew()\" class=\"btn btn-danger pull-right\" type=\"button\">Delete</button>\n" +
+    "      <button ng-click=\"askDestroy()\" ng-show=\"!isNew() && !options.disableDelete\" class=\"btn btn-danger pull-right\" type=\"button\">Delete</button>\n" +
     "\n" +
     "      <div class=\"btn-group\">\n" +
     "        <button ng-repeat=\"button in options.buttons\"\n" +

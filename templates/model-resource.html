@@ -38,7 +38,7 @@
       </div>
 
       <button ng-click="toggleDebug()" class="btn btn-default pull-right" type="button">Debug</button>
-      <button ng-click="askDestroy()" ng-show="!isNew()" class="btn btn-danger pull-right" type="button">Delete</button>
+      <button ng-click="askDestroy()" ng-show="!isNew() && !options.disableDelete" class="btn btn-danger pull-right" type="button">Delete</button>
 
       <div class="btn-group">
         <button ng-repeat="button in options.buttons"
