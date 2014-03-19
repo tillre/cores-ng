@@ -42,6 +42,16 @@ module.exports = J.object({
       }
     }),
 
+  selectRef: J.ref('Foo')
+    .custom('view', {
+      selectOnly: true,
+      previewPaths: ['/name'],
+      list: {
+        headers: [ { path: 'name' } ],
+        view: { name: 'names' }
+      }
+    }),
+
   image: J.ref('Image')
     .custom('view', { preview: 'cr-image-preview'}),
 

@@ -427,13 +427,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "\n" +
     "      <div class=\"cr-ref-controls\">\n" +
     "        <div class=\"btn-group\">\n" +
-    "          <button ng-click=\"newModel()\" class=\"btn btn-default\" type=\"button\">New</button>\n" +
-    "          <button ng-click=\"editModel()\" ng-show=\"hasModel()\" class=\"btn btn-default\" type=\"button\">Edit</button>\n" +
+    "          <button ng-click=\"newModel()\" ng-show=\"!options.selectOnly\" class=\"btn btn-default\" type=\"button\">New</button>\n" +
+    "          <button ng-click=\"editModel()\" ng-show=\"hasModel() && !options.selectOnly\" class=\"btn btn-default\" type=\"button\">Edit</button>\n" +
     "          <button ng-click=\"selectModel()\" class=\"btn btn-default\" type=\"button\">Select</button>\n" +
     "        </div>\n" +
     "      </div>\n" +
     "    </div>\n" +
-    "    <div ng-show=\"showModel\" class=\"panel-footer\">\n" +
+    "    <div ng-if=\"showModel\" class=\"panel-footer\">\n" +
     "      <div cr-model-resource type=\"{{ schema.$ref }}\" model-id=\"modelId\" defaults=\"options.defaults\" options=\"modelOptions\"></div>\n" +
     "    </div>\n" +
     "  </div>\n" +
@@ -1131,11 +1131,11 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   var module = angular.module('cores.services');
 
-  
+
   function isObjectSchema(schema) {
     return schema.type === 'object' || schema.properties;
   }
-  
+
   function isArraySchema(schema) {
     return schema.type === 'array' || schema.items;
   }
@@ -1143,22 +1143,22 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   function isRefSchema(schema) {
     return typeof schema.$ref === 'string';
   }
-  
+
 
   function isPrivateProperty(key) {
     return key === '_id' || key === '_rev' || key === 'type_';
   }
 
-  
+
   //
   // create a object with default values from schema
   //
-  
+
   function createValue(schema, typeName) {
 
     var hasDefaultValue = schema.hasOwnProperty('default');
     var type = schema.type;
-    
+
     if (schema.enum) {
       return hasDefaultValue ? schema.default : schema.enum[0];
     }
@@ -1170,7 +1170,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       if (schema.properties) type = 'object';
       if (schema.items) type = 'array';
     }
-    
+
     if (!type) throw new Error('Cannot create default value for schema without type');
 
     switch(type) {
@@ -1180,7 +1180,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     case 'string': return hasDefaultValue ? schema.default : '';
     case 'object':
       if (hasDefaultValue) return schema.default;
-      
+
       var obj = {};
       angular.forEach(schema.properties, function(propSchema, name) {
         // ignore some vals
@@ -1199,12 +1199,12 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   //
   // schema utility methods
   //
-  
+
   module.service('crSchema', function() {
 
     return {
       createValue: createValue,
-      
+
       isObjectSchema: isObjectSchema,
       isArraySchema: isArraySchema,
       isRefSchema: isRefSchema,
@@ -2227,6 +2227,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
         scope.destroy = function() {
+          // manually remove the modal's backdrop
+          $('.modal-backdrop').remove();
+
           scope.$emit('cr:model:destroy');
 
           return resource.destroy(scope.model).then(
