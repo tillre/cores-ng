@@ -1223,6 +1223,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
     return function($textarea) {
       var update = function() {
+        var body = $('body')[0];
+        var top = body.scrollTop;
         var p = 0;
         if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
           // add padding to height in firefox
@@ -1231,6 +1233,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         }
         $textarea.css('height', 'auto');
         $textarea.css('height', $textarea[0].scrollHeight + p);
+        if (top !== body.scrollTop) {
+          body.scrollTop = top;
+        }
       };
       $textarea.on('keyup', update);
       $textarea.on('input', update);
