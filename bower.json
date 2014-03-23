@@ -1,6 +1,6 @@
 {
   "name": "cores-ng",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "ignore": [
     "**/.*",
     "lib",
