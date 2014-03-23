@@ -4,6 +4,6 @@ module.exports = J.object({
 
   name: J.string().minLength(3),
   baz: J.number().multipleOf(3),
-  slug: J.string().custom('view', { type: 'cr-slug', source: 'title' }).format('slug')
+  slug: J.string().custom('view', { type: 'cr-slug', source: 'name' }).format('slug')
 
 }).required('name', 'slug');
