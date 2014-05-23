@@ -12,12 +12,12 @@
   "devDependencies": {
     "jski": "~0.5.x",
     "kew": "~0.4.x",
-    "hapi": "~2.x.x",
+    "hapi": "~5.x.x",
     "cores": "~0.8.x",
     "cores-hapi": "~0.9.x",
     "grunt": "~0.4.x",
     "grunt-karma": "~0.7.x",
-    "karma": "~0.11.x",
+    "karma": "~0.12.x",
     "karma-mocha": "0.1.x",
     "chai": "~1.9.x",
 

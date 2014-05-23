@@ -53,8 +53,13 @@ module.exports = function(grunt) {
   grunt.registerTask('server:run', 'start server', function() {
     var done = this.async();
     var startServer = require('./test/server.js');
+
     startServer(function(err) {
-      if (err) console.log(err);
+      if (err) {
+        console.log(err);
+        console.log(err.stack);
+        return done(err);
+      }
       console.log('server up');
     });
     // never call done to run endlessly
@@ -63,7 +68,13 @@ module.exports = function(grunt) {
   grunt.registerTask('server:test', 'start test server', function() {
     var done = this.async();
     var startServer = require('./test/server.js');
-    startServer(done);
+    startServer(function(err) {
+      if (err) {
+        console.log(err);
+        console.log(err.stack);
+      }
+      done(err);
+    });
   });
 
 
