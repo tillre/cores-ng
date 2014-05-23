@@ -70,12 +70,30 @@ module.exports = function setupServer(callback) {
       console.log('ERROR', error);
     });
 
+    server.views({
+      engines: {
+        jade: 'jade'
+      },
+      path: './test/views',
+      isCached: false
+    });
+
     server.route([
-      // index
+      // bar
       {
-        path: '/',
+        path: '/bar',
         method: 'GET',
-        handler: { file: './test/public/index.html' }
+        handler: function(request, reply) {
+          reply.view('bar');
+        }
+      },
+      // foo
+      {
+        path: '/foo',
+        method: 'GET',
+        handler: function(request, reply) {
+          reply.view('foo');
+        }
       },
       // static files
       {

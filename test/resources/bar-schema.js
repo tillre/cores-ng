@@ -37,8 +37,8 @@ module.exports = J.object({
       previewPaths: ['/name', '/slug'],
       defaults: { '/name': 'some value' },
       list: {
-        headers: [ { path: 'slug' } ],
-        view: { name: 'names' }
+        columns: [ { path: 'slug' } ],
+        view: 'ids'
       }
     }),
 
@@ -47,8 +47,8 @@ module.exports = J.object({
       selectOnly: true,
       previewPaths: ['/name'],
       list: {
-        headers: [ { path: 'name' } ],
-        view: { name: 'names' }
+        columns: [ { path: 'name' } ],
+        view: 'ids'
       }
     }),
 

@@ -1,0 +1,13 @@
+doctype html
+html(lang="en", ng-app="testCoresAngular")
+
+  include head
+  body
+    .container(ng-controller="FooCtrl")
+      .row
+        .col-md-12
+          div(cr-model-resource type="{{ type }}")
+          div(cr-model-list, type="{{ type }}", view="view" limit="limit", page="page", columns="columns", params="params")
+
+    include tail
+    script(src="/test/public/foo.js")

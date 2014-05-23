@@ -1,33 +1,24 @@
 <div>
-  <table class="table table-hover">
+  <table class="table table-striped">
     <thead>
       <tr>
         <th ng-repeat="title in titles">{{title}}</th>
-        <th ng-if="options.buttons && options.buttons.length" class="text-center">
-          <span class="glyphicon glyphicon-cog"></span>
-        </th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="row in rows" style="cursor:pointer;" ng-click="select(row.id)">
         <td ng-repeat="item in row.items" ng-bind-html="item.value"></td>
-        <td ng-if="options.buttons && options.buttons.length" class="cr-list-buttons">
-          <div class="btn-group">
-            <button ng-repeat="button in options.buttons" type="button"
-                 ng-click="buttonClick($event, button.event, row.id)"
-                 class="btn btn-default btn-xs">
-              <span ng-if="button.icon" class="glyphicon glyphicon-{{button.icon}}"></span>
-              {{button.title}}
-            </button>
-          </div>
-        </td>
       </tr>
     </tbody>
   </table>
-  <div ng-show="showPagination">
+  <div ng-show="enablePrev || enableNext">
     <ul class="pagination">
-      <li class="{{ !isLoading && prevKeys.length  ? '' : 'disabled' }}"><a href="" ng-click="prev()">Prev</a></li>
-      <li class="{{ !isLoading && nextKey ? '' : 'disabled' }}"><a href="" ng-click="next()">Next</a></li>
+      <li class="{{ !isLoading && enablePrev ? '' : 'disabled' }}">
+        <a href="" ng-click="prev()">Prev</a>
+      </li>
+      <li class="{{ !isLoading && enableNext ? '' : 'disabled' }}">
+        <a href="" ng-click="next()">Next</a>
+      </li>
     </ul>
   </div>
 </div>

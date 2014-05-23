@@ -1,0 +1,12 @@
+doctype html
+html(lang="en", ng-app="testCoresAngular")
+
+  include head
+  body
+    .container(ng-controller="BarCtrl")
+      .row
+        .col-md-12
+          div(cr-model-resource type="{{ type }}", model-id="modelId", options="modelOptions")
+
+    include tail
+    script(src="/test/public/bar.js")

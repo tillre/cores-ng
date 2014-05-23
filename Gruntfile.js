@@ -1,8 +1,5 @@
-var path = require('path');
-var nano = require('nano')('http://localhost:5984');
 
-
-var dbName = 'test-cores-ng';
+var couchdb = require('Cores')('http://localhost:5984/test-cores-ng').couchdb;
 
 
 module.exports = function(grunt) {
@@ -77,25 +74,20 @@ module.exports = function(grunt) {
   grunt.registerTask('db:create', 'create test DB', function() {
     var done = this.async();
 
-    // create db for testing
-    nano.db.get(dbName, function(err, body) {
-      if (!err) {
-        // db exists, recreate
-        nano.db.destroy(dbName, function(err) {
-          if (err) done(err);
-          nano.db.create(dbName, done);
-        });
-      }
-      else if (err.reason === 'no_db_file'){
-        // create the db
-        nano.db.create(dbName, done);
-      }
-      else done(err);
-    });
+    couchdb.info().then(function() {
+      return couchdb.destroyDB().then(function() {
+        return couchdb.createDB();
+      });
+    }, function(err) {
+      return couchdb.createDB();
+
+    }).then(function() {
+      done();
+    }, done);
   });
 
   grunt.registerTask('db:destroy', 'destroy test DB', function() {
     var done = this.async();
-    nano.db.destroy(dbName, done);
+    couchdb.destroyDB().then(function() { done(); }, done);
   });
 };
