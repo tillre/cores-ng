@@ -209,18 +209,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   );
 
 
-  $templateCache.put('cr-model-list-filter.html',
-    "<form class=\"form-inline\">\n" +
-    "  <div class=\"form-group\">\n" +
-    "    <label>Filter:</label>\n" +
-    "    <select class=\"form-control input-sm\" ng-model=\"selectedView\" ng-options=\"v.title for v in views\">\n" +
-    "      <option value=\"\">{{defaultTitle}}</option>\n" +
-    "    </select>\n" +
-    "  </div>\n" +
-    "</div>"
-  );
-
-
   $templateCache.put('cr-model-list-modal.html',
     "<div id=\"{{modalId}}\" class=\"modal fade\" tabindex=\"-1\">\n" +
     "  <div class=\"modal-dialog\">\n" +
@@ -1854,174 +1842,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   var module = angular.module('cores.directives');
 
-
-  module.directive('crModelList2', function(
-    $sce,
-    crCommon,
-    crResources,
-    crSchema,
-    crJSONPointer
-  ) {
-    return {
-      scope: {
-        type: '@',
-        view: '=?',
-        page: '=?',
-        limit: '=?',
-        // startkey: '=?',
-        // endkey: '=?',
-        options: '=?'
-        //headers: '=?'
-      },
-
-      replace: true,
-      templateUrl: 'cr-model-list.html',
-
-      controller: function($scope) {
-        $scope.buttonClick = function(e, eventName, id) {
-          e.stopPropagation();
-          $scope.$emit(eventName, id);
-        };
-      },
-
-      link: function(scope, elem, attrs) {
-
-        var resource;
-        var schema;
-
-        scope.limit = scope.limit || 25;
-        scope.page = scope.page || 0;
-        scope.options = scope.options || {};
-
-        function reset() {
-          scope.isLoading = false;
-          scope.rows = [];
-          scope.enablePrev = false;
-          scope.enableNext = false;
-        }
-        reset();
-
-
-        function update() {
-          scope.isLoading = true;
-
-          var params = {
-            include_docs: true,
-            // include_refs: true,
-            // fetch one more to see if there is a next page
-            limit: scope.limit + 1,
-            skip: scope.page * scope.limit
-            // startkey: scope.startkey,
-            // endkey: scope.endkey
-          };
-          angular.extend(params, scope.options.params);
-
-          console.log('update, params', params);
-
-          resource.view(scope.view || 'all', params).then(function success(result) {
-            console.log('result', result);
-            if(result.total_rows === 0) return;
-
-            scope.enablePrev = scope.page > 0;
-            scope.enableNext = result.rows.length > scope.limit;
-            scope.isLoading = false;
-
-            if (result.rows.length > scope.limit) {
-              result.rows.pop();
-            }
-
-            // table rows values according to header
-            scope.rows = result.rows.map(function(row) {
-              return {
-                id: row.id,
-                items: scope.headers.map(function(header, i) {
-                  var val = '';
-                  if (header.path) {
-                    val = crJSONPointer.get(row.doc, header.path);
-                  }
-                  else if (header.map) {
-                    val = header.map(row.doc);
-                  }
-                  return { value: $sce.trustAsHtml(String(val)) };
-                })
-              };
-            });
-
-          }, function(err) {
-            throw err;
-          });
-        }
-
-        //
-        // scope methods
-        //
-        scope.select = function(id) {
-          scope.$emit('cr:list:select', id);
-        };
-
-        scope.next = function() {
-          scope.page += 1;
-          update();
-        };
-
-        scope.prev = function() {
-          scope.page -= 1;
-          update();
-        };
-
-        scope.$on('cr:reload:list', function(e) {
-          e.preventDefault();
-          update();
-        });
-
-
-        //
-        // load schema and fill list
-        //
-        scope.$watch('type', function(newType) {
-          if (!newType) {
-            return;
-          }
-          scope.type = newType;
-
-          resource = crResources.get(scope.type);
-          resource.schema().then(function(s) {
-            schema = s;
-
-            // auto generate headers when not set
-            if (!scope.headers || scope.headers.length === 0) {
-              scope.headers = Object.keys(schema.properties).filter(function(key) {
-                return !crSchema.isPrivateProperty(key);
-              }).map(function(key) {
-                return { title: crCommon.capitalize(key).split('/')[0], path: key };
-              });
-            }
-            // table column titles
-            scope.titles = scope.headers.map(function(header) {
-              return header.title ||
-                (header.path ? crCommon.capitalize(header.path).split('/')[0] : '');
-            });
-
-            update();
-          });
-
-          scope.$watch('view', function(newValue, oldValue) {
-            if (newValue === oldValue) return;
-            if (!resource) return;
-            // reload list on view change
-            reset();
-            update();
-          });
-        });
-      }
-    };
-  });
-
-})();
-(function() {
-
-  var module = angular.module('cores.directives');
-
   module.directive('crModelList', function(
     $sce,
     crCommon,
@@ -2102,26 +1922,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
                 })
               };
             });
-
-            // elem.find('tbody').html(result.rows.map(function(row) {
-
-            //   var rowNode = $('<tr>');
-
-            //   rowNode.html(scope.columns.map(function(header) {
-            //     var node = $('<td>');
-            //     if (header.path) {
-            //       node.text(String(crJSONPointer.get(row.doc, header.path)));
-            //     }
-            //     if (header.map) {
-            //       node = header.map(node, row.doc);
-            //     }
-            //     return node;
-            //   }));
-
-            //   return rowNode;
-
-            // }));
-
           }, function(err) {
             throw err;
           });
@@ -2928,6 +2728,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           indent: true,
           inline: false
         }, scope.schema.view);
+
+        // default showLabel to false on all properties
+        Object.keys(scope.schema.properties).forEach(function(key) {
+          var prop = scope.schema.properties[key];
+          prop.view = prop.view || {};
+          prop.view.showLabel = prop.view.hasOwnProperty('showLabel') ? prop.view.showLabel : false;
+        });
 
         var props = crBuild.buildProperties(scope, scope.schema, scope.model, scope.path);
 
