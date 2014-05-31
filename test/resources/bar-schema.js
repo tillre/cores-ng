@@ -45,6 +45,7 @@ module.exports = J.object({
   selectRef: J.ref('Foo')
     .custom('view', {
       selectOnly: true,
+      enableClear: true,
       previewPaths: ['/name'],
       list: {
         columns: [ { path: 'name' } ],

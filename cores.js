@@ -408,8 +408,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "      <div class=\"cr-ref-controls\">\n" +
     "        <div class=\"btn-group\">\n" +
     "          <button ng-click=\"newModel()\" ng-show=\"!options.selectOnly\" class=\"btn btn-default\" type=\"button\">New</button>\n" +
-    "          <button ng-click=\"editModel()\" ng-show=\"hasModel() && !options.selectOnly\" class=\"btn btn-default\" type=\"button\">Edit</button>\n" +
+    "          <button ng-click=\"editModel()\" ng-show=\"!options.selectOnly && hasModel()\" class=\"btn btn-default\" type=\"button\">Edit</button>\n" +
     "          <button ng-click=\"selectModel()\" class=\"btn btn-default\" type=\"button\">Select</button>\n" +
+    "          <button ng-click=\"clearModel()\" ng-show=\"options.enableClear && hasModel()\" class=\"btn btn-default\" type=\"button\">Clear</button>\n" +
     "        </div>\n" +
     "      </div>\n" +
     "    </div>\n" +
@@ -2480,6 +2481,10 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
         scope.selectModel = function() {
           scope.$broadcast('cr:showModal:list', scope.selectModalId, true);
+        };
+
+        scope.clearModel = function() {
+          delete scope.model.id_;
         };
 
         scope.hasModel = function() {

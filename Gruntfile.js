@@ -41,10 +41,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-angular-templates');
 
-  grunt.registerTask('default', ['ngtemplates', 'concat']);
+  grunt.registerTask('build', ['ngtemplates', 'concat']);
 
   grunt.registerTask('serve', ['db:create', 'server:run', 'db:destroy']);
   grunt.registerTask('test', ['db:create', 'server:test', 'karma', 'db:destroy']);
+
+  grunt.registerTask('default', ['build', 'serve']);
 
   //
   // server tasks

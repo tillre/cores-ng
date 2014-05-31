@@ -8,8 +8,9 @@
       <div class="cr-ref-controls">
         <div class="btn-group">
           <button ng-click="newModel()" ng-show="!options.selectOnly" class="btn btn-default" type="button">New</button>
-          <button ng-click="editModel()" ng-show="hasModel() && !options.selectOnly" class="btn btn-default" type="button">Edit</button>
+          <button ng-click="editModel()" ng-show="!options.selectOnly && hasModel()" class="btn btn-default" type="button">Edit</button>
           <button ng-click="selectModel()" class="btn btn-default" type="button">Select</button>
+          <button ng-click="clearModel()" ng-show="options.enableClear && hasModel()" class="btn btn-default" type="button">Clear</button>
         </div>
       </div>
     </div>
