@@ -6,10 +6,14 @@
         <h4 class="modal-title">Select</h4>
       </div>
       <div class="modal-body">
+        <div cr-search-box
+             type="type"
+             paginator="list.paginator"
+             postpone-load="list.postpone"></div>
         <div cr-model-list
              paginator="list.paginator"
              columns="list.columns"
-             postpone-load="true"></div>
+             postpone-load="list.postpone"></div>
       </div>
       <div class="modal-footer">
         <button ng-click="cancel" class="btn btn-default pull-right" data-dismiss="modal">Cancel</button>

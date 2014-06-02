@@ -218,10 +218,14 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "        <h4 class=\"modal-title\">Select</h4>\n" +
     "      </div>\n" +
     "      <div class=\"modal-body\">\n" +
+    "        <div cr-search-box\n" +
+    "             type=\"type\"\n" +
+    "             paginator=\"list.paginator\"\n" +
+    "             postpone-load=\"list.postpone\"></div>\n" +
     "        <div cr-model-list\n" +
     "             paginator=\"list.paginator\"\n" +
     "             columns=\"list.columns\"\n" +
-    "             postpone-load=\"true\"></div>\n" +
+    "             postpone-load=\"list.postpone\"></div>\n" +
     "      </div>\n" +
     "      <div class=\"modal-footer\">\n" +
     "        <button ng-click=\"cancel\" class=\"btn btn-default pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
@@ -419,9 +423,19 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "\n" +
     "  <div cr-model-list-modal\n" +
     "       modal-id=\"{{selectModalId}}\"\n" +
-    "       list=\"options.list\">\n" +
+    "       list=\"options.list\"\n" +
+    "       type=\"{{ schema.$ref }}\">\n" +
     "  </div>\n" +
     "</div>\n"
+  );
+
+
+  $templateCache.put('cr-search-box.html',
+    "<form class=\"form-inline\">\n" +
+    "  <div class=\"form-group\">\n" +
+    "    <input type=\"text\" ng-model=\"model\" class=\"form-control\" placeholder=\"Search\">\n" +
+    "  </div>\n" +
+    "</form>"
   );
 
 
@@ -887,7 +901,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
     function createSearchPaginator(resource, search, query) {
-      console.log('create search paginator');
+
       query = query || {};
 
       var prevBookmarks = [];
@@ -896,7 +910,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       var firstPage = true;
 
       function load(bookmark) {
-        console.log('load search');
         var q = angular.copy(query);
         q.limit = q.limit || 10;
         // add bookmark
@@ -2090,9 +2103,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   ) {
     return {
       scope: {
-        columns: '=?',
         paginator: '=',
-        postponeLoad: '@?'
+        columns: '=?',
+        postponeLoad: '=?'
       },
 
       replace: true,
@@ -2100,7 +2113,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
       link: function(scope, elem, attrs) {
 
-        scope.postponeLoad = scope.postponeLoad === 'true';
+        scope.postponeLoad = scope.postponeLoad || false;
 
         scope.select = function(id) {
           scope.$emit('cr:list:select', id);
@@ -2160,7 +2173,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           scope.enablePrev = scope.paginator.hasPrev();
           scope.rows = result.rows.map(function(row) {
             return {
-              id: row.id,
+              id: row.doc._id,
               items: scope.columns.map(function(header) {
                 var val = '';
                 if (header.path) {
@@ -2660,6 +2673,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         if (!scope.options.list.paginator) {
           scope.options.list.paginator = crPagination.createViewPaginator(resource, 'all');
         }
+        scope.options.list.postpone = true;
 
         scope.modelId = scope.model.id_;
         scope.reset = false;
@@ -2766,6 +2780,46 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         if (scope.options.previewPath) {
           scope.options.previewPaths = [scope.options.previewPath];
         }
+      }
+    };
+  });
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+  module.directive('crSearchBox', function(crResources, crPagination) {
+    return {
+      scope: {
+        type: '=',
+        paginator: '=',
+        postponeLoad: '=?'
+      },
+      replace: true,
+      templateUrl: 'cr-search-box.html',
+
+      link: function(scope, elem, attrs) {
+
+        scope.model = '';
+
+        var searchActive = false;
+        var defaultPaginator = scope.paginator;
+
+        scope.$watch('model', function(value) {
+          if (!value) {
+            if (searchActive) {
+              scope.paginator = defaultPaginator;
+            }
+            searchActive = false;
+            return;
+          }
+          searchActive = true;
+          var searchPaginator = crPagination.createSearchPaginator(
+            crResources.get(scope.type), 'list', { q: value }
+          );
+          scope.postponeLoad = false;
+          scope.paginator = searchPaginator;
+        });
       }
     };
   });
