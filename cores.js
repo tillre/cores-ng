@@ -1381,7 +1381,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       // get a view by id
       //
       get: function(id) {
-        console.log('get view', id);
         var v = views[id];
         if (!v) {
           throw new Error('View does not exist: ' + (typeof id === 'string' ? id : JSON.stringify(id)));
@@ -2274,7 +2273,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
               err.errors.forEach(function(ve) {
                 var event = scope.$broadcast('cr:model:error', '/model' + ve.path, ve.code, ve.message);
                 if (!event.handled) {
-                  console.log('event handled');
                   scope.unhandledErrors.push(ve.message + ' - ' + ve.path);
                 }
               });
@@ -3030,7 +3028,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           };
 
           resource.save(doc).then(function(doc) {
-            console.log('save success', doc);
             scope.currentTag = '';
             if (addTag(doc)) {
               allTags.push({
