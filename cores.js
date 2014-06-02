@@ -3183,7 +3183,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         };
 
         scope.getTagName = function(id) {
-          return allTagsById[id].name;
+          var tag = allTagsById[id];
+          return tag ? tag.name : '';
         };
 
         tagInput.on('focus', function(e) {
