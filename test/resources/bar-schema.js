@@ -27,76 +27,53 @@ module.exports = J.object({
     }).custom('name', 'bar')
   )),
 
-  none: J.string().custom('view', { type: 'none' }),
-  readonly: J.string().default('readonly').custom('view', { type: 'cr-readonly' }),
+  none: J.string().custom('view', 'none'),
+  readonly: J.string().default('readonly').custom('view', 'readonly'),
 
   'enum': J.enum(1, 2, 3),
 
-  ref: J.ref('Foo')
-    .custom('view', {
-      previewPaths: ['/name', '/slug'],
-      defaults: { '/name': 'some value' },
-      list: {
-        columns: [ { path: 'slug' } ],
-        view: 'ids'
-      }
-    }),
+  ref: J.ref('Foo').custom('view', 'ref'),
 
-  selectRef: J.ref('Foo')
-    .custom('view', {
-      selectOnly: true,
-      enableClear: true,
-      previewPaths: ['/name'],
-      list: {
-        columns: [ { path: 'name' } ],
-        view: 'ids'
-      }
-    }),
+  selectRef: J.ref('Foo').custom('view', 'selectRef'),
 
-  image: J.ref('Image')
-    .custom('view', { preview: 'cr-image-preview'}),
+  image: J.ref('Image').custom('view', 'image'),
 
-  singleSelRef: J.ref('Foo')
-    .custom('view', { type: 'cr-single-select-ref', previewPaths: ['/name', '/slug'] }),
+  singleSelRef: J.ref('Foo').custom('view', 'singleSelRef'),
 
-  multiSelRef: J.array(J.ref('Foo'))
-    .custom('view', { type: 'cr-multi-select-ref', previewPath: '/name' }),
+  multiSelRef: J.array(J.ref('Foo')).custom('view', 'multiSelRef'),
 
-  tags: J.array(J.ref('Foo'))
-    .custom('view', { type: 'cr-tags' }),
+  tags: J.array(J.ref('Foo')).custom('view', 'tags'),
 
-  date: J.string().custom('view', { type: 'cr-datetime' }),
+  date: J.string().custom('view', 'datetime'),
 
-  slug: J.string()
-    .format('slug')
-    .custom('view', { type: 'cr-slug', source: ['string'] }),
+  slug: J.string().format('slug').custom('view', 'slug'),
 
   inlineObject: J.object({
     foo: J.string(),
     bar: J.number()
-  }).custom('view', { inline: true }),
+  }).custom('view', 'inline'),
 
   columnObject: J.object({
     foo: J.string(),
     bar: J.string(),
     baz: J.array(J.object({ num: J.number() }))
-  }).custom('view', { type: 'cr-column-object', showLabels: true }),
+  }).custom('view', 'columnObject'),
 
   tabObject: J.object({
     tab1: J.string(),
     tab2: J.object({
       foo: J.string(),
       bar: J.number()
-    }).custom('view', { inline: true })
-  }).custom('view', { type: 'cr-tab-object' }),
+    }).custom('view', 'inline')
+  }).custom('view', 'tabObject'),
 
   arrayRefs: J.array(
     J.ref('Foo')
-      .custom('view', { showLabel: true, previewPath: 'name' })
+      .custom('view', 'arrayRef')
       .title('Yam')
   ),
 
-  text: J.string().custom('view', { type: 'cr-text' }).minLength(10),
-  password: J.string().minLength(8).custom('view', { type: 'cr-password' })
+  text: J.string().custom('view', 'text').minLength(10),
+  password: J.string().minLength(8).custom('view', 'password')
 
-}).required('string');
+}).custom('view', 'base').required('string');

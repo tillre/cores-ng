@@ -3,15 +3,13 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">{{type}}</h4>
+        <h4 class="modal-title">Select</h4>
       </div>
       <div class="modal-body">
         <div cr-model-list
-             type="{{type}}"
-             view="list.view"
-             params="list.params"
+             paginator="list.paginator"
              columns="list.columns"
-             autoload="false"></div>
+             postpone-load="true"></div>
       </div>
       <div class="modal-footer">
         <button ng-click="cancel" class="btn btn-default pull-right" data-dismiss="modal">Cancel</button>

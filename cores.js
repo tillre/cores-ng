@@ -215,15 +215,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "    <div class=\"modal-content\">\n" +
     "      <div class=\"modal-header\">\n" +
     "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n" +
-    "        <h4 class=\"modal-title\">{{type}}</h4>\n" +
+    "        <h4 class=\"modal-title\">Select</h4>\n" +
     "      </div>\n" +
     "      <div class=\"modal-body\">\n" +
     "        <div cr-model-list\n" +
-    "             type=\"{{type}}\"\n" +
-    "             view=\"list.view\"\n" +
-    "             params=\"list.params\"\n" +
+    "             paginator=\"list.paginator\"\n" +
     "             columns=\"list.columns\"\n" +
-    "             autoload=\"false\"></div>\n" +
+    "             postpone-load=\"true\"></div>\n" +
     "      </div>\n" +
     "      <div class=\"modal-footer\">\n" +
     "        <button ng-click=\"cancel\" class=\"btn btn-default pull-right\" data-dismiss=\"modal\">Cancel</button>\n" +
@@ -421,8 +419,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "\n" +
     "  <div cr-model-list-modal\n" +
     "       modal-id=\"{{selectModalId}}\"\n" +
-    "       type=\"{{schema.$ref}}\"\n" +
-    "       list=\"options.list\"></div>\n" +
+    "       list=\"options.list\">\n" +
+    "  </div>\n" +
     "</div>\n"
   );
 
@@ -548,7 +546,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   var module = angular.module('cores.services');
 
 
-  module.factory('crBuild', function($compile, crCommon, crSchema, crJSONPointer) {
+  module.factory('crBuild', function($compile, crCommon, crViews, crSchema, crJSONPointer) {
 
     function getType(schema) {
       var type = schema.type;
@@ -571,10 +569,20 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       type = 'cr-' + type;
 
       if (schema.view) {
-        if (!angular.isObject(schema.view)) {
-          throw new Error('schema.view has to be an object ' + JSON.stringify(schema.view));
+        // if (typeof schema.view !== 'string') {
+        //   throw new Error('schema.view has to be a string ' + JSON.stringify(schema.view));
+        // }
+        // // custom type
+        // // var view = crViews.get(schema.view);
+        // // type = view.type || type;
+
+        // schema.view = crViews.get(schema.view);
+        // type = schema.view.type || type;
+
+        if (typeof schema.view === 'string') {
+          // instantiate view
+          schema.view = crViews.get(schema.view);
         }
-        // custom type
         type = schema.view.type || type;
       }
 
@@ -811,6 +819,110 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   var module = angular.module('cores.services');
 
+
+  module.factory('crPagination', function() {
+
+    function createViewPaginator(resource, view, query) {
+
+      view = view || 'all';
+      query = query || {};
+
+      var prevKeys = [];
+      var curKey = null;
+      var nextKey = null;
+
+      function load(startkey) {
+        var q = angular.copy(query);
+        // get one more to see if there is a next page
+        q.limit = q.limit ? q.limit + 1 : 11;
+        q.view = q.view || 'all';
+        // overwrite startkey on consecutive
+        q.startkey = startkey || q.startkey;
+        // force include docs
+        q.include_docs = true;
+
+        return resource.view(view, q).then(function(result) {
+          if (result.rows.length > 0) {
+            curKey = result.rows[0].key;
+            nextKey = null;
+
+            if (result.rows.length > q.limit - 1) {
+              // there is a next page
+              nextKey = result.rows[result.rows.length - 1].key;
+              result.rows.pop();
+            }
+          }
+          return result;
+        });
+      }
+
+      return Object.freeze({
+
+        resource: resource,
+
+        loadInitial: function() {
+          prevKeys = [];
+          curKey = nextKey = null;
+          return load();
+        },
+
+        hasNext: function hasNext() {
+          return !!nextKey;
+        },
+
+        hasPrev: function hasPrev() {
+          return prevKeys.length > 0;
+        },
+
+        loadNext: function loadNext() {
+          prevKeys.push(curKey);
+          return load(nextKey);
+        },
+
+        loadPrev: function loadPrev() {
+          return load(prevKeys.pop());
+        }
+      });
+    }
+
+
+    function createSearchPaginator(resource, search, query) {
+
+
+      return Object.freeze({
+
+        resource: resource,
+
+        loadInitial: function() {
+        },
+
+        hasNext: function hasNext() {
+        },
+
+        hasPrev: function hasPrev() {
+        },
+
+        loadNext: function loadNext() {
+        },
+
+        loadPrev: function loadPrev() {
+        }
+      });
+    }
+
+
+    return {
+      createViewPaginator: createViewPaginator,
+      createSearchPaginator: createSearchPaginator
+    };
+  });
+
+})();
+
+(function() {
+
+  var module = angular.module('cores.services');
+
   //
   // Create an error object from a response
   //
@@ -847,17 +959,21 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       // add config to this
       angular.extend(
         this,
-        { path: '', schemaPath: '', viewPaths: {} },
+        { path: '', schemaPath: '', viewPaths: {}, searchPaths: {} },
         config
       );
 
       if (apiUrl) {
+        // extend all paths with api url
         this.path = apiUrl + this.path;
         this.schemaPath = apiUrl + this.schemaPath;
 
         var self = this;
         angular.forEach(this.viewPaths, function(path, name) {
           self.viewPaths[name] = apiUrl + path;
+        });
+        angular.forEach(this.searchPaths, function(path, name) {
+          self.searchPaths[name] = apiUrl + path;
         });
       }
     };
@@ -1011,6 +1127,22 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     };
 
 
+    function parseQueryString(qs) {
+      // stringify non string params as json, to preserve them
+      // angularjs http will otherwise do funky stuff with array params
+      var r = {};
+      for (var x in qs) {
+        if (typeof qs[x] !== 'string') {
+          r[x] = JSON.stringify(qs[x]);
+        }
+        else {
+          r[x] = '\"' + qs[x] + '\"';
+        }
+      }
+      return r;
+    }
+
+
     //
     // Call a couchdb view
     //
@@ -1020,25 +1152,27 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       if (!path) {
         throw new Error('No view with name found: ' + name);
       }
-
-      var config = {
-        params: {}
-      };
-      // stringify non string params as json, to preserve them
-      // angularjs http will otherwise do funky stuff with array params
-      for (var x in params) {
-        if (typeof params[x] !== 'string') {
-          config.params[x] = JSON.stringify(params[x]);
-        }
-        else {
-          config.params[x] = params[x];
-        }
-      }
-      return $http.get(path, config).then(
+      return $http.get(path, { params: parseQueryString(params) }).then(
         function(res) { return res.data; },
         function(res) { return $q.reject(makeError(res)); }
       );
     };
+
+    //
+    // Call a couchdb search index
+    //
+    Resource.prototype.search = function(name, params) {
+
+      var path = this.searchPaths[name];
+      if (!path) {
+        throw new Error('No search index with name found: ' + name);
+      }
+      return $http.get(path, { params: parseQueryString(params) }).then(
+        function(res) { return res.data; },
+        function(res) { return $q.reject(makeError(res)); }
+      );
+    };
+
     return Resource;
   });
 
@@ -1227,6 +1361,55 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 })();
 (function() {
 
+  var module = angular.module('cores.services');
+
+
+  module.factory('crViews', function() {
+
+    var views = {};
+
+    function addView(id, spec) {
+      if (views[id]) {
+        throw new Error('View does already exist: ' + id);
+      }
+      views[id] = spec;
+    }
+
+    return {
+
+      //
+      // get a view by id
+      //
+      get: function(id) {
+        console.log('get view', id);
+        var v = views[id];
+        if (!v) {
+          throw new Error('View does not exist: ' + (typeof id === 'string' ? id : JSON.stringify(id)));
+        }
+        return v;
+      },
+
+      //
+      // add one or a map of view
+      // either (id, spec) or ({id1: spec1, id2: spec2})
+      //
+      add: function(id, spec) {
+        if (arguments.length === 1) {
+          Object.keys(id).forEach(function(key) {
+            addView(key, id[key]);
+          });
+        }
+        else {
+          addView(id, spec);
+        }
+      }
+    };
+  });
+
+})();
+
+(function() {
+
   var module = angular.module('cores.directives');
 
 
@@ -1381,7 +1564,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
   module.directive('crColumnObject', function(
-    crBuild
+    crBuild,
+    crViews
   ) {
     return {
       replace: true,
@@ -1416,7 +1600,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   var module = angular.module('cores.directives');
 
-  module.directive('crControl', function(crBuild) {
+  module.directive('crControl', function(crBuild, crViews) {
     return {
       require: 'crControl',
       scope: {
@@ -1843,6 +2027,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   var module = angular.module('cores.directives');
 
+
   module.directive('crModelList', function(
     $sce,
     crCommon,
@@ -1852,12 +2037,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   ) {
     return {
       scope: {
-        type: '@',
-        view: '=?',
-        page: '=?',
-        limit: '=?',
         columns: '=?',
-        params: '=?'
+        paginator: '=',
+        postponeLoad: '@?'
       },
 
       replace: true,
@@ -1865,106 +2047,35 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
       link: function(scope, elem, attrs) {
 
-        var resource;
-        var schema;
+        scope.postponeLoad = scope.postponeLoad === 'true';
 
-        scope.limit = scope.limit || 25;
-        scope.page = scope.page || 0;
-        scope.columns = scope.columns || [];
-        scope.params = scope.params || {};
-
-        function reset() {
-          scope.isLoading = false;
-          scope.rows = [];
-          scope.enablePrev = false;
-          scope.enableNext = false;
-        }
-        reset();
-
-
-        function update() {
-          scope.isLoading = true;
-
-          var params = {
-            include_docs: true,
-            // fetch one more to see if there is a next page
-            limit: scope.limit + 1,
-            skip: scope.page * scope.limit
-          };
-          angular.extend(params, scope.params);
-
-          resource.view(scope.view || 'all', params).then(function success(result) {
-
-            if(result.total_rows === 0) return;
-
-            scope.enablePrev = scope.page > 0;
-            scope.enableNext = result.rows.length > scope.limit;
-            scope.isLoading = false;
-
-            if (result.rows.length > scope.limit) {
-              result.rows.pop();
-            }
-
-            scope.rows = result.rows.map(function(row) {
-              return {
-                id: row.doc._id,
-                items: scope.columns.map(function(header) {
-                  var val = '';
-                  if (header.path) {
-                    val = crJSONPointer.get(row.doc, header.path);
-                  }
-                  else if (header.map) {
-                    val = header.map(row.doc);
-                  }
-                  else if (header.title) {
-                    val = row.doc[header.title.toLowerCase()];
-                  }
-                  return { value: $sce.trustAsHtml(String(val)) };
-                })
-              };
-            });
-          }, function(err) {
-            throw err;
-          });
-        }
-
-        //
-        // scope methods
-        //
         scope.select = function(id) {
           scope.$emit('cr:list:select', id);
         };
 
         scope.next = function() {
-          scope.page += 1;
-          update();
+          if (!scope.paginator.hasNext()) return;
+          scope.paginator.loadNext().then(onLoadSuccess, onLoadError);
         };
 
         scope.prev = function() {
-          scope.page -= 1;
-          update();
+          if (!scope.paginator.hasPrev()) return;
+          scope.paginator.loadPrev().then(onLoadSuccess, onLoadError);
         };
 
         scope.$on('cr:reload:list', function(e) {
           e.preventDefault();
-          update();
+          scope.paginator.loadInitial().then(onLoadSuccess, onLoadError);
         });
 
 
-        //
-        // load schema and fill list
-        //
-        scope.$watch('type', function(newType) {
-          if (!newType) {
+        scope.$watch('paginator', function(pg) {
+          if (!pg) {
             return;
           }
-          scope.type = newType;
+          pg.resource.schema().then(function(schema) {
 
-          resource = crResources.get(scope.type);
-          resource.schema().then(function(s) {
-            schema = s;
-
-            // auto generate headers when not set
+            // auto generate column configs when not set
             if (!scope.columns || scope.columns.length === 0) {
               scope.columns = Object.keys(schema.properties).filter(function(key) {
                 return !crSchema.isPrivateProperty(key);
@@ -1972,23 +2083,51 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
                 return { title: crCommon.capitalize(key).split('/')[0], path: key };
               });
             }
-            // table column titles
+
+            // create table column titles
             scope.titles = scope.columns.map(function(header) {
               return header.title ||
                 (header.path ? crCommon.capitalize(header.path).split('/')[0] : '');
             });
 
-            update();
-          });
-
-          scope.$watch('view', function(newValue, oldValue) {
-            if (newValue === oldValue) return;
-            if (!resource) return;
-            // reload list on view change
-            reset();
-            update();
+            if (scope.postponeLoad) {
+              return;
+            }
+            scope.isLoading = true;
+            pg.loadInitial().then(onLoadSuccess, onLoadError);
           });
         });
+
+
+        // load handlers
+
+        function onLoadSuccess(result) {
+          scope.isLoading = false;
+          scope.enableNext = scope.paginator.hasNext();
+          scope.enablePrev = scope.paginator.hasPrev();
+          scope.rows = result.rows.map(function(row) {
+            return {
+              id: row.id,
+              items: scope.columns.map(function(header) {
+                var val = '';
+                if (header.path) {
+                  val = crJSONPointer.get(row.doc, header.path);
+                }
+                else if (header.map) {
+                  val = header.map(row.doc);
+                }
+                else if (header.title) {
+                  val = row.doc[header.title.toLowerCase()];
+                }
+                return { value: $sce.trustAsHtml(String(val)) };
+              })
+            };
+          });
+        }
+
+        function onLoadError(err) {
+          throw err;
+        }
       }
     };
   });
@@ -2335,7 +2474,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
   module.directive('crObject', function(
-    crBuild
+    crBuild,
+    crViews
   ) {
     return {
       replace: true,
@@ -2445,6 +2585,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   module.directive('crRef', function(
     $compile,
     crResources,
+    crPagination,
+    crViews,
     crCommon
   ) {
     return {
@@ -2454,12 +2596,18 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
       link: function(scope, elem, attrs, crCtrl) {
 
+        var resource = crResources.get(scope.schema.$ref);
+
         scope.options = angular.extend({
           showLabel: true,
           indent: true,
           preview: 'cr-ref-preview',
           list: {}
         }, scope.schema.view);
+
+        if (!scope.options.list.paginator) {
+          scope.options.list.paginator = crPagination.createViewPaginator(resource, 'all');
+        }
 
         scope.modelId = scope.model.id_;
         scope.reset = false;
@@ -2525,7 +2673,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
         function update() {
           if (scope.model.id_) {
-            var resource = crResources.get(scope.schema.$ref);
             resource.load(scope.model.id_).then(function(doc) {
               scope.previewModel = doc;
             });
@@ -2720,6 +2867,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   module.directive('crTabObject', function(
     crBuild,
+    crViews,
     crCommon
   ) {
     return {

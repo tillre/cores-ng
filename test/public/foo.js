@@ -4,20 +4,15 @@
 
   angular.module('testCoresAngular', ['ng', 'cores'])
 
-    .controller('FooCtrl', function($scope, crResources) {
+    .controller('FooCtrl', function($scope, crResources, crPagination) {
 
       crResources.init().then(function() {
 
         $scope.type = 'Foo';
 
-        $scope.view = 'names';
-        $scope.limit = 3;
-        $scope.page = 0;
-
-        // $scope.params = {
-        //   startkey: 'so',
-        //   endkey: 'so\u9999'
-        // };
+        $scope.paginator = crPagination.createViewPaginator(
+          crResources.get('Foo'), 'names', { limit: 3 /*, startkey: 'so', endkey: 'so\u9999'*/ }
+        );
 
         $scope.columns = [
           { title: 'Name', path: 'name' },

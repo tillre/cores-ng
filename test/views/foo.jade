@@ -7,7 +7,7 @@ html(lang="en", ng-app="testCoresAngular")
       .row
         .col-md-12
           div(cr-model-resource type="{{ type }}")
-          div(cr-model-list, type="{{ type }}", view="view" limit="limit", page="page", columns="columns", params="params")
+          div(cr-model-list, columns="columns", paginator="paginator")
 
     include tail
     script(src="/test/public/foo.js")
