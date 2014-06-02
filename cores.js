@@ -866,14 +866,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           return load();
         },
 
-        hasNext: function hasNext() {
-          return !!nextKey;
-        },
-
-        hasPrev: function hasPrev() {
-          return prevKeys.length > 0;
-        },
-
         loadNext: function loadNext() {
           prevKeys.push(curKey);
           return load(nextKey);
@@ -881,31 +873,93 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
         loadPrev: function loadPrev() {
           return load(prevKeys.pop());
+        },
+
+        hasNext: function hasNext() {
+          return !!nextKey;
+        },
+
+        hasPrev: function hasPrev() {
+          return prevKeys.length > 0;
         }
       });
     }
 
 
     function createSearchPaginator(resource, search, query) {
+      console.log('create search paginator');
+      query = query || {};
 
+      var prevBookmarks = [];
+      var curBookmark = null;
+      var nextBookmark = null;
+      var firstPage = true;
+
+      function load(bookmark) {
+        console.log('load search');
+        var q = angular.copy(query);
+        q.limit = q.limit || 10;
+        // add bookmark
+        if (bookmark) {
+          q.bookmark = bookmark;
+        }
+        // force include docs
+        q.include_docs = true;
+        return resource.search(search, q);
+      }
 
       return Object.freeze({
 
         resource: resource,
 
+        setQuery: function(q) {
+          query = q;
+        },
+
         loadInitial: function() {
-        },
+          prevBookmarks = [];
+          curBookmark = nextBookmark = null;
+          firstPage = true;
 
-        hasNext: function hasNext() {
-        },
-
-        hasPrev: function hasPrev() {
+          return load().then(function(result) {
+            nextBookmark = result.bookmark;
+            return result;
+          });
         },
 
         loadNext: function loadNext() {
+          return load(nextBookmark).then(function(result) {
+            if (curBookmark) {
+              prevBookmarks.push(curBookmark);
+            }
+            curBookmark = nextBookmark;
+            nextBookmark = null;
+            if (result.rows.length === (query.limit || 10)) {
+              nextBookmark = result.bookmark;
+            }
+            firstPage = false;
+            return result;
+          });
         },
 
         loadPrev: function loadPrev() {
+          var b = prevBookmarks.pop();
+          if (!b) {
+            firstPage = true;
+          }
+          return load(b).then(function(result) {
+            curBookmark = b;
+            nextBookmark = result.bookmark;
+            return result;
+          });
+        },
+
+        hasNext: function hasNext() {
+          return !!nextBookmark;
+        },
+
+        hasPrev: function hasPrev() {
+          return !firstPage || prevBookmarks.length > 0;
         }
       });
     }
@@ -1127,7 +1181,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     };
 
 
-    function parseQueryString(qs) {
+    function parseViewQuery(qs) {
       // stringify non string params as json, to preserve them
       // angularjs http will otherwise do funky stuff with array params
       var r = {};
@@ -1152,7 +1206,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       if (!path) {
         throw new Error('No view with name found: ' + name);
       }
-      return $http.get(path, { params: parseQueryString(params) }).then(
+      return $http.get(path, { params: parseViewQuery(params) }).then(
         function(res) { return res.data; },
         function(res) { return $q.reject(makeError(res)); }
       );
@@ -1167,7 +1221,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       if (!path) {
         throw new Error('No search index with name found: ' + name);
       }
-      return $http.get(path, { params: parseQueryString(params) }).then(
+      return $http.get(path, { params: params }).then(
         function(res) { return res.data; },
         function(res) { return $q.reject(makeError(res)); }
       );
