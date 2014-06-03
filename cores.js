@@ -1267,6 +1267,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       return $http.get(this._apiUrl + '/_index').then(
 
         function(res) {
+          console.log('index', res.data);
           angular.forEach(res.data, function(config, key) {
             self._resources[key] = new crResource(key, config, self._apiUrl);
           });
