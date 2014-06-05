@@ -103,6 +103,7 @@ module.exports = function setupServer(callback) {
       }
     ]);
 
+    console.log('load resources');
     return server.plugins['cores-hapi'].cores.load(
       __dirname + '/resources',
       { imagesUrl: '/test/public/upload' },
@@ -111,6 +112,7 @@ module.exports = function setupServer(callback) {
 
   }).then(function() {
 
+    console.log('create api');
     var coresHapi = server.plugins['cores-hapi'];
 
     coresHapi.createApi();

@@ -499,7 +499,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "      <div class=\"cr-tag-matches\">\n" +
     "        <ul class=\"dropdown-menu\" role=\"menu\">\n" +
     "          <li ng-repeat=\"match in matches\" ng-class=\"{ active: activeListIndex === $index }\">\n" +
-    "            <a ng-click=\"selectMatch(match)\">{{ match.doc.name }}</a>\n" +
+    "            <a ng-click=\"selectMatch(match)\">{{ match.name }}</a>\n" +
     "          </li>\n" +
     "        </ul>\n" +
     "      </div>\n" +
@@ -510,7 +510,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "      <div>\n" +
     "        <ul class=\"list-inline\">\n" +
     "          <li ng-repeat=\"tag in model\" ng-click=\"removeTag($index)\">\n" +
-    "            <span class=\"label label-primary\">{{ getTagName(tag.id_) }}  <span class=\"glyphicon glyphicon-remove\"></span> </span>\n" +
+    "            <span class=\"label label-primary\">{{ getTagName(tag.slug) }}  <span class=\"glyphicon glyphicon-remove\"></span> </span>\n" +
     "          </li>\n" +
     "        </ul>\n" +
     "      </div>\n" +
@@ -1393,6 +1393,44 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       isRefSchema: isRefSchema,
 
       isPrivateProperty: isPrivateProperty
+    };
+  });
+
+})();
+(function() {
+
+  var module = angular.module('cores.services');
+
+
+  module.factory('crTagCompletion', function() {
+
+    var items = [];
+    var itemsMap = {};
+
+    function createKey(str) {
+      return str.toLowerCase().replace(/ +?/g, '');
+    }
+
+    return {
+
+      getItem: function(slug) {
+        return itemsMap[slug];
+      },
+
+      addItem: function(name, slug) {
+        if (itemsMap[slug]) return false;
+        var t = { name: name, slug: slug, key: createKey(slug) };
+        items.push(t);
+        itemsMap[slug] = t;
+        return true;
+      },
+
+      match: function(str) {
+        var re = new RegExp('^' + createKey(str));
+        return items.filter(function(i) {
+          return i.key.match(re);
+        });
+      }
     };
   });
 
@@ -3037,10 +3075,10 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   var module = angular.module('cores.directives');
 
-
   module.directive('crTags', function(
     crResources,
-    crCommon
+    crCommon,
+    crTagCompletion
   ) {
     return {
       require: '^crControl',
@@ -3052,30 +3090,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         // validation
         if (scope.required) {
           crCtrl.addValidator('required', function(value) {
-            return !!value;
+            return !!value && !!value.length;
           });
         }
-
-        var allTags = [];
-        var allTagsById = {};
-        var resource = crResources.get(scope.schema.items.$ref);
-
-        // load all tags
-        resource.view('all', { include_docs: true }).then(function(result) {
-
-          allTags = result.rows.map(function(row) {
-            var doc = row.doc;
-
-            allTagsById[doc._id] = doc;
-
-            // return tag for lookup
-            return {
-              doc: doc,
-              key: createKey(doc.name)
-            };
-          });
-        });
-
 
         var tagInput = elem.find('input');
         var dropdown = elem.find('.dropdown-menu');
@@ -3085,28 +3102,15 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         scope.currentTag = '';
 
         scope.$watch('currentTag', function(value) {
-          if (!allTags) return;
           checkMatch(value);
         });
-
-
-        function createKey(str) {
-          return str.toLowerCase().replace(/ +?/g, '');
-        }
-
-        function match(str) {
-          var re = new RegExp('^' + createKey(str));
-          return allTags.filter(function(t) {
-            return t.key.match(re);
-          });
-        }
 
         function checkMatch(value) {
           if (!value) {
             closeDropdown();
             return;
           }
-          scope.matches = match(value);
+          scope.matches = crTagCompletion.match(value);
           if (scope.matches.length) {
             if (scope.matches.length < scope.activeListIndex - 1) {
               scope.activeListIndex = scope.matches.length - 1;
@@ -3118,42 +3122,17 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           }
         }
 
-        function addTag(doc) {
+        function addTag(tag) {
           var exists = scope.model.some(function(t) {
-            if (t.id_ === doc._id) {
+            if (t.slug === tag.slug) {
               return true;
             }
             return false;
           });
           if (exists) return false;
-          scope.model.push({ id_: doc._id });
+          crTagCompletion.addItem(tag.name, tag.slug);
+          scope.model.push(tag);
           return true;
-        }
-
-        function createTag(name) {
-          var doc = {
-            name: name,
-            slug: crCommon.slugify(name)
-          };
-
-          resource.save(doc).then(function(doc) {
-            scope.currentTag = '';
-            if (addTag(doc)) {
-              allTags.push({
-                doc: doc,
-                key: createKey(doc.name)
-              });
-              allTagsById[doc._id] = doc;
-            }
-
-          }, function(err) {
-            console.log('save error', err);
-            scope.error = err;
-          });
-        }
-
-        function removeTag(index) {
-          scope.model.splice(index, 1);
         }
 
         function openDropdown() {
@@ -3166,25 +3145,30 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         }
 
 
-
         scope.selectMatch = function(match) {
           closeDropdown();
           scope.currentTag = '';
           tagInput.val('');
           tagInput.focus();
-          addTag(match.doc);
+          addTag({ name: match.name, slug: match.slug });
         };
 
         scope.createTag = function() {
-          createTag(scope.currentTag);
+          var name = scope.currentTag;
+          var tag = {
+            name: name,
+            slug: crCommon.slugify(name)
+          };
+          addTag(tag);
+          scope.currentTag = '';
         };
 
         scope.removeTag = function(index) {
-          removeTag(index);
+          scope.model.splice(index, 1);
         };
 
-        scope.getTagName = function(id) {
-          var tag = allTagsById[id];
+        scope.getTagName = function(slug) {
+          var tag = crTagCompletion.getItem(slug);
           return tag ? tag.name : '';
         };
 
@@ -3192,7 +3176,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           checkMatch(scope.currentTag);
         });
 
-        tagInput.on('keyup', function(e) {
+        tagInput.on('keydown', function(e) {
           var ENTER = 13;
           var TAB = 9;
           var UP = 38;
@@ -3229,6 +3213,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       }
     };
   });
+
 })();
 (function() {
 

@@ -4,7 +4,16 @@
 
   angular.module('testCoresAngular', ['ng', 'cores'])
 
-    .controller('BarCtrl', function($scope, crResources, crViews, crPagination) {
+    .controller('BarCtrl', function($scope, crResources, crViews, crPagination, crTagCompletion) {
+
+      // add some dummy tags for completion
+      [ { name: 'Hello', slug: 'hello' },
+        { name: 'World', slug: 'world' },
+        { name: 'Foo', slug: 'foo' },
+        { name: 'Bar', slug: 'bar' }
+      ].forEach(function(tag) {
+        crTagCompletion.addItem(tag.name, tag.slug);
+      });
 
       crResources.init().then(function() {
 

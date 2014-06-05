@@ -42,7 +42,9 @@ module.exports = J.object({
 
   multiSelRef: J.array(J.ref('Foo')).custom('view', 'multiSelRef'),
 
-  tags: J.array(J.ref('Foo')).custom('view', 'tags'),
+  tags: J.array(
+    J.object({ name: J.string(), slug: J.string() })
+  ).custom('view', 'tags'),
 
   date: J.string().custom('view', 'datetime'),
 
