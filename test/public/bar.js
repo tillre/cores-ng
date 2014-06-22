@@ -44,7 +44,7 @@
             preview: 'cr-image-preview'
           },
           singleSelRef: {
-            type: 'cr-single-select-ref',
+            type: 'cr-select-ref',
             previewPaths: ['/name', '/slug']
           },
           multiSelRef: {
@@ -53,6 +53,9 @@
           },
           tags: {
             type: 'cr-tags'
+          },
+          selTag: {
+            type: 'cr-select-tag'
           },
           datetime: {
             type: 'cr-datetime'

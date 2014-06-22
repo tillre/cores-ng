@@ -1,0 +1,22 @@
+<div>
+  <label class="control-label" ng-show="options.showLabel">{{ label }}:</label>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-addon">
+          <span class="label label-primary">{{ model.name }}</span>
+        </span>
+        <input class="form-control" type="text" ng-model="currentTag"/>
+      </div>
+      <div class="cr-tag-matches">
+        <ul class="dropdown-menu" role="menu">
+          <li ng-repeat="match in matches" ng-class="{ active: activeListIndex === $index }">
+            <a ng-click="selectMatch(match)">{{ match.name }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div ng-show="error" class="alert alert-danger">{{ error.message }}</div>
+</div>

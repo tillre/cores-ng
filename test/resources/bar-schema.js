@@ -46,6 +46,10 @@ module.exports = J.object({
     J.object({ name: J.string(), slug: J.string() })
   ).custom('view', 'tags'),
 
+  tag: J.object(
+    { name: J.string(), slug: J.string() }
+  ).custom('view', 'selTag'),
+
   date: J.string().custom('view', 'datetime'),
 
   slug: J.string().format('slug').custom('view', 'slug'),

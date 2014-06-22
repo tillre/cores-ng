@@ -439,6 +439,32 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   );
 
 
+  $templateCache.put('cr-select-tag.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
+    "\n" +
+    "  <div class=\"row\">\n" +
+    "    <div class=\"col-md-6\">\n" +
+    "      <div class=\"input-group\">\n" +
+    "        <span class=\"input-group-addon\">\n" +
+    "          <span class=\"label label-primary\">{{ model.name }}</span>\n" +
+    "        </span>\n" +
+    "        <input class=\"form-control\" type=\"text\" ng-model=\"currentTag\"/>\n" +
+    "      </div>\n" +
+    "      <div class=\"cr-tag-matches\">\n" +
+    "        <ul class=\"dropdown-menu\" role=\"menu\">\n" +
+    "          <li ng-repeat=\"match in matches\" ng-class=\"{ active: activeListIndex === $index }\">\n" +
+    "            <a ng-click=\"selectMatch(match)\">{{ match.name }}</a>\n" +
+    "          </li>\n" +
+    "        </ul>\n" +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
+    "  <div ng-show=\"error\" class=\"alert alert-danger\">{{ error.message }}</div>\n" +
+    "</div>"
+  );
+
+
   $templateCache.put('cr-single-select-ref.html',
     "<div>\n" +
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
@@ -2868,7 +2894,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   var module = angular.module('cores.directives');
 
 
-  module.directive('crSingleSelectRef', function(
+  module.directive('crSelectRef', function(
     crResources,
     crJSONPointer
   ) {
@@ -2926,6 +2952,118 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       }
     };
   });
+})();
+(function() {
+
+  var module = angular.module('cores.directives');
+
+  module.directive('crSelectTag', function(
+    crResources,
+    crCommon,
+    crTagCompletion
+  ) {
+    return {
+      require: '^crControl',
+      replace: true,
+      templateUrl: 'cr-select-tag.html',
+
+      link: function(scope, elem, attrs, crCtrl) {
+        // validation
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value && !!value.name && !!value.slug;
+          });
+        }
+
+        var tagInput = elem.find('input');
+        var dropdown = elem.find('.dropdown-menu');
+
+        scope.matches = [];
+        scope.activeListIndex = 0;
+        scope.currentTag = '';
+
+        scope.$watch('currentTag', function(value) {
+          checkMatch(value);
+        });
+
+        function checkMatch(value) {
+          if (!value) {
+            closeDropdown();
+            return;
+          }
+          scope.matches = crTagCompletion.match(value);
+          if (scope.matches.length) {
+            if (scope.matches.length < scope.activeListIndex - 1) {
+              scope.activeListIndex = scope.matches.length - 1;
+            }
+            openDropdown();
+          }
+          else {
+            closeDropdown();
+          }
+        }
+
+        function openDropdown() {
+          scope.activeListIndex = 0;
+          dropdown.css('display', 'block');
+        }
+
+        function closeDropdown() {
+          dropdown.css('display', 'none');
+        }
+
+
+        scope.selectMatch = function(match) {
+          closeDropdown();
+          scope.currentTag = '';
+          tagInput.val('');
+          tagInput.focus();
+          scope.model.name = match.name;
+          scope.model.slug = match.slug;
+        };
+
+        tagInput.on('focus', function(e) {
+          checkMatch(scope.currentTag);
+        });
+
+        tagInput.on('keydown', function(e) {
+          var ENTER = 13;
+          var TAB = 9;
+          var UP = 38;
+          var DOWN = 40;
+
+          switch(e.keyCode) {
+          case ENTER:
+          case TAB:
+            e.preventDefault();
+            var l = scope.matches.length;
+            if (l > 0 && scope.activeListIndex < l) {
+              scope.selectMatch(scope.matches[scope.activeListIndex]);
+              scope.$apply();
+            }
+            break;
+
+          case UP:
+            e.preventDefault();
+            if (scope.activeListIndex > 0) {
+              scope.activeListIndex--;
+              scope.$apply();
+            }
+            break;
+
+          case DOWN:
+            e.preventDefault();
+            if (scope.activeListIndex < scope.matches.length - 1) {
+              scope.activeListIndex++;
+              scope.$apply();
+            }
+            break;
+          }
+        });
+      }
+    };
+  });
+
 })();
 (function() {
 

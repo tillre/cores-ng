@@ -54,7 +54,7 @@
     margin-bottom: 15px
 }
 
-[cr-tags] .cr-tag-matches {
+.cr-tag-matches {
     position: relative;
 }
 [cr-tags] .label {
