@@ -439,6 +439,17 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   );
 
 
+  $templateCache.put('cr-select-ref.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
+    "\n" +
+    "  <select class=\"form-control\" ng-model=\"selectedRow\" ng-options=\"r.name for r in rows\">\n" +
+    "    <option value=\"\">-- choose --</option>\n" +
+    "  </select>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('cr-select-tag.html',
     "<div>\n" +
     "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
@@ -462,17 +473,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "  </div>\n" +
     "  <div ng-show=\"error\" class=\"alert alert-danger\">{{ error.message }}</div>\n" +
     "</div>"
-  );
-
-
-  $templateCache.put('cr-single-select-ref.html',
-    "<div>\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
-    "\n" +
-    "  <select class=\"form-control\" ng-model=\"selectedRow\" ng-options=\"r.name for r in rows\">\n" +
-    "    <option value=\"\">-- choose --</option>\n" +
-    "  </select>\n" +
-    "</div>\n"
   );
 
 
@@ -588,7 +588,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   module.factory('crBuild', function($compile, crCommon, crViews, crSchema, crJSONPointer) {
 
-    function getType(schema) {
+    function getDefaultType(schema) {
       var type = schema.type;
 
       // infer some types
@@ -607,25 +607,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
       // add namespace prefix for default views
       type = 'cr-' + type;
-
-      if (schema.view) {
-        // if (typeof schema.view !== 'string') {
-        //   throw new Error('schema.view has to be a string ' + JSON.stringify(schema.view));
-        // }
-        // // custom type
-        // // var view = crViews.get(schema.view);
-        // // type = view.type || type;
-
-        // schema.view = crViews.get(schema.view);
-        // type = schema.view.type || type;
-
-        if (typeof schema.view === 'string') {
-          // instantiate view
-          schema.view = crViews.get(schema.view);
-        }
-        type = schema.view.type || type;
-      }
-
       return type;
     }
 
@@ -665,7 +646,23 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
     function buildType(scope, schema) {
-      var tmpl = '<div ' + getType(schema) + '></div>';
+      var type = getDefaultType(schema);
+      scope.options = scope.options || {};
+
+      if (schema.view) {
+        if (typeof schema.view === 'string') {
+          // get view config
+          schema.view = crViews.get(schema.view);
+        }
+        type = schema.view.type || type;
+
+        // merge options from view
+        scope.options = angular.extend({
+          showLabel: true
+        }, scope.schema.view);
+      }
+
+      var tmpl = '<div ' + type + '></div>';
       return $compile(tmpl)(scope);
     }
 
@@ -703,7 +700,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
     return {
-      getType: getType,
       getLabel: getLabel,
 
       buildControl: buildControl,
@@ -1783,10 +1779,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
         scope.required = attrs.hasOwnProperty('required');
         scope.label = crBuild.getLabel(scope.schema, scope.path);
-
-        scope.options = angular.extend({
-          showLabel: true
-        }, scope.schema.view);
 
         scope.$on('cr:model:error', function(e, path, code, message) {
           if (path === scope.path) {
@@ -2901,7 +2893,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     return {
       require: '^crControl',
       replace: true,
-      templateUrl: 'cr-single-select-ref.html',
+      templateUrl: 'cr-select-ref.html',
 
       link: function(scope, elem, attrs, crCtrl) {
 
@@ -2917,20 +2909,24 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         // load models
         crResources.get(scope.schema.$ref).view(
           'all', { include_docs: true }
+
         ).then(function(result) {
           // create rows
           scope.rows = result.rows.map(function(row) {
             var r = {
-              id: row.id
+              id: row.id,
+              name: ''
             };
             if (scope.options.previewPath) {
               r.name = crJSONPointer.get(row.doc, scope.options.previewPath);
             }
             else if (scope.options.previewPaths) {
-              r.name = '';
               scope.options.previewPaths.forEach(function(path) {
                 r.name += crJSONPointer.get(row.doc, path) + ' ';
               });
+            }
+            else {
+              r.name = row.doc.title || row.doc.name || '';
             }
             if (scope.model.id_ && r.id === scope.model.id_) {
               scope.selectedRow = r;
