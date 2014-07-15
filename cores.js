@@ -121,8 +121,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   $templateCache.put('cr-control.html',
     "<div class=\"form-group\"\n" +
-    "     ng-class=\"{ 'has-success': required, 'has-error': !valid }\">\n" +
-    "</div>"
+    "     ng-class=\"{ 'has-error': !valid || (!dirty && required) }\">\n" +
+    "</div>\n"
   );
 
 
@@ -1844,11 +1844,11 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         };
 
         $scope.$watch('model', function(newValue, oldValue) {
-          if (newValue && newValue !== oldValue) {
+          if (newValue) {
             console.log('set dirty');
             $scope.dirty = true;
-            self.validate();
           }
+          self.validate();
         });
       },
 
@@ -1861,8 +1861,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         scope.$on('cr:model:error', function(e, path, code, message) {
           if (path === scope.path) {
             e.handled = true;
+            ctrl.setValidity(code, false);
           }
-          ctrl.setValidity(code, false);
         });
 
         elem.html(crBuild.buildType(scope, scope.schema));
