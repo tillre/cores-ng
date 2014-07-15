@@ -32,6 +32,10 @@
     border: 0;
 }
 
+[cr-any-of] .item {
+    margin-top: 5px;
+}
+
 [cr-slug] input[type=text] {
     text-transform: lowercase;
 }

@@ -17,15 +17,23 @@ module.exports = J.object({
     foo: J.boolean()
   })),
 
-  anyof: J.array(J.anyOf(
+  arrayAnyOf: J.array(J.anyOf(
     J.object({
       string: J.string()
     }).custom('name', 'foo'),
-
     J.object({
       number: J.number()
     }).custom('name', 'bar')
   )),
+
+  anyOf: J.anyOf(
+    J.object({
+      string: J.string()
+    }).custom('name', 'foo'),
+    J.object({
+      number: J.number()
+    }).custom('name', 'bar')
+  ),
 
   none: J.string().custom('view', 'none'),
   readonly: J.string().default('readonly').custom('view', 'readonly'),

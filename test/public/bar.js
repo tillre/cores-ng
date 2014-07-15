@@ -17,12 +17,17 @@
 
       crResources.init().then(function() {
 
+        crResources.get('Bar').schema().then(function(schema) {
+          console.log('Bar schema:', schema);
+        });
+
         crViews.add({
           none: {
             type: 'none'
           },
           readonly: {
-            type: 'readonly'
+            showLabel: false,
+            type: 'cr-readonly'
           },
           ref: {
             previewPaths: ['/name', '/slug'],

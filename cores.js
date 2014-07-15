@@ -33,6 +33,16 @@
 angular.module('cores').run(['$templateCache', function($templateCache) {
   'use strict';
 
+  $templateCache.put('cr-any-of.html',
+    "<div>\n" +
+    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
+    "  <select class=\"form-control\" ng-model=\"selectedRow\" ng-options=\"r.name for r in schemas\">\n" +
+    "  </select>\n" +
+    "  <div class=\"item\"></div>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('cr-array-controls.html',
     "<div ng-switch=\"numSchemas\">\n" +
     "\n" +
@@ -111,7 +121,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   $templateCache.put('cr-control.html',
     "<div class=\"form-group\"\n" +
-    "     ng-class=\"{ 'has-error': (dirty && !valid) || (required && !dirty) }\">\n" +
+    "     ng-class=\"{ 'has-success': required, 'has-error': !valid }\">\n" +
     "</div>"
   );
 
@@ -604,6 +614,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       else if (schema.hasOwnProperty('$ref')) {
         type = 'ref';
       }
+      else if (schema.hasOwnProperty('anyOf')) {
+        type = 'any-of';
+      }
 
       // add namespace prefix for default views
       type = 'cr-' + type;
@@ -647,7 +660,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
     function buildType(scope, schema) {
       var type = getDefaultType(schema);
-      scope.options = scope.options || {};
+      scope.options = scope.options || {
+        showLabel: true
+      };
 
       if (schema.view) {
         if (typeof schema.view === 'string') {
@@ -657,9 +672,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         type = schema.view.type || type;
 
         // merge options from view
-        scope.options = angular.extend({
-          showLabel: true
-        }, scope.schema.view);
+        scope.options = angular.extend(scope.options, scope.schema.view);
       }
 
       var tmpl = '<div ' + type + '></div>';
@@ -1370,6 +1383,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     if (schema.$ref) {
       return hasDefaultValue ? schema.default : {};
     }
+    if (schema.anyOf) {
+      return hasDefaultValue ? schema.default : {};
+    }
     if (!type) {
       // infer object and array
       if (schema.properties) type = 'object';
@@ -1535,6 +1551,67 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 })();
 
+(function() {
+
+  var module = angular.module('cores.directives');
+
+
+  module.directive('crAnyOf', function(crBuild) {
+    return {
+      require: '^crControl',
+      replace: true,
+      templateUrl: 'cr-any-of.html',
+
+      link: function(scope, elem, attrs, crCtrl) {
+
+        scope.schemas = scope.schema.anyOf;
+        // default showLabel option to false on all possible schemas
+        scope.schemas.forEach(function(s) {
+          s.view = s.view || {};
+          s.view.showLabel = s.view.hasOwnProperty('showLabel') ? s.view.showLabel : false;
+        });
+
+
+        function createItem(index, resetModel) {
+          // create ui and maybe reset model
+          var schema = scope.schemas[index];
+          if (resetModel) {
+            scope.model = { type_: schema.name };
+          }
+          var ctrlElem = crBuild.buildControl(scope, 'schemas[' + index + ']');
+          elem.find('.item').html(ctrlElem);
+        }
+
+
+        // initial state
+        if (scope.model.type_) {
+          // existing model, get item schema index
+          var index = scope.schemas.reduce(function(acc, s, i) {
+            acc = (s.name === scope.model.type_ ? i : acc);
+            return acc;
+          }, 0);
+          scope.selectedRow = scope.schemas[index];
+          createItem(index, false);
+        }
+        else {
+          // empty model
+          scope.selectedRow = scope.schemas[0];
+          createItem(0, true);
+        }
+
+
+        // watch for item schema selection changes
+        scope.$watch('selectedRow', function(newValue, oldValue) {
+          if (!newValue || newValue === oldValue) {
+            return;
+          }
+          var index = parseInt(elem.find('select').val());
+          createItem(index, true);
+        });
+      }
+    };
+  });
+})();
 (function() {
 
   var module = angular.module('cores.directives');
@@ -1767,10 +1844,11 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         };
 
         $scope.$watch('model', function(newValue, oldValue) {
-          if (newValue) {
+          if (newValue && newValue !== oldValue) {
+            console.log('set dirty');
             $scope.dirty = true;
+            self.validate();
           }
-          self.validate();
         });
       },
 
@@ -1783,8 +1861,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         scope.$on('cr:model:error', function(e, path, code, message) {
           if (path === scope.path) {
             e.handled = true;
-            ctrl.setValidity(code, false);
           }
+          ctrl.setValidity(code, false);
         });
 
         elem.html(crBuild.buildType(scope, scope.schema));
