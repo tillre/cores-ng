@@ -25,6 +25,10 @@
     width: auto;
 }
 
+[cr-object] label.has-error {
+    color: #a94442;
+}
+
 [cr-column-object] .cr-seperate {
     border-right: 1px solid #ddd;
 }

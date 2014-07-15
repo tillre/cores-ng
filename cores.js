@@ -365,7 +365,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
   $templateCache.put('cr-object.html',
     "<div>\n" +
-    "  <label class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
+    "  <label ng-class=\"{ 'has-error': !childsValid }\" class=\"control-label cr-object-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
     "  <div ng-class=\"{ 'cr-indent': options.indent, 'form-inline': options.inline }\"\n" +
     "       class=\"properties\"></div>\n" +
     "</div>\n"
@@ -2692,6 +2692,21 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         elem.find('.properties').html(
           props.map(function(p) { return p.elem; })
         );
+
+
+        var errors = {};
+        scope.childsValid = true;
+
+        scope.$on('cr:model:setValidity', function(e, code, valid) {
+          console.log('set validity', code, valid);
+          errors[code] = !valid;
+          scope.childsValid = true;
+          angular.forEach(errors, function(error, key) {
+            if (error) {
+              scope.childsValid = false;
+            }
+          });
+        });
       }
     };
   });
@@ -2978,7 +2993,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         // validation
         if (scope.required) {
           crCtrl.addValidator('required', function(value) {
-            return !!value;
+            return value && value.id_;
           });
         }
 
