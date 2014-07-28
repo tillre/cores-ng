@@ -9,7 +9,7 @@ module.exports = J.object({
   string: J.string().minLength(2).maxLength(10).pattern('[a-zA-Z]+'),
 
   object: J.object({
-    string: J.string().minLength(3),
+    string: J.string(),
     number: J.number()
   }).required('string'),
 

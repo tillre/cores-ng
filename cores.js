@@ -120,9 +120,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('cr-control.html',
-    "<div class=\"form-group\"\n" +
-    "     ng-class=\"{ 'has-error': !valid || (!dirty && required) }\">\n" +
-    "</div>\n"
+    "<div class=\"form-group\" ng-class=\"{ 'has-error': !valid }\"></div>\n"
   );
 
 
@@ -1677,7 +1675,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       replace: true,
       templateUrl: 'cr-array.html',
 
-      link: function(scope, elem, attrs) {
+      link: function(scope, elem, attrs, crCtrl) {
+
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value && value.length > 0;
+          });
+        }
 
         scope.schemas = {};
         scope.showSchemaName = false;
@@ -2072,6 +2076,11 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
       link: function(scope, elem, attrs, crCtrl) {
 
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value;
+          });
+        }
         if (scope.schema.hasOwnProperty('multipleOf')) {
           crCtrl.addValidator('multipleOf', function(value) {
             return (value % scope.schema.multipleOf) === 0;
@@ -2668,6 +2677,12 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
       link: function(scope, elem, attrs, crCtrl) {
 
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value;
+          });
+        }
+
         if (scope.schema.hasOwnProperty('multipleOf')) {
           crCtrl.addValidator('multipleOf', function(value) {
             return (value % scope.schema.multipleOf) === 0;
@@ -2732,6 +2747,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       templateUrl: 'cr-password.html',
 
       link: function(scope, elem, attrs, crCtrl) {
+
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value;
+          });
+        }
+
 
         scope.pass1 = '';
         scope.pass2 = '';
@@ -2819,6 +2841,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       templateUrl: 'cr-ref.html',
 
       link: function(scope, elem, attrs, crCtrl) {
+
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value && value.id_;
+          });
+        }
+
 
         var resource = crResources.get(scope.schema.$ref);
 
@@ -3073,7 +3102,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         // validation
         if (scope.required) {
           crCtrl.addValidator('required', function(value) {
-            return !!value && !!value.name && !!value.slug;
+            return value && value.slug;
           });
         }
 
@@ -3180,6 +3209,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
       link: function(scope, elem, attrs, crCtrl) {
 
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value;
+          });
+        }
+
+
         if (scope.schema.hasOwnProperty('maxLength')) {
           crCtrl.addValidator('maxLength', function(value) {
             return value.length <= scope.schema.maxLength;
@@ -3225,6 +3261,12 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       templateUrl: 'cr-string.html',
 
       link: function(scope, elem, attrs, crCtrl) {
+
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value;
+          });
+        }
 
         if (scope.schema.hasOwnProperty('maxLength')) {
           crCtrl.addValidator('maxLength', function(value) {
@@ -3330,7 +3372,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         // validation
         if (scope.required) {
           crCtrl.addValidator('required', function(value) {
-            return !!value && !!value.length;
+            return value && value.length > 0;
           });
         }
 
@@ -3471,6 +3513,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       templateUrl: 'cr-text.html',
 
       link: function(scope, elem, attrs, crCtrl) {
+
+        if (scope.required) {
+          crCtrl.addValidator('required', function(value) {
+            return !!value;
+          });
+        }
+
 
         if (scope.schema.hasOwnProperty('maxLength')) {
           crCtrl.addValidator('maxLength', function(value) {

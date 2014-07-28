@@ -106,6 +106,13 @@
         });
 
         $scope.type = 'Bar';
+
+        if (window.location.hash) {
+          $scope.modelId = window.location.hash.substr(1);
+        }
+        $scope.$on('cr:model:saved', function(e, model) {
+          window.location.hash = model._id;
+        });
       });
     })
   ;
