@@ -442,7 +442,6 @@ describe('cores', function() {
 
       // extra string directives
       { schema: { type: 'string', view: { type: 'cr-text' } }, testAttr: 'cr-text' },
-      { schema: { type: 'string', view: { type: 'cr-markdown' } }, testAttr: 'cr-markdown' },
       { schema: { type: 'string', view: { type: 'cr-date' } }, testAttr: 'cr-date' },
       { schema: { type: 'string', view: { type: 'cr-slug' } }, testAttr: 'cr-slug' },
       { schema: { type: 'string', view: { type: 'cr-password' } }, testAttr: 'cr-password' },

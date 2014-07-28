@@ -180,28 +180,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   );
 
 
-  $templateCache.put('cr-markdown.html',
-    "<div>\n" +
-    "  <label class=\"control-label\" ng-show=\"options.showLabel\">{{ label }}:</label>\n" +
-    "\n" +
-    "  <div class=\"cr-editor clearfix\" ng-class=\"{ 'cr-border': options.showBorder }\">\n" +
-    "    <textarea class=\"form-control cr-editor-area\" ng-model=\"model\" rows=\"1\"></textarea>\n" +
-    "    <div class=\"cr-editor-preview\"></div>\n" +
-    "    <div class=\"btn-group pull-right\">\n" +
-    "      <button class=\"btn btn-default btn-sm\" ng-click=\"togglePreview()\" type=\"button\">\n" +
-    "        {{ isPreview ? \"Edit\" : \"Preview\" }}\n" +
-    "      </button>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div ng-show=\"dirty && !valid\">\n" +
-    "      <p class=\"help-block\" ng-show=\"errors.maxLength\">Text is longer than {{ schema.maxLength }}</p>\n" +
-    "      <p class=\"help-block\" ng-show=\"errors.minLength\">Text is shorter than {{ schema.minLength }}</p>\n" +
-    "    </div>\n" +
-    "  </div>\n" +
-    "</div>"
-  );
-
-
   $templateCache.put('cr-model-form.html',
     "<div>\n" +
     "  <form name=\"modelForm\"></form>\n" +
@@ -2104,71 +2082,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
       }
     };
   });
-})();
-(function() {
-
-  var module = angular.module('cores.directives');
-
-
-  module.directive('crMarkdown', function(
-    crTextareaAutosize
-  ) {
-    return {
-      require: '^crControl',
-      replace: true,
-      templateUrl: 'cr-markdown.html',
-
-      link: function(scope, elem, attrs, crCtrl) {
-
-        scope.options = angular.extend({
-          showBorder: true
-        }, scope.options);
-
-        if (scope.schema.hasOwnProperty('maxLength')) {
-          crCtrl.addValidator('maxLength', function(value) {
-            return value.length <= scope.schema.maxLength;
-          });
-        }
-        if (scope.schema.hasOwnProperty('minLength')) {
-          crCtrl.addValidator('minLength', function(value) {
-            return value.length >= scope.schema.minLength;
-          });
-        }
-
-
-        var $area = elem.find('.cr-editor-area');
-        var $preview = elem.find('.cr-editor-preview');
-
-        var updateSize = crTextareaAutosize($area);
-
-        scope.isPreview = false;
-        scope.togglePreview = function() {
-          scope.isPreview = !scope.isPreview;
-          if (scope.isPreview) {
-            $preview.html(markdown.toHTML($area.val()));
-          }
-          else {
-            updateSize();
-          }
-          $area.toggle();
-          $preview.toggle();
-        };
-
-        // manually trigger autosize on first model change
-        var unwatch = scope.$watch('model', function(newValue, oldValue) {
-          if (newValue) {
-            unwatch();
-            updateSize();
-          }
-        });
-        // update size when tab changes
-        scope.$on('cr:tab:shown', function(e) {
-          updateSize();
-        });
-      }
-    };
-  });
-
 })();
 (function() {
 
