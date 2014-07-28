@@ -2989,19 +2989,18 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
             return r;
           });
 
-
+          // watch for selection changes
+          scope.$watch('selectedRow', function(newValue, oldValue) {
+            if (newValue === oldValue) return;
+            if (!newValue) {
+              scope.model = {};
+            }
+            else {
+              scope.model = { id_: newValue.id };
+            }
+          });
         });
 
-        // watch for selection changes
-        scope.$watch('selectedRow', function(newValue, oldValue) {
-          if (newValue === oldValue) return;
-          if (!newValue) {
-            scope.model = {};
-          }
-          else {
-            scope.model = { id_: newValue.id };
-          }
-        });
       }
     };
   });
