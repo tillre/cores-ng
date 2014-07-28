@@ -2220,7 +2220,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           build();
         });
 
-
         scope.errors = {};
         scope.valid = true;
 
@@ -2604,6 +2603,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         // load models
         crResources.get(scope.schema.items.$ref).view(
           'all', { include_docs: true }
+
         ).then(function(result) {
           // create rows
           scope.rows = result.rows.map(function(row) {
@@ -2622,25 +2622,31 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
             }
             return r;
           });
+
           // select rows when id is in model
           scope.model.forEach(function(ref) {
             scope.rows.forEach(function(row) {
               if (row.id == ref.id_) { row.selected = true; }
             });
           });
+
+
+          // watch for selection changes
+          scope.$watch('rows', function(newRows, oldRows) {
+            // abort if selection didnt change
+            var same = newRows.every(function(row, i) {
+              return row.selected === oldRows[i].selected;
+            });
+            if (same) return;
+
+            // sync selected rows with model
+            scope.model = newRows.filter(function(row) {
+              return row.selected;
+            }).map(function(row) {
+              return { id_: row.id };
+            });
+          }, true);
         });
-
-
-        // watch for selection changes
-        scope.$watch('rows', function(newValue, oldValue) {
-          if (!newValue || (newValue && newValue.length === 0)) return;
-          // sync selected rows with model
-          scope.model = scope.rows.filter(function(row) {
-            return row.selected;
-          }).map(function(row) {
-            return { id_: row.id };
-          });
-        }, true);
       }
     };
   });
