@@ -1710,15 +1710,18 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         scope.moveUp = function(index) {
           if (index === 0) return;
           scope.model.splice(index - 1, 0, scope.model.splice(index, 1)[0]);
+          scope.$emit('cr:model:change', scope.path);
         };
 
         scope.moveDown = function(index) {
           if (index >= scope.model.length) return;
           scope.model.splice(index + 1, 0, scope.model.splice(index, 1)[0]);
+          scope.$emit('cr:model:change', scope.path);
         };
 
         scope.remove = function(index) {
           scope.model.splice(index, 1);
+          scope.$emit('cr:model:change', scope.path);
         };
 
         scope.$on('cr:array:addItem', function(e, index, schema) {
@@ -1731,6 +1734,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           else {
             scope.model.splice(index, 0, obj);
           }
+          scope.$emit('cr:model:change', scope.path);
         });
 
         scope.getSchema = function(type) {
@@ -1841,7 +1845,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
               $scope.valid = false;
             }
             $scope.errors[code] = !valid;
-            $scope.$emit('cr:model:setValidity', $scope.path + ':' + code, valid);
+            $scope.$emit('cr:model:validity', $scope.path + ':' + code, valid);
           });
         };
 
@@ -1869,7 +1873,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         });
 
         // set validity based on child validity
-        scope.$on('cr:model:setValidity', function(e, code, valid) {
+        scope.$on('cr:model:validity', function(e, code, valid) {
           scope.childsErrors[code] = !valid;
           scope.childsValid = true;
           angular.forEach(scope.childsErrors, function(error, key) {
@@ -2223,7 +2227,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         scope.errors = {};
         scope.valid = true;
 
-        scope.$on('cr:model:setValidity', function(e, code, valid) {
+        scope.$on('cr:model:validity', function(e, code, valid) {
           e.stopPropagation();
           scope.errors[code] = !valid;
           scope.valid = true;
@@ -2853,7 +2857,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         };
 
         scope.clearModel = function() {
-          delete scope.model.id_;
+          scope.model = {};
         };
 
         scope.hasModel = function() {
@@ -2864,7 +2868,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         scope.$on('cr:model:saved', function(e, model) {
           e.stopPropagation();
           scope.showModel = false;
-          scope.model.id_ = model._id;
+          scope.model = { id_: model._id };
           crCtrl.validate();
           update();
         });
@@ -2873,7 +2877,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         scope.$on('cr:list:select', function(e, id) {
           e.stopPropagation();
           scope.showModel = false;
-          scope.modelId = scope.model.id_ = id;
+          scope.model = { id_: id };
+          scope.modelId = id;
+
           crCtrl.validate();
           update();
         });
@@ -3031,16 +3037,18 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
             }
             return r;
           });
+
+
         });
 
         // watch for selection changes
         scope.$watch('selectedRow', function(newValue, oldValue) {
           if (newValue === oldValue) return;
           if (!newValue) {
-            delete scope.model.id_;
+            scope.model = {};
           }
           else {
-            scope.model.id_ = newValue.id;
+            scope.model = { id_: newValue.id };
           }
         });
       }
@@ -3363,7 +3371,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           });
           if (exists) return false;
           crTagCompletion.addItem(tag.name, tag.slug);
-          scope.model.push(tag);
+          scope.model = scope.model.concat([tag]);
           return true;
         }
 
@@ -3396,7 +3404,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         };
 
         scope.removeTag = function(index) {
-          scope.model.splice(index, 1);
+          scope.model = scope.model.filter(function(tag, i) {
+            return i !== index;
+          });
         };
 
         scope.getTagName = function(slug) {
