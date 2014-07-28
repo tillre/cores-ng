@@ -6,6 +6,26 @@
 
     .controller('BarCtrl', function($scope, crResources, crViews, crPagination, crTagCompletion) {
 
+      var changed = false;
+      $scope.$on('cr:model:change', function() {
+        changed = true;
+      });
+
+      window.onbeforeunload = function (evt) {
+        if (!changed) {
+          return;
+        }
+        var message = 'Discard changes?';
+        if (typeof evt === 'undefined') {
+          evt = window.event;
+        }
+        if (evt ) {
+          evt.returnValue = message;
+        }
+        return message;
+      };
+
+
       // add some dummy tags for completion
       [ { name: 'Hello', slug: 'hello' },
         { name: 'World', slug: 'world' },

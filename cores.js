@@ -355,8 +355,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "\n" +
     "  <div ng-show=\"dirty && !valid\">\n" +
     "    <p class=\"help-block\" ng-show=\"errors.multipleOf\">Number should be a multiple of {{ schema.multipleOf }}</p>\n" +
-    "    <p class=\"help-block\" ng-show=\"errors.minimum\">Number should be smaller or equal to {{ schema.minimum }}</p>\n" +
-    "    <p class=\"help-block\" ng-show=\"errors.maximum\">Number should be greater or equal to {{ schema.maximum }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.minimum\">Number should be greater or equal to {{ schema.minimum }}</p>\n" +
+    "    <p class=\"help-block\" ng-show=\"errors.maximum\">Number should be smaller or equal to {{ schema.maximum }}</p>\n" +
     "    <p class=\"help-block\" ng-show=\"errors.integer\">Number should be an integer</p>\n" +
     "  </div>\n" +
     "</div>\n"
@@ -1821,6 +1821,8 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
 
         $scope.errors = {};
         $scope.valid = true;
+        $scope.childsErrors = {};
+        $scope.childsValid = true;
         $scope.dirty = false;
 
         this.addValidator = function(name, fn) {
@@ -1844,9 +1846,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         };
 
         $scope.$watch('model', function(newValue, oldValue) {
-          if (newValue) {
-            console.log('set dirty');
+          if (newValue && newValue !== oldValue) {
             $scope.dirty = true;
+            $scope.$emit('cr:model:change', $scope.path);
           }
           self.validate();
         });
@@ -1858,11 +1860,23 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         scope.required = attrs.hasOwnProperty('required');
         scope.label = crBuild.getLabel(scope.schema, scope.path);
 
+        // set validity on model error
         scope.$on('cr:model:error', function(e, path, code, message) {
           if (path === scope.path) {
             e.handled = true;
             ctrl.setValidity(code, false);
           }
+        });
+
+        // set validity based on child validity
+        scope.$on('cr:model:setValidity', function(e, code, valid) {
+          scope.childsErrors[code] = !valid;
+          scope.childsValid = true;
+          angular.forEach(scope.childsErrors, function(error, key) {
+            if (error) {
+              scope.childsValid = false;
+            }
+          });
         });
 
         elem.html(crBuild.buildType(scope, scope.schema));
@@ -2692,21 +2706,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         elem.find('.properties').html(
           props.map(function(p) { return p.elem; })
         );
-
-
-        var errors = {};
-        scope.childsValid = true;
-
-        scope.$on('cr:model:setValidity', function(e, code, valid) {
-          console.log('set validity', code, valid);
-          errors[code] = !valid;
-          scope.childsValid = true;
-          angular.forEach(errors, function(error, key) {
-            if (error) {
-              scope.childsValid = false;
-            }
-          });
-        });
       }
     };
   });
