@@ -848,7 +848,6 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   module.factory('crPagination', function() {
 
     function createViewPaginator(resource, view, query) {
-
       view = view || 'all';
       query = query || {};
 
@@ -860,12 +859,13 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         var q = angular.copy(query);
         // get one more to see if there is a next page
         q.limit = q.limit ? q.limit + 1 : 11;
-        q.view = q.view || 'all';
-        // overwrite startkey on consecutive
-        q.startkey = startkey || q.startkey;
+
+        if (startkey || q.startkey) {
+          // overwrite startkey on consecutive
+          q.startkey = startkey || q.startkey;
+        }
         // force include docs
         q.include_docs = true;
-
         return resource.view(view, q).then(function(result) {
           if (result.rows.length > 0) {
             curKey = result.rows[0].key;
@@ -2772,7 +2772,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         }, scope.schema.view);
 
         if (!scope.options.list.paginator) {
-          scope.options.list.paginator = crPagination.createViewPaginator(resource, 'all');
+          var view = scope.options.list.view || 'all';
+          var query = scope.options.list.params || {};
+          scope.options.list.paginator = crPagination.createViewPaginator(resource, view, query);
         }
         scope.options.list.postpone = true;
 

@@ -56,7 +56,9 @@
             previewPaths: ['/name'],
             list: {
               columns: [ { path: 'name' } ],
-              paginator: crPagination.createViewPaginator(crResources.get('Foo'), 'ids')
+              view: 'ids',
+              params: { descending: true }
+              //paginator: crPagination.createViewPaginator(crResources.get('Foo'), 'ids')
             }
           },
           image: {
