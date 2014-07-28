@@ -6,6 +6,10 @@ html(lang="en", ng-app="testCoresAngular")
     .container(ng-controller="BarCtrl")
       .row
         .col-md-12
+          div(cr-search-box type="type")
+          hr
+      .row
+        .col-md-12
           div(cr-model-resource type="{{ type }}", model-id="modelId", options="modelOptions")
 
     include tail

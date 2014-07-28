@@ -2895,7 +2895,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     return {
       scope: {
         type: '=',
-        paginator: '=',
+        paginator: '=?',
         postponeLoad: '=?'
       },
       replace: true,
@@ -2908,20 +2908,29 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         var searchActive = false;
         var defaultPaginator = scope.paginator;
 
-        scope.$watch('model', function(value) {
-          if (!value) {
-            if (searchActive) {
-              scope.paginator = defaultPaginator;
+        elem.find('input').on('keydown', function(e) {
+          var ENTER = 13;
+
+          switch(e.keyCode) {
+          case ENTER:
+            e.preventDefault();
+            var value = scope.model;
+            if (!value) {
+              if (searchActive) {
+                scope.paginator = defaultPaginator;
+              }
+              searchActive = false;
+              return;
             }
-            searchActive = false;
-            return;
+            searchActive = true;
+
+            var searchPaginator = crPagination.createSearchPaginator(
+              crResources.get(scope.type), 'list', { q: value }
+            );
+            scope.postponeLoad = false;
+            scope.paginator = searchPaginator;
+            break;
           }
-          searchActive = true;
-          var searchPaginator = crPagination.createSearchPaginator(
-            crResources.get(scope.type), 'list', { q: value }
-          );
-          scope.postponeLoad = false;
-          scope.paginator = searchPaginator;
         });
       }
     };
