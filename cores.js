@@ -419,7 +419,7 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
   $templateCache.put('cr-search-box.html',
     "<form class=\"form-inline\">\n" +
     "  <div class=\"form-group\">\n" +
-    "    <input type=\"text\" ng-model=\"model\" class=\"form-control\" placeholder=\"Search\">\n" +
+    "    <input type=\"text\" ng-keydown=\"search($event)\" ng-model=\"model\" class=\"form-control\" placeholder=\"Search\">\n" +
     "  </div>\n" +
     "</form>"
   );
@@ -2910,30 +2910,28 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
         var searchActive = false;
         var defaultPaginator = scope.paginator;
 
-        elem.find('input').on('keydown', function(e) {
-          var ENTER = 13;
-
-          switch(e.keyCode) {
-          case ENTER:
-            e.preventDefault();
-            var value = scope.model;
-            if (!value) {
-              if (searchActive) {
-                scope.paginator = defaultPaginator;
-              }
-              searchActive = false;
-              return;
-            }
-            searchActive = true;
-
-            var searchPaginator = crPagination.createSearchPaginator(
-              crResources.get(scope.type), 'list', { q: value }
-            );
-            scope.postponeLoad = false;
-            scope.paginator = searchPaginator;
-            break;
+        scope.search = function(e) {
+          // is it enter?
+          if (e.keyCode !== 13) {
+            return;
           }
-        });
+          var value = scope.model;
+
+          if (!value) {
+            if (searchActive) {
+              scope.paginator = defaultPaginator;
+            }
+            searchActive = false;
+            return;
+          }
+          searchActive = true;
+
+          var searchPaginator = crPagination.createSearchPaginator(
+            crResources.get(scope.type), 'list', { q: value }
+          );
+          scope.postponeLoad = false;
+          scope.paginator = searchPaginator;
+        };
       }
     };
   });
