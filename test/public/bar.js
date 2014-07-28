@@ -7,23 +7,17 @@
     .controller('BarCtrl', function($scope, crResources, crViews, crPagination, crTagCompletion) {
 
       var changed = false;
-      $scope.$on('cr:model:change', function() {
+      $scope.$on('cr:model:change', function(e, path) {
         changed = true;
+        console.log('changed', path);
       });
 
-      window.onbeforeunload = function (evt) {
-        if (!changed) {
-          return;
-        }
-        var message = 'Discard changes?';
-        if (typeof evt === 'undefined') {
-          evt = window.event;
-        }
-        if (evt ) {
-          evt.returnValue = message;
-        }
-        return message;
-      };
+      // window.onbeforeunload = function (evt) {
+      //   if (!changed) {
+      //     return;
+      //   }
+      //   return "Discard changes?";
+      // };
 
 
       // add some dummy tags for completion
