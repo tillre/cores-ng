@@ -131,14 +131,14 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"input-group date\">\n" +
     "      <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-calendar\"></span></span>\n" +
-    "      <input type=\"text\" class=\"form-control\" data-format=\"D.MM.YYYY\" />\n" +
+    "      <input type=\"text\" class=\"form-control\" data-date-format=\"D.MM.YYYY\" />\n" +
     "    </div>\n" +
     "  </div>\n" +
     "\n" +
     "  <div class=\"col-md-3\">\n" +
     "    <div class=\"input-group time\">\n" +
     "      <span class=\"input-group-addon\"><span class=\"glyphicon glyphicon-time\"></span></span>\n" +
-    "      <input type=\"text\" class=\"form-control\" data-format=\"H:mm\"/>\n" +
+    "      <input type=\"text\" class=\"form-control\" data-date-format=\"H:mm\"/>\n" +
     "    </div>\n" +
     "  </div>\n" +
     "</div>\n"
@@ -1904,8 +1904,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           pickTime: false
         });
         dtDate.data('DateTimePicker').setDate(date);
-        dtDate.on('change.dp', function(e) {
+        dtDate.on('dp.change', function(e) {
           e.stopPropagation();
+          console.log('e.date', e.date);
           if (!e.date) return;
 
           date.setFullYear(e.date.year());
@@ -1925,8 +1926,9 @@ angular.module('cores').run(['$templateCache', function($templateCache) {
           pickSeconds: false
         });
         dtTime.data('DateTimePicker').setDate(date);
-        dtTime.on('change.dp', function(e) {
+        dtTime.on('dp.change', function(e) {
           e.stopPropagation();
+          console.log('e.date', e.date);
           if  (!e.date) return;
 
           date.setHours(e.date.hours());

@@ -1,6 +1,6 @@
 {
   "name": "cores-ng",
-  "version": "0.12.3",
+  "version": "0.12.4",
   "ignore": [
     "**/.*",
     "lib",
@@ -15,6 +15,6 @@
     "jquery": "~2.x.x",
     "angular": "~1.2.x",
     "bootstrap": "~3.x.x",
-    "eonasdan-bootstrap-datetimepicker": "2.1.30"
+    "eonasdan-bootstrap-datetimepicker": "3.x.x"
   }
 }
